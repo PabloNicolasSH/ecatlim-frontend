@@ -1,1 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+@plugin 'tailwindcss-primeui';
+@layer tailwind, primeng;
+
+@layer tailwind {
+  @import "tailwindcss";
+}
+
+*{
+  font-family: "Droid Sans", sans-serif;
+}
+
+h1{
+  font-size: 36px;
+}
+
+h2{
+  font-size: 20px;
+}
