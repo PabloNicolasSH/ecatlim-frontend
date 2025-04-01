@@ -5,6 +5,8 @@ import {MainComponent} from './core/main/main.component';
 import {authGuard} from './core/auth/auth.guard';
 import {HomeComponent} from './features/home/home.component';
 import {redirect, redirectGuard} from './core/auth/redirect.guard';
+import {UserProfileComponent} from './features/user-profile/user-profile.component';
+import {UserListComponent} from './features/user-list/user-list.component';
 
 export const routes: Routes = [
   {
@@ -23,6 +25,14 @@ export const routes: Routes = [
       {
         path: "home",
         component: HomeComponent
+      },
+      {
+        path: "profile",
+        component: UserProfileComponent
+      },
+      {
+        path: "users",
+        component: UserListComponent
       }
     ]
   },
