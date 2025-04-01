@@ -1,12 +1,29 @@
-import {Component, inject} from '@angular/core';
+import {Component, EventEmitter, inject, Output, ViewChild} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
-import {MenuItem} from 'primeng/api';
+import {MenuItem, PrimeTemplate, TreeNode} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
+import {Button} from 'primeng/button';
+import {OverlayBadge} from 'primeng/overlaybadge';
+import {Router, RouterLink} from '@angular/router';
+import {Drawer} from 'primeng/drawer';
+import {Ripple} from 'primeng/ripple';
+import {StyleClass} from 'primeng/styleclass';
+import {Tree} from 'primeng/tree';
+import {Popover} from 'primeng/popover';
+import {Avatar} from 'primeng/avatar';
 
 @Component({
   selector: 'app-header',
   imports: [
-    SplitButton
+    SplitButton,
+    Button,
+    OverlayBadge,
+    RouterLink,
+    Drawer,
+    Tree,
+    PrimeTemplate,
+    Popover,
+    Avatar
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
@@ -14,9 +31,17 @@ import {AuthService} from '../auth/auth.service';
 export class HeaderComponent {
 
   protected readonly authService = inject(AuthService);
+  protected readonly router = inject(Router);
+
+  @ViewChild('op') op!: Popover;
 
   userOptions: MenuItem[];
   username: string = "Pablo Nicolás Santana Hernández"
+  sidebarVisible: boolean = false;
+
+  messages: string[] = ["Parche la chupa de locos"];
+  notifies: string[] = [];
+  nodes!: TreeNode[];
 
   constructor() {
     this.userOptions = [
@@ -24,8 +49,27 @@ export class HeaderComponent {
       {separator: true},
       {
         label: 'Cerrar Sesión',
+        icon: 'pi pi-fw pi-power-off',
         command: () => {this.authService.logout()}
       }
-    ]
+    ];
+
+    this.nodes = [
+      {
+        key: '0',
+        label: 'Administración',
+        children: [
+          {key: '0-0', label: 'Usuarios', data: {route:'/app/users', icon: "pi pi-users"}, type: 'route'}
+        ]
+      }
+    ];
+  }
+
+  toggle(event: any){
+    this.op.toggle(event)
+  }
+
+  onMenuClick() {
+    this.sidebarVisible = !this.sidebarVisible;
   }
 }

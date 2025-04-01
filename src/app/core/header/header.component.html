@@ -1,16 +1,95 @@
-<header class="flex items-center justify-between px-6 py-4">
+<header class="flex items-center justify-between border-b border-gray-300 px-6 py-4">
   <div class="flex items-center space-x-4">
-    <h1 class="text-xl font-semibold">ECATLIM</h1>
+    <p-button
+      (onClick)="onMenuClick()"
+      icon="pi pi-bars"
+      label="Menú"
+      severity="secondary"
+      variant="text"
+    >
+    </p-button>
+    <h1 class="text-xl font-semibold"><a routerLink="/home">ECATLIM</a></h1>
   </div>
   <div class="flex items-center space-x-3">
+
+    @if (messages.length > 0) {
+      <p-overlay-badge [value]="messages?.length" severity="info">
+        <p-button
+          icon="pi pi-comments"
+          severity="secondary"
+          rounded
+        ></p-button>
+      </p-overlay-badge>
+    } @else {
+      <p-button
+        icon="pi pi-comments"
+        severity="secondary"
+        rounded
+      ></p-button>
+    }
+
+    @if (notifies.length > 0) {
+      <p-overlay-badge [value]="notifies?.length" severity="danger">
+        <p-button
+          (onClick)="toggle($event)"
+          icon="pi pi-bell"
+          severity="secondary"
+          rounded
+        ></p-button>
+      </p-overlay-badge>
+    } @else {
+      <p-button
+        (onClick)="toggle($event)"
+        icon="pi pi-bell"
+        severity="secondary"
+        rounded
+      ></p-button>
+    }
     <p-splitbutton
-      label="{{username}}"
+      (onClick)="router.navigateByUrl('/app/profile')"
       [model]="userOptions"
+      severity="secondary"
       text
     >
-      <span class="p-button-label">
-        <img src="" />
-      </span>
+      <ng-template #content>
+        <span class="flex items-center font-bold">
+          <p-avatar image="logo.jpeg" shape="circle"/>
+          <span style="margin-left: 0.75rem">{{username}}</span>
+        </span>
+      </ng-template>
     </p-splitbutton>
   </div>
 </header>
+
+<p-drawer
+  [(visible)]="sidebarVisible"
+  [closable]="false"
+>
+  <p-tree [value]="nodes">
+    <ng-template let-node pTemplate="route">
+      <p-button
+        [icon]="node.data.icon"
+        [routerLink]="node.data.route"
+        [label]="node.label"
+        (onClick)="sidebarVisible = !sidebarVisible"
+        text
+      ></p-button>
+    </ng-template>
+    <ng-template let-node pTemplate="default">
+      <b>{{ node.label }}</b>
+    </ng-template>
+  </p-tree>
+  <ng-template #footer>
+
+  </ng-template>
+</p-drawer>
+
+<p-popover #op>
+  @if (notifies.length > 0) {
+    @for (notify of notifies; track $index) {
+
+    }
+  } @else {
+   <p>No tiene notificaciones nuevas</p>
+  }
+</p-popover>
