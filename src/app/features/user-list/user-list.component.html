@@ -1,0 +1,59 @@
+<h1 class="font-bold">Usuarios</h1>
+<p-tabs value="0">
+  <p-tablist>
+    <p-tab value="0">Usuarios Activos</p-tab>
+    <p-tab value="1">Usuarios Inactivos</p-tab>
+    <p-tab value="2">Solicitudes de Alta</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="0">
+      <p-table
+        #dt
+        [value]="users"
+        [rows]="50"
+        [paginator]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p>Actualmente se cuenta con {{users.length}} usuarios activos</p>
+            <p-button
+              (onClick)="showDialog()"
+              icon="pi pi-plus"
+              label="Añadir Usuario"
+            ></p-button>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo Electrónico</th>
+            <th>Grupo Scout/Entidad</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-user>
+          <tr>
+            <td>{{user.surname}}, {{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.scoutGroup.name}}</td>
+            <td>
+              <p-button
+                icon="pi pi-pen-to-square"
+                label="Editar"
+                [rounded]="true"
+                (onClick)="openEditDialog(user)"
+                severity="info"
+                outlined
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
+<app-user-modal-add-edit
+  [(visible)]="visible"
+  [userToEdit]="userToEdit"
+  [dialogMode]="dialogMode"
+></app-user-modal-add-edit>

@@ -1,0 +1,25 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+>
+  @if (dialogMode == 'Add') {
+    <ng-template #header>
+      <span class="font-bold whitespace-nowrap">Añadir un Nuevo Usuario</span>
+    </ng-template>
+  } @else if (dialogMode == 'Edit'){
+    <ng-template #header>
+      <div class="inline-flex items-start gap-2">
+        <span class="font-bold whitespace-nowrap">{{userToEdit.name}} {{userToEdit.surname}}</span>
+      </div>
+    </ng-template>
+    <span class="text-surface-500 block mb-8">Actualice la información del usuario.</span>
+    <form [formGroup]="" (ngSubmit)="onSubmit()">
+
+    </form>
+  }
+  <ng-template #footer>
+    <p-button label="Cancelar" severity="danger" (onClick)="visible.set(false)" outlined/>
+    <p-button [label]="dialogMode=='Add'?'Añadir Usuario':'Guardar'" severity="success" type="submit" outlined/>
+  </ng-template>
+</p-dialog>
