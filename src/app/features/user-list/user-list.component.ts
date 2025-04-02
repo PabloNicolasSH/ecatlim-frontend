@@ -31,12 +31,10 @@ export class UserListComponent implements OnInit{
   users: User[] = [];
   userToEdit!: User;
 
+  inactiveUsers: User[] = [];
+
   ngOnInit(): void {
-   this.userService.getUsers().subscribe({
-       next: users => {
-         this.users = users;
-       }
-   });
+   this.loadUsers();
   }
 
   showDialog() {
@@ -48,5 +46,34 @@ export class UserListComponent implements OnInit{
     this.userToEdit = user;
     this.visible = true;
     this.dialogMode = 'Edit';
+  }
+
+  loadUsers() {
+    this.userService.getUsers().subscribe({
+      next: users => {
+        this.users = users;
+      }
+    });
+
+    this.userService.getInactiveUsers().subscribe({
+      next: inactiveUsers => {
+        this.inactiveUsers = inactiveUsers;
+      }
+    });
+  }
+
+  deactivateUser(user: User) {
+    this.userService.deactivateUser(user.id!).subscribe({
+      next: () => {
+        console.log("HOLAAA");
+        this.loadUsers();
+      }
+    });
+  }
+
+  activateUser(user: User) {
+    this.userService.activateUser(user.id!).subscribe({
+      next: () => this.loadUsers()
+    });
   }
 }

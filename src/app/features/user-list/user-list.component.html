@@ -10,12 +10,14 @@
       <p-table
         #dt
         [value]="users"
-        [rows]="50"
+        [rows]="25"
         [paginator]="true"
       >
         <ng-template #caption>
           <div class="flex items-center justify-between">
-            <p>Actualmente se cuenta con {{users.length}} usuarios activos</p>
+            <p>Actualmente se cuenta con <span class="font-black">{{users.length}} </span> @if (users.length == 1) {
+              usuario <span class="text-green-600 font-bold"> activo</span>
+            } @else {usuarios <span class="text-green-600 font-bold"> activos</span>}</p>
             <p-button
               (onClick)="showDialog()"
               icon="pi pi-plus"
@@ -27,7 +29,7 @@
           <tr>
             <th>Nombre</th>
             <th>Correo Electrónico</th>
-            <th>Grupo Scout/Entidad</th>
+            <th>Grupo Scout</th>
             <th></th>
           </tr>
         </ng-template>
@@ -35,14 +37,75 @@
           <tr>
             <td>{{user.surname}}, {{user.name}}</td>
             <td>{{user.email}}</td>
-            <td>{{user.scoutGroup.name}}</td>
-            <td>
+            <td>@if (user.scoutGroup != null) {
+              {{user.scoutGroup.name}}
+            }</td>
+            <td class="flex gap-2 justify-end">
               <p-button
                 icon="pi pi-pen-to-square"
                 label="Editar"
                 [rounded]="true"
                 (onClick)="openEditDialog(user)"
                 severity="info"
+                outlined
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                label="Desactivar"
+                [rounded]="true"
+                (onClick)="deactivateUser(user)"
+                severity="danger"
+                outlined
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+    <p-tabpanel value="1">
+      <p-table
+        #dt
+        [value]="inactiveUsers"
+        [rows]="25"
+        [paginator]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p>En la base de datos hay <span class="font-black">{{inactiveUsers.length}}</span> @if (inactiveUsers.length == 1) {
+              usuario <span class="text-red-500 font-bold"> inactivo</span>
+            } @else { usuarios <span class="text-red-500 font-bold"> inactivos</span>}</p>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo Electrónico</th>
+            <th>Grupo Scout</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-user>
+          <tr>
+            <td>{{user.surname}}, {{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td>@if (user.scoutGroup != null) {
+              {{user.scoutGroup.name}}
+            }</td>
+            <td class="flex gap-2 justify-end">
+              <p-button
+                icon="pi pi-pen-to-square"
+                label="Editar"
+                [rounded]="true"
+                (onClick)="openEditDialog(user)"
+                severity="info"
+                outlined
+              ></p-button>
+              <p-button
+                icon="pi pi-history"
+                label="Reactivar"
+                [rounded]="true"
+                (onClick)="activateUser(user)"
+                severity="success"
                 outlined
               ></p-button>
             </td>
@@ -53,6 +116,7 @@
   </p-tabpanels>
 </p-tabs>
 <app-user-modal-add-edit
+  (userUpdated)="loadUsers()"
   [(visible)]="visible"
   [userToEdit]="userToEdit"
   [dialogMode]="dialogMode"

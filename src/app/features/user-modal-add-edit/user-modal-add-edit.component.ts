@@ -1,16 +1,28 @@
-import {Component, inject, Input, model, OnInit} from '@angular/core';
+import {Component, effect, EventEmitter, inject, Input, model, OnInit, Output} from '@angular/core';
 import {Dialog} from 'primeng/dialog';
 import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import * as console from 'node:console';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {FloatLabel} from 'primeng/floatlabel';
+import {Select} from 'primeng/select';
+import {ScoutGroup} from '../../shared/models/scout-group.model';
+import {InputText} from 'primeng/inputtext';
+import {UserService} from '../../shared/services/user.service';
+import {UserForm} from '../../shared/models/user-form.model';
+import {ProgressSpinner} from 'primeng/progressspinner';
+import {Role} from '../../shared/models/role.model';
 
 @Component({
   selector: 'app-user-modal-add-edit',
   imports: [
     Dialog,
     Button,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FloatLabel,
+    Select,
+    FormsModule,
+    InputText
   ],
   templateUrl: './user-modal-add-edit.component.html',
   styleUrl: './user-modal-add-edit.component.scss'
@@ -18,47 +30,101 @@ import * as console from 'node:console';
 export class UserModalAddEditComponent implements OnInit{
 
   protected readonly formBuilder = inject(FormBuilder);
+  protected readonly scoutGroupService = inject(ScoutGroupService);
+  protected readonly userService = inject(UserService);
 
   visible = model<boolean>(false);
   @Input() dialogMode!: string;
   @Input() userToEdit!: User;
 
+  @Output() userUpdated = new EventEmitter();
+
   protected form!: FormGroup;
   protected loading: boolean = false;
 
-  ngOnInit(): void {
-    this.initializeForm();
+  scoutGroups: ScoutGroup[] = [];
+  roles: Role[] = [];
+
+  constructor() {
+    effect(() => {
+      if (this.dialogMode == 'Edit'){
+        this.initializeEditForm();
+      }
+      if (!this.visible()){
+        this.form.reset();
+        this.loading = false;
+      }
+    });
   }
 
-  onSubmit() {
-    console.log("Prueba");
+  ngOnInit(): void {
+    this.initializeForm();
+    this.getScoutGroups();
+    this.roles = ["ADMIN", "MANAGEMENT" , "EVENT_DIRECTOR" , "TRAINER" , "STUDENT"]
   }
 
   private initializeForm() {
-    if (this.dialogMode == 'Add'){
-      this.form = this.formBuilder.group({
-        name: ["", Validators.required],
-        surname: ["", Validators.required],
-        email: ["", [Validators.required, Validators.email]],
-        phone: [""],
-        census: [""],
-        nif: [""],
-        address: [""],
-        city: [""],
-        country: [""]
-      })
-    } else if (this.dialogMode == 'Edit'){
-      this.form = this.formBuilder.group({
-        name: [this.userToEdit.name, Validators.required],
-        surname: [this.userToEdit.surname, Validators.required],
-        email: [this.userToEdit.email, [Validators.required, Validators.email]],
-        phone: [this.userToEdit.phone],
-        census: [this.userToEdit.census],
-        nif: [this.userToEdit.nif],
-        address: [this.userToEdit.address],
-        city: [this.userToEdit.city],
-        country: [this.userToEdit.country]
-      })
+    this.form = this.formBuilder.group({
+      name: ["", Validators.required],
+      surname: ["", Validators.required],
+      email: ["", [Validators.required, Validators.email]],
+      phone: [""],
+      census: [""],
+      nif: [""],
+      address: [""],
+      city: [""],
+      country: [""],
+      selectedScoutGroup: [],
+      selectedRole: [null, Validators.required]
+    });
+  }
+
+  private getScoutGroups() {
+    this.scoutGroupService.getScoutGroups().subscribe({
+      next: scoutGroups => this.scoutGroups = scoutGroups
+    })
+  }
+
+  onSubmit() {
+    this.form.markAsDirty();
+    if (this.form.valid && !this.loading){
+      this.loading = true;
+      const userForm: UserForm = {...this.form.value};
+      userForm.scoutGroupId = this.form.get('selectedScoutGroup')?.value?.id;
+      userForm.role = this.form.get('selectedRole')?.value;
+      if (this.dialogMode == 'Edit'){
+        this.userService.updateUser(this.userToEdit.id!, userForm).subscribe({
+          next: () => {
+            this.loading = false;
+            this.visible.set(false);
+            this.userUpdated.emit();
+          }
+        })
+      } else {
+        this.userService.addUser(userForm).subscribe({
+          next: () => {
+            this.loading = false;
+            this.visible.set(false);
+            this.userUpdated.emit();
+          }
+        })
+      }
     }
+  }
+
+  private initializeEditForm() {
+    this.form = this.formBuilder.group({
+      name: [this.userToEdit.name, Validators.required],
+      surname: [this.userToEdit.surname, Validators.required],
+      email: [this.userToEdit.email, [Validators.required, Validators.email]],
+      phone: [this.userToEdit.phone],
+      census: [this.userToEdit.census],
+      nif: [this.userToEdit.nif],
+      address: [this.userToEdit.address],
+      city: [this.userToEdit.city],
+      country: [this.userToEdit.country],
+      selectedScoutGroup: [this.userToEdit.scoutGroup],
+      selectedRole: [this.userToEdit.role, Validators.required]
+    });
   }
 }
