@@ -7,6 +7,7 @@ import {Password} from 'primeng/password';
 import {Router, RouterLink} from '@angular/router';
 import {UserToLog} from '../../core/auth/user-to-log.model';
 import {AuthService} from '../../core/auth/auth.service';
+import {UserService} from '../../shared/services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -26,16 +27,26 @@ export class LoginComponent  implements OnInit{
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
   private readonly router = inject(Router);
 
   protected loginForm!: FormGroup;
+  protected recoverPasswordForm!: FormGroup;
+
   protected loading: boolean = false;
+  protected recoverPassword: boolean = false;
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group(
       {
         username: ["", [Validators.required, Validators.email]],
         password: ["", Validators.required]
+      }
+    )
+
+    this.recoverPasswordForm = this.formBuilder.group(
+      {
+        recoverUsername: ["", [Validators.required, Validators.email]]
       }
     )
   }
@@ -52,5 +63,9 @@ export class LoginComponent  implements OnInit{
         }
       });
     }
+  }
+
+  sendRecoverEmail(){
+
   }
 }

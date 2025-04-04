@@ -35,4 +35,8 @@ export class UserService {
   activateUser(id: number): Observable<User> {
     return this.http.put<User>(`${environment.apiUrl}/user/admin/activate/${id}`, {});
   }
+
+  forgotPassword(username: string): Observable<void>{
+    return this.http.get<void>(`${environment.apiUrl}/`)
+  }
 }

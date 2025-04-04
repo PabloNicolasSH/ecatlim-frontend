@@ -11,42 +11,75 @@
            style="font-style: inherit;
                 text-decoration-line: underline;"
         >Solicita una</a></p>
-      <form (ngSubmit)="login()" [formGroup]="loginForm">
-        <div class="flex flex-col items-center mt-6">
-          <p-floatlabel variant="on" class="w-full">
-            <input
-              id="username"
-              pInputText
-              formControlName="username"
-              type="text"
-              class="w-full"
-            />
-            <label for="username">Correo Electrónico</label>
-          </p-floatlabel>
-          <p-floatlabel variant="on" class="mt-5 w-full">
-            <p-password
-              id="password"
-              formControlName="password"
-              [toggleMask]="true"
-              [feedback]="false"
-            ></p-password>
-            <label for="password">Contraseña</label>
-          </p-floatlabel>
-          <div class="w-full flex justify-end">
-            <a class="text-blue-500 text-sm mt-1">
-              He olvidado mi contraseña
-            </a>
+      @if (!recoverPassword) {
+        <form (ngSubmit)="login()" [formGroup]="loginForm">
+          <div class="flex flex-col items-center mt-6">
+            <p-floatlabel variant="on" class="w-full">
+              <input
+                id="username"
+                pInputText
+                formControlName="username"
+                type="text"
+                class="w-full"
+              />
+              <label for="username">Correo Electrónico</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-5 w-full">
+              <p-password
+                id="password"
+                formControlName="password"
+                [toggleMask]="true"
+                [feedback]="false"
+              ></p-password>
+              <label for="password">Contraseña</label>
+            </p-floatlabel>
+            <div class="w-full flex justify-end">
+              <a class="text-blue-500 text-sm mt-3" style="cursor:pointer" (click)="recoverPassword = true">
+                He olvidado mi contraseña
+              </a>
+            </div>
+            <p-button
+              class="mt-4"
+              severity="primary"
+              label="Iniciar Sesión"
+              icon="pi pi-user"
+              [loading]="loading"
+              type="submit"
+            ></p-button>
           </div>
-          <p-button
-            class="mt-4"
-            severity="primary"
-            label="Iniciar Sesión"
-            icon="pi pi-user"
-            [loading]="loading"
-            type="submit"
-          ></p-button>
-        </div>
-      </form>
+        </form>
+      } @else {
+        <form (ngSubmit)="sendRecoverEmail()" [formGroup]="recoverPasswordForm">
+          <div class="flex flex-col items-center mt-3">
+            <p>Introduce a continuación tu correo de acceso</p>
+            <p>para enviarte una nueva contraseña.</p>
+            <p-floatlabel variant="on" class="w-full mt-6">
+              <input
+                id="recover"
+                pInputText
+                formControlName="recoverUsername"
+                type="text"
+                class="w-full"
+              />
+              <label for="recover">Correo Electrónico</label>
+            </p-floatlabel>
+            <div class="w-full flex justify-end">
+              <a class="text-blue-500 text-sm mt-3" style="cursor:pointer" (click)="recoverPassword = false">
+                Volver a inicio de sesión
+              </a>
+            </div>
+            <p-button
+              class="mt-4"
+              severity="primary"
+              label="Enviar correo"
+              icon="pi pi-send"
+              [loading]="loading"
+              [disabled]="!recoverPasswordForm.valid"
+              type="submit"
+            ></p-button>
+          </div>
+        </form>
+      }
     </div>
     <div class="flex flex-col justify-between h-screen p-2 max-h-svh">
       <img alt="castores" src="login-elements/Castor.svg">
