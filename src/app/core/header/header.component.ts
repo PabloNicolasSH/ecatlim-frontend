@@ -11,6 +11,8 @@ import {StyleClass} from 'primeng/styleclass';
 import {Tree} from 'primeng/tree';
 import {Popover} from 'primeng/popover';
 import {Avatar} from 'primeng/avatar';
+import {User} from '../../shared/models/user.model';
+import {Profile} from '../../shared/models/profile.model';
 
 @Component({
   selector: 'app-header',
@@ -35,15 +37,29 @@ export class HeaderComponent {
 
   @ViewChild('op') op!: Popover;
 
-  userOptions: MenuItem[];
-  username: string = "Pablo Nicolás Santana Hernández"
+  userOptions!: MenuItem[];
+  user!: Profile;
   sidebarVisible: boolean = false;
 
   messages: string[] = ["Parche la chupa de locos"];
   notifies: string[] = [];
-  nodes!: TreeNode[];
+  sidebarMenu!: TreeNode[];
 
   constructor() {
+    this.createUserOptions();
+    this.createSidebarMenu();
+  }
+
+  toggle(event: any){
+    this.op.toggle(event)
+  }
+
+  onMenuClick() {
+    this.sidebarVisible = !this.sidebarVisible;
+  }
+
+  private createUserOptions() {
+    this.user = this.authService.getProfile();
     this.userOptions = [
       {},
       {separator: true},
@@ -53,8 +69,10 @@ export class HeaderComponent {
         command: () => {this.authService.logout()}
       }
     ];
+  }
 
-    this.nodes = [
+  private createSidebarMenu() {
+    this.sidebarMenu = [
       {
         key: '0',
         label: 'Administración',
@@ -63,13 +81,5 @@ export class HeaderComponent {
         ]
       }
     ];
-  }
-
-  toggle(event: any){
-    this.op.toggle(event)
-  }
-
-  onMenuClick() {
-    this.sidebarVisible = !this.sidebarVisible;
   }
 }
