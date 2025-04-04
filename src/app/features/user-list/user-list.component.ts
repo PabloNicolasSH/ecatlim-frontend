@@ -26,7 +26,7 @@ import {ConfirmPopup} from 'primeng/confirmpopup';
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'
 })
-export class UserListComponent implements OnInit{
+export class UserListComponent implements OnInit {
 
   protected readonly userService = inject(UserService);
   protected readonly confirmationService = inject(ConfirmationService);
@@ -41,7 +41,7 @@ export class UserListComponent implements OnInit{
   inactiveUsers: User[] = [];
 
   ngOnInit(): void {
-   this.loadUsers();
+    this.loadUsers();
   }
 
   showDialog() {
@@ -83,80 +83,86 @@ export class UserListComponent implements OnInit{
     });
   }
 
-  confirmDialog(event: Event, user: User, mode: string){
-    if (mode == 'Deactivate'){
-      this.confirmDeactivate(event, user);
+  confirmDialog(event: Event, user: User, mode: string) {
+    if (mode == 'Deactivate') {
+      const confirmationMessage = {
+        message: '¿Está seguro de que desea desactivar a ' + user.name + "?",
+        header: 'Confirmación de desactivación de usuario',
+        icon: 'pi pi-exclamation-triangle',
+        rejectLabel: 'Cancelar la desactivación',
+        acceptLabel: 'Confirmo'
+      }
+      this.generateConfirmation(event, user, mode, confirmationMessage);
     } else {
-      this.confirmReactivate(event, user);
+      const confirmationMessage = {
+        message: '¿Está seguro de que desea reactivar a ' + user.name + "?",
+        header: 'Confirmación de reactivación de usuario',
+        icon: 'pi pi-exclamation-triangle',
+        rejectLabel: 'Cancelar la activación',
+        acceptLabel: 'Activar'
+      }
+      this.generateConfirmation(event, user, mode, confirmationMessage);
     }
   }
 
-
-  private confirmDeactivate(event: Event, user: User) {
+  private generateConfirmation(event: Event, user: User, mode: string, confirmation: {
+    message: string;
+    header: string;
+    icon: string,
+    rejectLabel: string,
+    acceptLabel: string
+  }) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: '¿Está seguro de que desea desactivar a ' + user.name + "?",
-      header: 'Confirmación de desactivación de usuario',
+      message: confirmation.message,
+      header: confirmation.header,
       closable: true,
       closeOnEscape: true,
-      icon: 'pi pi-exclamation-triangle',
+      icon: confirmation.icon,
       rejectButtonProps: {
-        label: 'Cancelar la desactivación',
+        label: confirmation.rejectLabel,
         severity: 'secondary',
         outlined: true,
       },
       acceptButtonProps: {
-        label: 'Confirmo',
+        label: confirmation.acceptLabel,
       },
       accept: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Confirmado',
-          detail: 'Se ha desactivado a ' + user.name
-        });
-        this.deactivateUser(user);
+        this.sendAcceptedMessageAndDoActionMode(mode, user);
       },
       reject: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Cancelado',
-          detail: 'Se ha cancelado la desactivación del usuario'
-        });
+        if (mode == 'Deactivate') {
+          this.sendRejectedMessage('Se ha cancelado la desactivación del usuario');
+        } else {
+          this.sendRejectedMessage('Se ha cancelado la activación del usuario')
+        }
       },
     });
   }
 
-  private confirmReactivate(event: Event, user: User) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: '¿Está seguro de que desea reactivar a ' + user.name + "?",
-      header: 'Confirmación de reactivación de usuario',
-      closable: true,
-      closeOnEscape: true,
-      icon: 'pi pi-exclamation-triangle',
-      rejectButtonProps: {
-        label: 'Cancelar la activación',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Activar',
-      },
-      accept: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Confirmado',
-          detail: 'Se ha activado a ' + user.name
-        });
-        this.activateUser(user);
-      },
-      reject: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Cancelado',
-          detail: 'Se ha cancelado la activación del usuario'
-        });
-      },
+  private sendAcceptedMessageAndDoActionMode(mode: string, user: User) {
+    if (mode == 'Deactivate') {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Confirmado',
+        detail: 'Se ha desactivado a ' + user.name
+      });
+      this.deactivateUser(user);
+    } else {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Confirmado',
+        detail: 'Se ha activado a ' + user.name
+      });
+      this.activateUser(user);
+    }
+  }
+
+  private sendRejectedMessage(detail: string) {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Cancelado',
+      detail: detail
     });
   }
 }
