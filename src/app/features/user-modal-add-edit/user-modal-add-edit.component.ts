@@ -12,6 +12,7 @@ import {UserService} from '../../shared/services/user.service';
 import {UserForm} from '../../shared/models/user-form.model';
 import {ProgressSpinner} from 'primeng/progressspinner';
 import {Role} from '../../shared/models/role.model';
+import {MessageService} from 'primeng/api';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -32,6 +33,7 @@ export class UserModalAddEditComponent implements OnInit{
   protected readonly formBuilder = inject(FormBuilder);
   protected readonly scoutGroupService = inject(ScoutGroupService);
   protected readonly userService = inject(UserService);
+  protected readonly messageService = inject(MessageService);
 
   visible = model<boolean>(false);
   @Input() dialogMode!: string;
@@ -98,6 +100,18 @@ export class UserModalAddEditComponent implements OnInit{
             this.loading = false;
             this.visible.set(false);
             this.userUpdated.emit();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Confirmado',
+              detail: 'Se ha actualizado correctamente el usuario'
+            })
+          },
+          error: err => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err.message
+            })
           }
         })
       } else {
@@ -106,6 +120,20 @@ export class UserModalAddEditComponent implements OnInit{
             this.loading = false;
             this.visible.set(false);
             this.userUpdated.emit();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Confirmado',
+              detail: 'Se ha añadido el usuario al Aula Virtual'
+            })
+          },
+          error: err => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err.message
+            })
+            this.visible.set(false);
+            this.loading = false;
           }
         })
       }

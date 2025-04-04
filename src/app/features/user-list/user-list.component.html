@@ -53,7 +53,7 @@
                 icon="pi pi-trash"
                 label="Desactivar"
                 [rounded]="true"
-                (onClick)="deactivateUser(user)"
+                (onClick)="confirmDialog($event, user, 'Deactivate')"
                 severity="danger"
                 outlined
               ></p-button>
@@ -104,7 +104,7 @@
                 icon="pi pi-history"
                 label="Reactivar"
                 [rounded]="true"
-                (onClick)="activateUser(user)"
+                (onClick)="confirmDialog($event, user, '')"
                 severity="success"
                 outlined
               ></p-button>
@@ -121,3 +121,4 @@
   [userToEdit]="userToEdit"
   [dialogMode]="dialogMode"
 ></app-user-modal-add-edit>
+<p-confirm-dialog [draggable]="false"/>
