@@ -1,1 +1,12 @@
 <router-outlet></router-outlet>
+<p-toast
+  [breakpoints]="{'512px': { width: '100%', right:'0', left: '0'}}"
+  position="bottom-right"
+></p-toast>
+<p-toast
+  [breakpoints]="{'710px': { width: '100%'}}"
+  [style]="{width: '700px', opacity: 0.97}"
+  class="opaque"
+  key="maintenance"
+  position="bottom-center"
+></p-toast>

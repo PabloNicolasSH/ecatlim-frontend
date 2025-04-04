@@ -8,9 +8,12 @@ import {providePrimeNG} from 'primeng/config';
 import {MyPreset} from './mypreset'
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {tokenInterceptor} from './core/auth/token.interceptor';
+import {ConfirmationService, MessageService} from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    MessageService,
+    ConfirmationService,
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([tokenInterceptor])),
