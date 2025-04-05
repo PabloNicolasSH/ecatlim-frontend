@@ -19,8 +19,8 @@
   }
   <form #userForm (ngSubmit)="onSubmit()" [formGroup]="form" class="mt-2">
     <div class="flex flex-col justify-between">
-      <div class="flex flex-row gap-4">
-        <div class="flex flex-col">
+      <div class="flex flex-row gap-2 w-full">
+        <div class="flex flex-col basis-1/2">
           <p class="text-cyan-900 font-bold">Nombre y Apellidos</p>
           <div class="flex flex-row gap-2 mt-2">
             <p-floatlabel variant="on">
@@ -43,7 +43,7 @@
             </p-floatlabel>
           </div>
         </div>
-        <div class="flex flex-col">
+        <div class="flex flex-col basis-1/2">
           <p class="text-cyan-900 font-bold">Datos de Contacto</p>
           <div class="flex flex-row mt-2 gap-2">
             <p-floatlabel variant="on">

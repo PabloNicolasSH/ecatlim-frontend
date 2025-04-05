@@ -7,7 +7,6 @@ import {Button} from 'primeng/button';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {ConfirmDialog} from 'primeng/confirmdialog';
 import {ConfirmationService, MessageService} from 'primeng/api';
-import {ConfirmPopup} from 'primeng/confirmpopup';
 
 @Component({
   selector: 'app-user-list',
@@ -20,8 +19,7 @@ import {ConfirmPopup} from 'primeng/confirmpopup';
     TableModule,
     Button,
     UserModalAddEditComponent,
-    ConfirmDialog,
-    ConfirmPopup
+    ConfirmDialog
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'

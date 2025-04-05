@@ -82,4 +82,8 @@ export class HeaderComponent {
       }
     ];
   }
+
+  userFirstLetter() {
+    return this.user.name.at(0);
+  }
 }
