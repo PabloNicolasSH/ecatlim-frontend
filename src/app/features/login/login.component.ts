@@ -31,7 +31,7 @@ export class LoginComponent  implements OnInit{
   private readonly router = inject(Router);
 
   protected loginForm!: FormGroup;
-  protected recoverPasswordForm!: FormGroup;
+  protected forgotUsername!: string;
 
   protected loading: boolean = false;
   protected recoverPassword: boolean = false;
@@ -41,12 +41,6 @@ export class LoginComponent  implements OnInit{
       {
         username: ["", [Validators.required, Validators.email]],
         password: ["", Validators.required]
-      }
-    )
-
-    this.recoverPasswordForm = this.formBuilder.group(
-      {
-        recoverUsername: ["", [Validators.required, Validators.email]]
       }
     )
   }
@@ -66,6 +60,14 @@ export class LoginComponent  implements OnInit{
   }
 
   sendRecoverEmail(){
-
+    if (this.forgotUsername && !this.loading){
+      this.loading = true;
+      this.userService.forgotPassword(this.forgotUsername).subscribe({
+        next: () => {
+          this.loading = false;
+          this.forgotUsername = "";
+        }
+      });
+    }
   }
 }

@@ -7,6 +7,7 @@ import {HomeComponent} from './features/home/home.component';
 import {redirect, redirectGuard} from './core/auth/redirect.guard';
 import {UserProfileComponent} from './features/user-profile/user-profile.component';
 import {UserListComponent} from './features/user-list/user-list.component';
+import {ResetPasswordComponent} from './features/reset-password/reset-password.component';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,10 @@ export const routes: Routes = [
   {
     path: "register",
     component: RegisterRequestComponent
+  },
+  {
+    path: "reset-password",
+    component: ResetPasswordComponent
   },
   {
     path: "app",
