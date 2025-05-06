@@ -82,7 +82,7 @@ export class UserModalAddEditComponent implements OnInit{
 
   private getScoutGroups() {
     this.scoutGroupService.getScoutGroups().subscribe({
-      next: scoutGroups => this.scoutGroups = scoutGroups
+      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
     })
   }
 

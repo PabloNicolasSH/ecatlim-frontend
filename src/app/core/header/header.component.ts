@@ -1,18 +1,16 @@
-import {Component, EventEmitter, inject, Output, ViewChild} from '@angular/core';
+import {Component, inject, ViewChild} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
-import {MenuItem, PrimeTemplate, TreeNode} from 'primeng/api';
+import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
 import {OverlayBadge} from 'primeng/overlaybadge';
 import {Router, RouterLink} from '@angular/router';
 import {Drawer} from 'primeng/drawer';
-import {Ripple} from 'primeng/ripple';
-import {StyleClass} from 'primeng/styleclass';
-import {Tree} from 'primeng/tree';
 import {Popover} from 'primeng/popover';
 import {Avatar} from 'primeng/avatar';
-import {User} from '../../shared/models/user.model';
 import {Profile} from '../../shared/models/profile.model';
+import {PanelMenu} from 'primeng/panelmenu';
+import {Divider} from 'primeng/divider';
 
 @Component({
   selector: 'app-header',
@@ -22,10 +20,10 @@ import {Profile} from '../../shared/models/profile.model';
     OverlayBadge,
     RouterLink,
     Drawer,
-    Tree,
-    PrimeTemplate,
     Popover,
-    Avatar
+    Avatar,
+    PanelMenu,
+    Divider
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
@@ -36,6 +34,7 @@ export class HeaderComponent {
   protected readonly router = inject(Router);
 
   @ViewChild('op') op!: Popover;
+  @ViewChild('drawerRef') drawerRef!: Drawer;
 
   userOptions!: MenuItem[];
   user!: Profile;
@@ -43,7 +42,7 @@ export class HeaderComponent {
 
   messages: string[] = ["Parche la chupa de locos"];
   notifies: string[] = [];
-  sidebarMenu!: TreeNode[];
+  sidebarMenu!: MenuItem[];
 
   constructor() {
     this.createUserOptions();
@@ -63,7 +62,7 @@ export class HeaderComponent {
     this.userOptions = [
       {
         label: 'Mi Perfil',
-        command: () => {this.router.navigateByUrl('/app/profile')}
+        command: () => {this.router.navigateByUrl('/app/perfil')}
       },
       {separator: true},
       {
@@ -77,11 +76,13 @@ export class HeaderComponent {
   private createSidebarMenu() {
     this.sidebarMenu = [
       {
-        key: '0',
         label: 'Administración',
-        children: [
-          {key: '0-0', label: 'Usuarios', data: {route:'/app/users', icon: "pi pi-users"}, type: 'route'},
-          {key: '0-1', label: 'Entidades', data: {route:'/app/entities', icon: ''}, type: 'route'}
+        items: [
+          {label: 'Usuarios', icon: "pi pi-users", command: () => {
+            this.router.navigateByUrl('/app/usuarios');
+            this.sidebarVisible = false;
+          }},
+          {label: 'Entidades', route:'/app/entities'}
         ]
       }
     ];
