@@ -4,30 +4,42 @@ import {RegisterRequestComponent} from './features/register-request/register-req
 import {MainComponent} from './core/main/main.component';
 import {authGuard} from './core/auth/auth.guard';
 import {HomeComponent} from './features/home/home.component';
-import {redirect, redirectGuard} from './core/auth/redirect.guard';
+import {redirect} from './core/auth/redirect.guard';
 import {UserProfileComponent} from './features/user-profile/user-profile.component';
 import {UserListComponent} from './features/user-list/user-list.component';
 import {ResetPasswordComponent} from './features/reset-password/reset-password.component';
+import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';
+import {InformationFormPagesComponent} from './core/information-form-pages/information-form-pages.component';
 
 export const routes: Routes = [
   {
-    path: "login",
-    component: LoginComponent
-  },
-  {
-    path: "register",
-    component: RegisterRequestComponent
-  },
-  {
-    path: "reset-password",
-    component: ResetPasswordComponent
-  },
-  {
-    path: "change-password",
-    component: ResetPasswordComponent,
-    data: {
-      changePassword: true
-    }
+    path:"",
+    component: InformationFormPagesComponent,
+    children: [
+      {
+        path: "login",
+        component: LoginComponent
+      },
+      {
+        path: "solicitud-registro",
+        component: RegisterRequestComponent
+      },
+      {
+        path: "resetear-contraseña",
+        component: ResetPasswordComponent
+      },
+      {
+        path: "cambiar-contraseña",
+        component: ResetPasswordComponent,
+        data: {
+          changePassword: true
+        }
+      },
+      {
+        path: "politica-privacidad",
+        component: PrivacyPolicyComponent
+      }
+    ]
   },
   {
     path: "app",
@@ -39,11 +51,11 @@ export const routes: Routes = [
         component: HomeComponent
       },
       {
-        path: "profile",
+        path: "perfil",
         component: UserProfileComponent
       },
       {
-        path: "users",
+        path: "usuarios",
         component: UserListComponent
       }
     ]
