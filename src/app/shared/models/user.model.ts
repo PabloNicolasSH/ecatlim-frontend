@@ -14,4 +14,5 @@ export interface User {
   city: string;
   country: string;
   scoutGroup: ScoutGroup;
+  avatarUrl?: string;
 }

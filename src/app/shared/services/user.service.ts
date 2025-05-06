@@ -4,7 +4,9 @@ import {Observable} from 'rxjs';
 import {User} from '../models/user.model';
 import {environment} from '../../../environments/environment';
 import {UserForm} from '../models/user-form.model';
-import {ResetPassword} from '../../features/reset-password/reset-password.model';
+import {ResetPassword} from '../../features/reset-password/models/reset-password.model';
+import {UserMeForm} from '../models/user-me-form.model';
+import {ChangePassword} from '../../features/reset-password/models/change-password.model';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +44,18 @@ export class UserService {
   }
 
   resetPassword(newPassword: ResetPassword): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/password/reset`, newPassword)
+    return this.http.post<void>(`${environment.apiUrl}/password/reset`, newPassword);
+  }
+
+  changePassword(newPassword: ChangePassword): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/password/change-password`, newPassword);
+  }
+
+  updateMyInfo(userMe: UserMeForm): Observable<User> {
+    return this.http.put<User>(`${environment.apiUrl}/user/update/me`, userMe)
+  }
+
+  getMyInfo(): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/user/me`);
   }
 }

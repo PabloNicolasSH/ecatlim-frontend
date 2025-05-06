@@ -1,12 +1,13 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {UserService} from '../../shared/services/user.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Button} from 'primeng/button';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Password} from 'primeng/password';
-import {ResetPassword} from './reset-password.model';
+import {ResetPassword} from './models/reset-password.model';
 import {MessageService} from 'primeng/api';
+import {ChangePassword} from './models/change-password.model';
 
 @Component({
   selector: 'app-reset-password',
@@ -20,7 +21,7 @@ import {MessageService} from 'primeng/api';
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss'
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnInit{
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -31,6 +32,9 @@ export class ResetPasswordComponent {
   newPassword: string = '';
   repeatedPassword: string = '';
   loading: boolean = false;
+
+  changePassword: boolean = false;
+  actualPassword: string = '';
 
   protected passwordRegex: RegExp = /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)_\+\[\]{};':"\\|,.<>\/?`~\-])(?!.*\s).{8,}$/;
 
@@ -50,6 +54,10 @@ export class ResetPasswordComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.changePassword = this.route.snapshot.data["changePassword"];
+  }
+
   protected checkPasswordRegex(regex: RegExp): 'green' | 'red' {
     return regex.test(this.newPassword) ? 'green' : 'red';
   }
@@ -67,9 +75,29 @@ export class ResetPasswordComponent {
   }
 
   resetPassword(){
+    if (this.changePassword){
+      this.changeUserPassword();
+    } else {
+      this.loading = true;
+      const forgotPassword: ResetPassword = {token: this.token, newPassword: this.newPassword, newPasswordRepeat: this.repeatedPassword};
+      this.userService.resetPassword(forgotPassword).subscribe({
+        next: () => {
+          this.loading = false;
+          this.messageService.add({
+            severity: "success",
+            detail: "Se ha cambiado correctamente tu contraseña"
+          });
+          this.router.navigateByUrl('/login');
+        }
+      });
+    }
+  }
+
+
+  private changeUserPassword() {
     this.loading = true;
-    const forgotPassword: ResetPassword = {token: this.token, newPassword: this.newPassword, newPasswordRepeat: this.repeatedPassword};
-    this.userService.resetPassword(forgotPassword).subscribe({
+    const changePassword: ChangePassword = {currentPassword: this.actualPassword, newPassword: this.newPassword, newPasswordRepeat: this.repeatedPassword};
+    this.userService.changePassword(changePassword).subscribe({
       next: () => {
         this.loading = false;
         this.messageService.add({

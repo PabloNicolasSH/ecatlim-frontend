@@ -23,6 +23,13 @@ export const routes: Routes = [
     component: ResetPasswordComponent
   },
   {
+    path: "change-password",
+    component: ResetPasswordComponent,
+    data: {
+      changePassword: true
+    }
+  },
+  {
     path: "app",
     component: MainComponent,
     canActivate: [authGuard],
