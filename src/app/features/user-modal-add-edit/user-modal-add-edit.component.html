@@ -143,13 +143,12 @@
       </div>
     </div>
     <div class="mt-6 text-end w-full">
-      <p-button label="Cancelar" severity="danger" (onClick)="visible.set(false)" class="mr-3" rounded/>
+      <p-button label="Cancelar" severity="danger" (onClick)="visible.set(false)" class="mr-3"/>
       <p-button
         [label]="dialogMode=='Add'?'Añadir Usuario':'Guardar'"
         [disabled]="!this.form.valid"
         [loading]="loading"
         type="submit"
-        rounded
       />
     </div>
   </form>

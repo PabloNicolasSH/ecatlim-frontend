@@ -10,7 +10,6 @@ import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {InputText} from 'primeng/inputtext';
 import {UserService} from '../../shared/services/user.service';
 import {UserForm} from '../../shared/models/user-form.model';
-import {ProgressSpinner} from 'primeng/progressspinner';
 import {Role} from '../../shared/models/role.model';
 import {MessageService} from 'primeng/api';
 
