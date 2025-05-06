@@ -61,7 +61,10 @@ export class HeaderComponent {
   private createUserOptions() {
     this.user = this.authService.getProfile();
     this.userOptions = [
-      {},
+      {
+        label: 'Mi Perfil',
+        command: () => {this.router.navigateByUrl('/app/profile')}
+      },
       {separator: true},
       {
         label: 'Cerrar Sesión',
@@ -77,7 +80,8 @@ export class HeaderComponent {
         key: '0',
         label: 'Administración',
         children: [
-          {key: '0-0', label: 'Usuarios', data: {route:'/app/users', icon: "pi pi-users"}, type: 'route'}
+          {key: '0-0', label: 'Usuarios', data: {route:'/app/users', icon: "pi pi-users"}, type: 'route'},
+          {key: '0-1', label: 'Entidades', data: {route:'/app/entities', icon: ''}, type: 'route'}
         ]
       }
     ];
