@@ -14,4 +14,16 @@ export class PendingUserService {
   createRequest(pendingUser: PendingUser): Observable<PendingUser>{
     return this.http.post<PendingUser>(`${environment.apiUrl}/pending-user/request`, pendingUser);
   }
+
+  getPendingUsers(): Observable<PendingUser[]>{
+    return this.http.get<PendingUser[]>(`${environment.apiUrl}/pending-user/admin/all`);
+  }
+
+  createUserFromRequest(pendingUser: PendingUser): Observable<PendingUser>{
+    return this.http.post<PendingUser>(`${environment.apiUrl}/pending-user/admin/create-user`, pendingUser);
+  }
+
+  deletePendingUser(pendingUser: PendingUser): Observable<any>{
+    return this.http.put<any>(`${environment.apiUrl}/pending-user/admin/delete`, pendingUser);
+  }
 }

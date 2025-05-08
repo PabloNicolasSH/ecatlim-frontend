@@ -7,6 +7,8 @@ import {Button} from 'primeng/button';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {ConfirmDialog} from 'primeng/confirmdialog';
 import {ConfirmationService, MessageService} from 'primeng/api';
+import {PendingUserService} from '../../shared/services/pending-user.service';
+import {PendingUser} from '../../shared/models/pending-user.model';
 
 @Component({
   selector: 'app-user-list',
@@ -27,6 +29,7 @@ import {ConfirmationService, MessageService} from 'primeng/api';
 export class UserListComponent implements OnInit {
 
   protected readonly userService = inject(UserService);
+  protected readonly pendingUserService = inject(PendingUserService);
   protected readonly confirmationService = inject(ConfirmationService);
   protected readonly messageService = inject(MessageService);
 
@@ -37,9 +40,15 @@ export class UserListComponent implements OnInit {
   userToEdit!: User;
 
   inactiveUsers: User[] = [];
+  pendingUserRequests: PendingUser[] = [];
 
   ngOnInit(): void {
     this.loadUsers();
+    this.pendingUserService.getPendingUsers().subscribe({
+      next: pendingUsers => {
+        this.pendingUserRequests = pendingUsers;
+      }
+    });
   }
 
   showDialog() {
@@ -81,37 +90,72 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  confirmDialog(event: Event, user: User, mode: string) {
-    if (mode == 'Deactivate') {
+  confirmDialog(event: Event, mode: string, user?: User, pendingUser?: PendingUser) {
+    if (mode == 'Deactivate' && user) {
       const confirmationMessage = {
         message: '¿Está seguro de que desea desactivar a ' + user.name + "?",
         header: 'Confirmación de desactivación de usuario',
         icon: 'pi pi-exclamation-triangle',
         rejectLabel: 'Cancelar la desactivación',
-        acceptLabel: 'Confirmo'
+        acceptLabel: 'Confirmo',
+        event: event,
+        user: user,
+        mode: mode
       }
-      this.generateConfirmation(event, user, mode, confirmationMessage);
-    } else {
+      this.generateConfirmation(confirmationMessage);
+    } else if (mode == 'Create User' && pendingUser) {
+      const confirmationMessage = {
+        message: 'Con este proceso acepta la solicitud de alta de ' + pendingUser.name + ". Le llegará un correo informativo al " +
+          "usuario diciéndole que se le ha dado de alta en el Aula Virtual y que ya tiene acceso, ¿estás de acuerdo?",
+        header: 'Confirmación de creación de usuario',
+        icon: 'pi pi-save',
+        rejectLabel: 'Cancelar',
+        acceptLabel: 'Crear Usuario',
+        event: event,
+        mode: mode,
+        pendingUser: pendingUser
+      }
+      this.generateConfirmation(confirmationMessage);
+    } else if (mode == 'Delete request' && pendingUser) {
+      const confirmationMessage = {
+        message: 'Va a eliminar la solicitud de alta de ' + pendingUser.name + " ¿Está seguro?",
+        header: 'Eliminar solicitud de alta',
+        icon: 'pi pi-exclamation-triangle',
+        rejectLabel: 'No, cancelar',
+        acceptLabel: 'Sí, eliminar solicitud',
+        pendingUser: pendingUser,
+        event: event,
+        mode: mode
+      }
+      this.generateConfirmation(confirmationMessage);
+    } else if (user){
       const confirmationMessage = {
         message: '¿Está seguro de que desea reactivar a ' + user.name + "?",
         header: 'Confirmación de reactivación de usuario',
-        icon: 'pi pi-exclamation-triangle',
+        icon: 'pi pi-history',
         rejectLabel: 'Cancelar la activación',
-        acceptLabel: 'Activar'
+        acceptLabel: 'Activar',
+        event: event,
+        user: user,
+        mode: mode
       }
-      this.generateConfirmation(event, user, mode, confirmationMessage);
+      this.generateConfirmation(confirmationMessage);
     }
   }
 
-  private generateConfirmation(event: Event, user: User, mode: string, confirmation: {
+  private generateConfirmation(confirmation: {
     message: string;
     header: string;
     icon: string,
     rejectLabel: string,
-    acceptLabel: string
+    acceptLabel: string,
+    user?: User,
+    pendingUser?: PendingUser,
+    event: Event,
+    mode: string
   }) {
     this.confirmationService.confirm({
-      target: event.target as EventTarget,
+      target: confirmation.event.target as EventTarget,
       message: confirmation.message,
       header: confirmation.header,
       closable: true,
@@ -126,11 +170,19 @@ export class UserListComponent implements OnInit {
         label: confirmation.acceptLabel,
       },
       accept: () => {
-        this.sendAcceptedMessageAndDoActionMode(mode, user);
+        if (confirmation.user != null){
+          this.sendAcceptedMessageAndDoActionMode(confirmation.mode, confirmation.user);
+        } else if (confirmation.pendingUser != null){
+          this.sendAcceptedMessageAndDoActionMode(confirmation.mode, undefined ,confirmation.pendingUser);
+        }
       },
       reject: () => {
-        if (mode == 'Deactivate') {
+        if (confirmation.mode == 'Deactivate') {
           this.sendRejectedMessage('Se ha cancelado la desactivación del usuario');
+        } else if (confirmation.mode == 'Create User') {
+          this.sendRejectedMessage('Se ha cancelado la aceptación de la solicitud de alta');
+        } else if (confirmation.mode == 'Delete request') {
+          this.sendRejectedMessage('Se ha cancelado la eliminación de la solicitud de alta');
         } else {
           this.sendRejectedMessage('Se ha cancelado la activación del usuario')
         }
@@ -138,15 +190,19 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  private sendAcceptedMessageAndDoActionMode(mode: string, user: User) {
-    if (mode == 'Deactivate') {
+  private sendAcceptedMessageAndDoActionMode(mode: string, user?: User, pendingUser?: PendingUser) {
+    if (mode == 'Deactivate' && user) {
       this.messageService.add({
         severity: 'success',
         summary: 'Confirmado',
         detail: 'Se ha desactivado a ' + user.name
       });
       this.deactivateUser(user);
-    } else {
+    } else if (mode == 'Create User' && pendingUser) {
+      this.createUserFromPendingUser(pendingUser);
+    } else if (mode == 'Delete request' && pendingUser) {
+      this.deletePendingUserRequest(pendingUser);
+    } else if (user) {
       this.messageService.add({
         severity: 'success',
         summary: 'Confirmado',
@@ -162,5 +218,29 @@ export class UserListComponent implements OnInit {
       summary: 'Cancelado',
       detail: detail
     });
+  }
+
+  private createUserFromPendingUser(pendingUser: PendingUser) {
+    this.pendingUserService.createUserFromRequest(pendingUser).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Confirmado',
+          detail: 'Se ha creado un usuario a ' + pendingUser.name
+        });
+      }
+    });
+  }
+
+  private deletePendingUserRequest(pendingUser: PendingUser) {
+    this.pendingUserService.deletePendingUser(pendingUser).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Confirmado',
+          detail: 'Se ha eliminado la solicitud de alta de ' + pendingUser.name
+        });
+      }
+    })
   }
 }

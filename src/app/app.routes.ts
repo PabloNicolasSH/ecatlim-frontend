@@ -17,6 +17,11 @@ export const routes: Routes = [
     component: InformationFormPagesComponent,
     children: [
       {
+        path: "",
+        pathMatch: "full",
+        redirectTo: "login"
+      },
+      {
         path: "login",
         component: LoginComponent
       },

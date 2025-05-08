@@ -44,6 +44,7 @@ export class RegisterRequestComponent implements OnInit{
       name: ["", [Validators.required]],
       surname: ["", [Validators.required]],
       email: ["", [Validators.required, Validators.email]],
+      nif: ["", [Validators.required]],
       selectedScoutGroup: [Validators.required],
       checkbox: [false, [Validators.requiredTrue]]
     })
@@ -58,6 +59,7 @@ export class RegisterRequestComponent implements OnInit{
     if (this.registerForm.valid && !this.loading){
       this.loading = true;
       const pendingUser: PendingUser = {...this.registerForm.value};
+      pendingUser.scoutGroupId = this.registerForm.get('selectedScoutGroup')?.value?.id;
       this.pendingUserService.createRequest(pendingUser).subscribe({
         next: () => {
           this.loading = false;
@@ -65,6 +67,7 @@ export class RegisterRequestComponent implements OnInit{
             severity: "success",
             detail: "Se ha recibido correctamente su solicitud, deberá llegarle un correo de confirmación"
           });
+          this.registerForm.reset();
         },
         error: err => {
           this.loading = false;

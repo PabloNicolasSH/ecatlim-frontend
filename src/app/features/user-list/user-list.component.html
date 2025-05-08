@@ -27,7 +27,7 @@
         </ng-template>
         <ng-template #header>
           <tr>
-            <th>Nombre</th>
+            <th>Apellidos, Nombre</th>
             <th>Correo Electrónico</th>
             <th>Grupo Scout</th>
             <th></th>
@@ -53,7 +53,7 @@
                 icon="pi pi-trash"
                 label="Desactivar"
                 [rounded]="true"
-                (onClick)="confirmDialog($event, user, 'Deactivate')"
+                (onClick)="confirmDialog($event, 'Deactivate', user)"
                 severity="danger"
                 outlined
               ></p-button>
@@ -78,7 +78,7 @@
         </ng-template>
         <ng-template #header>
           <tr>
-            <th>Nombre</th>
+            <th>Apellidos, Nombre</th>
             <th>Correo Electrónico</th>
             <th>Grupo Scout</th>
             <th></th>
@@ -104,8 +104,59 @@
                 icon="pi pi-history"
                 label="Reactivar"
                 [rounded]="true"
-                (onClick)="confirmDialog($event, user, '')"
+                (onClick)="confirmDialog($event, '', user)"
                 severity="success"
+                outlined
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+    <p-tabpanel value="2">
+      <p-table
+        #dt
+        [value]="pendingUserRequests"
+        [rows]="25"
+        [paginator]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p>En la base de datos hay <span class="font-black">{{pendingUserRequests.length}}</span> @if (pendingUserRequests.length == 1) {
+              solicitud
+            } @else { solicitudes }de alta en el aula virtual</p>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Apellidos, Nombre</th>
+            <th>DNI/Documento de identificación</th>
+            <th>Correo Electrónico</th>
+            <th>Grupo Scout de Procedencia</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-pendingUser>
+          <tr>
+            <td>{{pendingUser.surname}}, {{pendingUser.name}}</td>
+            <td>{{pendingUser.nif}}</td>
+            <td>{{pendingUser.email}}</td>
+            <td>@if (pendingUser.scoutGroup != null) {
+              {{pendingUser.scoutGroup.name}}
+            }</td>
+            <td class="flex gap-2 justify-end">
+              <p-button
+                icon="pi pi-user-plus"
+                (onClick)="confirmDialog($event,'Create User', undefined , pendingUser)"
+                severity="info"
+                rounded
+                outlined
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                (onClick)="confirmDialog($event, 'Delete request', undefined, pendingUser)"
+                severity="danger"
+                rounded
                 outlined
               ></p-button>
             </td>
@@ -121,4 +172,6 @@
   [userToEdit]="userToEdit"
   [dialogMode]="dialogMode"
 ></app-user-modal-add-edit>
-<p-confirm-dialog [draggable]="false"/>
+<p-confirm-dialog
+  styleClass="max-w-[40rem]"
+/>
