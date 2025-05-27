@@ -91,7 +91,11 @@
   <ng-template #footer>
     <div class="text-center">
       <p-divider></p-divider>
-      <p-button routerLink="/politica-privacidad" label="Política de Privacidad" severity="secondary" text></p-button>
+      <div class="flex flex-col">
+        <p-button routerLink="/politica-privacidad" label="Política de Privacidad" severity="secondary" text></p-button>
+        <a class="font-bold" href="mailto:ecatlim@scoutsdecanarias.org">ecatlim&#64;scoutsdecanarias.org</a>
+        <a class="flex font-bold items-center justify-center gap-1" href="https://www.instagram.com/ecatlim/" target="_blank"><i class="pi pi-instagram"></i> &#64;ecatlim</a>
+      </div>
     </div>
   </ng-template>
 </p-drawer>
