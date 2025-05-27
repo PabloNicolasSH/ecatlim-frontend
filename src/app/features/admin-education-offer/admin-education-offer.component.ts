@@ -1,0 +1,38 @@
+import {Component, inject, OnInit} from '@angular/core';
+import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
+import {TableModule} from 'primeng/table';
+import {Button} from 'primeng/button';
+import {RouterLink, RouterLinkActive} from '@angular/router';
+import {EducationStageService} from '../../shared/services/education-stage.service';
+import {EducationStage} from '../../shared/models/education-stage.model';
+
+@Component({
+  selector: 'app-admin-education-offer',
+  imports: [
+    Tabs,
+    TabList,
+    Tab,
+    TabPanels,
+    TabPanel,
+    TableModule,
+    Button,
+    RouterLinkActive,
+    RouterLink
+  ],
+  templateUrl: './admin-education-offer.component.html',
+  styleUrl: './admin-education-offer.component.scss'
+})
+export class AdminEducationOfferComponent implements OnInit{
+
+  protected readonly educationStageService = inject(EducationStageService)
+
+  educationStages: EducationStage[] = [];
+
+  ngOnInit(): void {
+    this.educationStageService.getEducationStages().subscribe({
+      next: educationStages => {
+        this.educationStages = educationStages;
+      }
+    })
+  }
+}

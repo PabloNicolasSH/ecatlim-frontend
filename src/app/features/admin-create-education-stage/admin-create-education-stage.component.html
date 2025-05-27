@@ -1,0 +1,76 @@
+<h1 class="font-bold">Crear Etapa Educativa</h1>
+<div class="mt-3">
+  <div class="ps-12 pe-12">
+    <p-stepper [value]="1">
+      <p-step-list>
+        <p-step [value]="1">Definición de la Etapa</p-step>
+        <p-step [value]="2">Creación de Módulos</p-step>
+        <p-step [value]="3">Creación de Bloques Formativos</p-step>
+        <p-step [value]="4">Confirmar</p-step>
+      </p-step-list>
+      <p-step-panels>
+        <p-step-panel [value]="1">
+          <ng-template #content let-activateCallback="activateCallback">
+            <div class="flex flex-col h-48">
+              <div class="flex flex-row">
+
+              </div>
+              <div
+                class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+              >
+                Content I
+              </div>
+              <div class="flex pt-6 justify-end">
+                <p-button label="Siguiente" icon="pi pi-arrow-right" iconPos="right" (onClick)="activateCallback(2)"/>
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+        <p-step-panel [value]="2">
+          <ng-template #content let-activateCallback="activateCallback">
+            <div class="flex flex-col h-48">
+              <div
+                class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+              >
+                Content II
+              </div>
+              <div class="flex pt-6  justify-between">
+                <p-button label="Anterior" severity="secondary" icon="pi pi-arrow-left" (onClick)="activateCallback(1)" />
+                <p-button label="Siguiente" icon="pi pi-arrow-right" iconPos="right" (onClick)="activateCallback(3)" />
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+        <p-step-panel [value]="3">
+          <ng-template #content let-activateCallback="activateCallback">
+            <div class="flex flex-col h-48">
+              <div
+                class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+              >
+                Content III
+              </div>
+              <div class="flex pt-6  justify-between">
+                <p-button label="Anterior" severity="secondary" icon="pi pi-arrow-left" (onClick)="activateCallback(2)" />
+                <p-button label="Siguiente" icon="pi pi-arrow-right" iconPos="right" (onClick)="activateCallback(4)" />
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+        <p-step-panel [value]="4">
+          <ng-template #content let-activateCallback="activateCallback">
+            <div class="flex flex-col h-48">
+              <div
+                class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+              >
+                Content IV
+              </div>
+              <div class="flex pt-6  justify-between">
+                <p-button label="Anterior" severity="secondary" icon="pi pi-arrow-left" (onClick)="activateCallback(3)" />
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+      </p-step-panels>
+    </p-stepper>
+  </div>
+</div>

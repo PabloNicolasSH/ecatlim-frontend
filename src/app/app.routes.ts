@@ -10,6 +10,13 @@ import {UserListComponent} from './features/user-list/user-list.component';
 import {ResetPasswordComponent} from './features/reset-password/reset-password.component';
 import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';
 import {InformationFormPagesComponent} from './core/information-form-pages/information-form-pages.component';
+import {GeneralInfoComponent} from './info-pages/general-info/general-info.component';
+import {AdminEducationalHomeComponent} from './features/admin-educational-home/admin-educational-home.component';
+import {EntityListComponent} from './features/entity-list/entity-list.component';
+import {AdminEducationOfferComponent} from './features/admin-education-offer/admin-education-offer.component';
+import {
+  AdminCreateEducationStageComponent
+} from './features/admin-create-education-stage/admin-create-education-stage.component';
 
 export const routes: Routes = [
   {
@@ -56,12 +63,32 @@ export const routes: Routes = [
         component: HomeComponent
       },
       {
+        path: "informacion-general",
+        component: GeneralInfoComponent
+      },
+      {
         path: "perfil",
         component: UserProfileComponent
       },
       {
-        path: "usuarios",
+        path: "admin/usuarios",
         component: UserListComponent
+      },
+      {
+        path: "admin/entidades",
+        component: EntityListComponent
+      },
+      {
+        path: "admin/formacion",
+        component: AdminEducationalHomeComponent
+      },
+      {
+        path: "admin/oferta-educativa",
+        component: AdminEducationOfferComponent
+      },
+      {
+        path: "admin/oferta-educativa/crear-etapa-educativa",
+        component: AdminCreateEducationStageComponent
       }
     ]
   },
