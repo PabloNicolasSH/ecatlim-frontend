@@ -14,4 +14,8 @@ export class EducationStageService {
   getEducationStages(): Observable<EducationStage[]>{
     return this.http.get<EducationStage[]>(`${environment.apiUrl}/education-stage/admin/all`)
   }
+
+  createEducationStage(educationStageForm: EducationStage): Observable<any> {
+    return this.http.post<Observable<any>>(`${environment.apiUrl}/education-stage/admin/add`, educationStageForm);
+  }
 }

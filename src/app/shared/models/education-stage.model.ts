@@ -1,7 +1,8 @@
 export interface EducationStage {
+  id?: number;
   name: string;
-  surname: string;
-  email: string;
-  nif: string;
-  scoutGroupId: number;
+  code: string;
+  description: string;
+  previousStageRequired?: boolean;
+  previousStageId?: number;
 }

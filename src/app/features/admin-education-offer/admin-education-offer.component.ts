@@ -16,7 +16,6 @@ import {EducationStage} from '../../shared/models/education-stage.model';
     TabPanel,
     TableModule,
     Button,
-    RouterLinkActive,
     RouterLink
   ],
   templateUrl: './admin-education-offer.component.html',
@@ -32,7 +31,13 @@ export class AdminEducationOfferComponent implements OnInit{
     this.educationStageService.getEducationStages().subscribe({
       next: educationStages => {
         this.educationStages = educationStages;
+        console.log(educationStages);
       }
     })
+  }
+
+  getEducationStageCode(previousStageId: number) {
+    const previousStage = this.educationStages.find(e => e.id === previousStageId);
+    return previousStage ? previousStage["code"] : null;
   }
 }

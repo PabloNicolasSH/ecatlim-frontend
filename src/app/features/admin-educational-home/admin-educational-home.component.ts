@@ -9,12 +9,6 @@ import {RouterLink} from '@angular/router';
 @Component({
   selector: 'app-admin-educational-home',
   imports: [
-    Divider,
-    Tabs,
-    TabList,
-    Tab,
-    TabPanels,
-    TabPanel,
     Carousel,
     Button,
     TableModule,
