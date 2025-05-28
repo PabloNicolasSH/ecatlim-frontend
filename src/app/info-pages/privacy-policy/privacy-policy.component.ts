@@ -5,8 +5,7 @@ import {RouterLink} from '@angular/router';
 @Component({
   selector: 'app-privacy-policy',
   imports: [
-    Button,
-    RouterLink
+    Button
   ],
   templateUrl: './privacy-policy.component.html',
   styleUrl: './privacy-policy.component.scss'
