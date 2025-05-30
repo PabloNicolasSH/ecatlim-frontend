@@ -17,6 +17,7 @@ import {AdminEducationOfferComponent} from './features/admin-education-offer/adm
 import {
   AdminCreateEducationStageComponent
 } from './features/admin-create-education-stage/admin-create-education-stage.component';
+import {EducationStageDetailComponent} from './features/education-stage-detail/education-stage-detail.component';
 
 export const routes: Routes = [
   {
@@ -85,6 +86,10 @@ export const routes: Routes = [
       {
         path: "admin/oferta-educativa",
         component: AdminEducationOfferComponent
+      },
+      {
+        path: "admin/oferta-educativa/detalle-etapa/:id",
+        component: EducationStageDetailComponent
       },
       {
         path: "admin/oferta-educativa/crear-etapa-educativa",

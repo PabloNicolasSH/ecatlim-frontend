@@ -1,0 +1,120 @@
+@if (stage) {
+  <div class="pe-12 ps-12">
+    <div class="flex flex-row justify-between items-center">
+      <h1 class="text-center font-bold">{{ stage.name }} ({{ stage.code }})</h1>
+      <div class="flex flex-row gap-2 items-center mr-0">
+        <p-button
+          icon="pi pi-pencil"
+          label="Editar"
+          severity="info"
+          rounded
+          outlined
+        ></p-button>
+        <p-button
+          label="Añadir Módulo"
+          severity="secondary"
+          rounded
+          outlined
+        ></p-button>
+        <p-button
+          label="Añadir Bloque"
+          severity="secondary"
+          rounded
+          outlined
+        ></p-button>
+      </div>
+    </div>
+    <div class="flex flex-row gap-4 mt-2 p-2">
+      <div>
+        <p-fieldset legend="Descripción de la Etapa">
+          <p-scroll-panel [style]="{ width: '100%', height: '140px' }">
+            <p>{{ stage.description }}</p>
+          </p-scroll-panel>
+        </p-fieldset>
+        <p class="mt-2"><strong>¿Requiere etapa previa?:</strong> {{ stage.previousStageRequired ? 'Sí' : 'No' }}</p>
+      </div>
+      <div class="flex items-center justify-end">
+        <table class="hours-table">
+          <thead>
+          <tr>
+            <th class="!bg-white"></th>
+            <th>Total</th>
+            <th>Asignadas</th>
+            <th>% Cubierto</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td><i class="pi pi-globe"></i> Online</td>
+            <td>{{ stage.onlineHours ?? 0 }}</td>
+            <td>{{ stage.allocatedOnlineHours ?? 0 }}</td>
+            <td>
+              {{
+                stage.onlineHours
+                  ? (stage.allocatedOnlineHours ?? 0) / stage.onlineHours * 100
+                  : 0
+                    | number:'1.0-0'
+              }}%
+            </td>
+          </tr>
+          <tr>
+            <td><i class="pi pi-users"></i> Presenciales</td>
+            <td>{{ stage.contactHours ?? 0 }}</td>
+            <td>{{ stage.allocatedContactHours ?? 0 }}</td>
+            <td>
+              {{
+                stage.contactHours
+                  ? (stage.allocatedContactHours ?? 0) / stage.contactHours * 100
+                  : 0
+                    | number:'1.0-0'
+              }}%
+            </td>
+          </tr>
+          <tr>
+            <td><i class="pi pi-cog"></i> Prácticas</td>
+            <td>{{ stage.practicalHours ?? 0 }}</td>
+            <td>{{ stage.allocatedPracticalHours ?? 0 }}</td>
+            <td>
+              {{
+                stage.practicalHours
+                  ? ((stage.allocatedPracticalHours ?? 0) / stage.practicalHours * 100 | number:'1.0-0')
+                  : 0
+              }}
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+
+
+    @if (hasModule(stage)) {
+      <h2>Módulos de la Etapa</h2>
+      @for (module of stage.modules; track module.id) {
+        <h3>{{ module.name }}: {{ module.description }}</h3>
+        <p><strong>Tipo:</strong> {{ module.type | moduleType }}</p>
+        <p><strong>Horas:</strong> Online {{ module.onlineHours }} | Presenciales {{ module.contactHours }}</p>
+        <p><strong>Horas Asignadas:</strong> Online {{ module.allocatedOnlineHours }} |
+          Presenciales {{ module.allocatedContactHours }}</p>
+
+        @if (hasLessonBlock(module)) {
+          <h4>Bloques:</h4>
+          @for (block of module.lessonBlocks; track block.lessonBlockId) {
+            <h5>{{ block.name }}</h5>
+            <p><strong>Descripción:</strong> {{ block.description }}</p>
+            <p><strong>Horas:</strong> Online {{ block.onlineHours }} | Presenciales {{ block.contactHours }}</p>
+            <p><strong>¿Convalidable?:</strong> {{ block.recognizable ? 'Sí' : 'No' }}</p>
+          }
+        } @else {
+          <p>No hay bloques en este módulo</p>
+        }
+      }
+    } @else {
+      <p>No hay módulos para esta etapa</p>
+    }</div>
+} @else {
+  <p>Cargando información de la etapa...</p>
+}
