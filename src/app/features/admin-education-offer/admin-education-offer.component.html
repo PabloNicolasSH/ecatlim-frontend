@@ -12,6 +12,8 @@
         [value]="educationStages"
         [rows]="25"
         [paginator]="true"
+        selectionMode="single"
+        (onRowSelect)="openEducationStage($event)"
       >
         <ng-template #caption>
           <div class="flex items-center justify-end">
@@ -31,7 +33,9 @@
           </tr>
         </ng-template>
         <ng-template #body let-educationStage>
-          <tr>
+          <tr
+            [pSelectableRow]="educationStage"
+          >
             <td>{{educationStage.name}}</td>
             <td class="!text-center">{{educationStage.code}}</td>
             <td>{{educationStage.description}}</td>

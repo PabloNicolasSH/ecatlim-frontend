@@ -2,7 +2,7 @@ import {Component, inject, OnInit} from '@angular/core';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {TableModule} from 'primeng/table';
 import {Button} from 'primeng/button';
-import {RouterLink, RouterLinkActive} from '@angular/router';
+import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {EducationStageService} from '../../shared/services/education-stage.service';
 import {EducationStage} from '../../shared/models/education-stage.model';
 
@@ -23,7 +23,8 @@ import {EducationStage} from '../../shared/models/education-stage.model';
 })
 export class AdminEducationOfferComponent implements OnInit{
 
-  protected readonly educationStageService = inject(EducationStageService)
+  protected readonly educationStageService = inject(EducationStageService);
+  protected readonly router = inject(Router);
 
   educationStages: EducationStage[] = [];
 
@@ -31,7 +32,6 @@ export class AdminEducationOfferComponent implements OnInit{
     this.educationStageService.getEducationStages().subscribe({
       next: educationStages => {
         this.educationStages = educationStages;
-        console.log(educationStages);
       }
     })
   }
@@ -39,5 +39,10 @@ export class AdminEducationOfferComponent implements OnInit{
   getEducationStageCode(previousStageId: number) {
     const previousStage = this.educationStages.find(e => e.id === previousStageId);
     return previousStage ? previousStage["code"] : null;
+  }
+
+  openEducationStage(event: any) {
+    const educationStage = event.data;
+    this.router.navigateByUrl("app/admin/oferta-educativa/detalle-etapa/" + educationStage.id);
   }
 }
