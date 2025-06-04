@@ -98,6 +98,23 @@ export class HeaderComponent {
       {
         label: 'La Biblioteca',
         icon: "pi pi-bookmark"
+      },
+      {
+        label: 'Mi formación',
+        items: [
+          {
+            label: 'Oferta Educativa', icon: 'pi pi-graduation-cap', command: () => {
+              this.router.navigateByUrl('/app/oferta-educativa');
+              this.sidebarVisible = false;
+            }
+          },
+          {
+            label: 'Mis Etapas y Cursos', icon: 'pi pi-book', command: () => {
+              this.router.navigateByUrl('');
+              this.sidebarVisible = false;
+            }
+          }
+        ]
       }
     ];
     if (this.user.role == "ADMIN"){
