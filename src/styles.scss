@@ -15,7 +15,7 @@ h1{
 }
 
 h2{
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .p-tieredmenu-overlay{
@@ -26,3 +26,18 @@ h2{
 .p-panelmenu-panel {
   border-style: none;
 }
+
+label, span, th {
+  &.required:after {
+    content: "*";
+    font-weight: bold;
+    color: red;
+    margin-left: 4px;
+  }
+}
+
+.title-2{
+  color: var(--p-amber-600);
+  font-size: x-large;
+}
+

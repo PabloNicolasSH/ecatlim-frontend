@@ -6,9 +6,13 @@ import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {ConfirmDialog} from 'primeng/confirmdialog';
-import {ConfirmationService, MessageService} from 'primeng/api';
+import {ConfirmationService, FilterService, MessageService} from 'primeng/api';
 import {PendingUserService} from '../../shared/services/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
+import {FormsModule} from '@angular/forms';
+import {MultiSelect} from 'primeng/multiselect';
+import {ScoutGroup} from '../../shared/models/scout-group.model';
+import {ScoutGroupService} from '../../shared/services/scout-group.service';
 
 @Component({
   selector: 'app-user-list',
@@ -21,7 +25,9 @@ import {PendingUser} from '../../shared/models/pending-user.model';
     TableModule,
     Button,
     UserModalAddEditComponent,
-    ConfirmDialog
+    ConfirmDialog,
+    FormsModule,
+    MultiSelect
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'
@@ -30,8 +36,10 @@ export class UserListComponent implements OnInit {
 
   protected readonly userService = inject(UserService);
   protected readonly pendingUserService = inject(PendingUserService);
+  protected readonly scoutGroupService = inject(ScoutGroupService);
   protected readonly confirmationService = inject(ConfirmationService);
   protected readonly messageService = inject(MessageService);
+  protected readonly filterService = inject(FilterService);
 
   visible: boolean = false;
   dialogMode: string = '';
@@ -41,9 +49,11 @@ export class UserListComponent implements OnInit {
 
   inactiveUsers: User[] = [];
   pendingUserRequests: PendingUser[] = [];
+  scoutGroups: ScoutGroup[] = [];
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadScoutGroups();
     this.pendingUserService.getPendingUsers().subscribe({
       next: pendingUsers => {
         this.pendingUserRequests = pendingUsers;
@@ -68,6 +78,11 @@ export class UserListComponent implements OnInit {
         this.users = users;
       }
     });
+
+    this.users = this.users.map(user => ({
+      ...user,
+      fullName: `${user.surname}, ${user.name}`
+    }));
 
     this.userService.getInactiveUsers().subscribe({
       next: inactiveUsers => {
@@ -240,6 +255,14 @@ export class UserListComponent implements OnInit {
           summary: 'Confirmado',
           detail: 'Se ha eliminado la solicitud de alta de ' + pendingUser.name
         });
+      }
+    })
+  }
+
+  private loadScoutGroups() {
+    this.scoutGroupService.getScoutGroups().subscribe({
+      next: value => {
+        this.scoutGroups = value;
       }
     })
   }

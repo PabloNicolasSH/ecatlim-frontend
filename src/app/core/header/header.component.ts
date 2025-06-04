@@ -1,6 +1,6 @@
 import {Component, inject, ViewChild} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
-import {MenuItem} from 'primeng/api';
+import {MenuItem, MenuItemCommandEvent} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
 import {OverlayBadge} from 'primeng/overlaybadge';
@@ -76,19 +76,74 @@ export class HeaderComponent {
   private createSidebarMenu() {
     this.sidebarMenu = [
       {
-        label: 'Administración',
+        label: 'Inicio',
+        icon: "pi pi-home",
+        command: () => {
+          this.router.navigateByUrl('/app/home');
+          this.sidebarVisible = false;
+        }
+      },
+      {
+        label: 'Información General',
+        icon: "pi pi-info-circle",
+        command: () => {
+          this.router.navigateByUrl('/app/informacion-general');
+          this.sidebarVisible = false;
+        }
+      },
+      {
+        label: 'Calendario de la Escuela',
+        icon: "pi pi-calendar"
+      },
+      {
+        label: 'La Biblioteca',
+        icon: "pi pi-bookmark"
+      },
+      {
+        label: 'Mi formación',
         items: [
-          {label: 'Usuarios', icon: "pi pi-users", command: () => {
-            this.router.navigateByUrl('/app/usuarios');
-            this.sidebarVisible = false;
-          }},
-          {label: 'Entidades', route:'/app/entities'}
+          {
+            label: 'Oferta Educativa', icon: 'pi pi-graduation-cap', command: () => {
+              this.router.navigateByUrl('/app/oferta-educativa');
+              this.sidebarVisible = false;
+            }
+          },
+          {
+            label: 'Mis Etapas y Cursos', icon: 'pi pi-book', command: () => {
+              this.router.navigateByUrl('');
+              this.sidebarVisible = false;
+            }
+          }
         ]
       }
     ];
+    if (this.user.role == "ADMIN"){
+      this.addAdminOptions();
+    }
   }
 
   userFirstLetter() {
     return this.user.name.at(0);
+  }
+
+  private addAdminOptions() {
+    this.sidebarMenu.push({
+      label: 'Administración',
+      items: [
+        {label: 'Usuarios', icon: "pi pi-users", command: () => {
+            this.router.navigateByUrl('/app/admin/usuarios');
+            this.sidebarVisible = false;
+          }},
+        {label: 'Entidades', icon: "pi pi-building-columns", command: () => {
+            this.router.navigateByUrl('/app/admin/entidades');
+            this.sidebarVisible = false;
+          }},
+        {label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
+            this.router.navigateByUrl('/app/admin/formacion');
+            this.sidebarVisible = false;
+          }},
+        {label: 'Eventos Formativos', icon: "pi pi-calendar"}
+      ]
+    });
   }
 }

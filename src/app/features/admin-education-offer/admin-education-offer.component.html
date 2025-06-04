@@ -1,0 +1,50 @@
+<h1 class="font-bold">Oferta Educativa Actual</h1>
+<p>Aquí puedes ver y añadir elementos a la oferta educativa de la escuela.</p>
+<p-tabs value="0" class="mt-3">
+  <p-tablist>
+    <p-tab value="0">Etapas Formativas</p-tab>
+    <p-tab value="1">Sesiones Formativas</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="0">
+      <p-table
+        #dt
+        [value]="educationStages"
+        [rows]="25"
+        [paginator]="true"
+        selectionMode="single"
+        (onRowSelect)="openEducationStage($event)"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-end">
+            <p-button
+              icon="pi pi-plus"
+              routerLink="/app/admin/oferta-educativa/crear-etapa-educativa"
+              label="Añadir Etapa Formativa"
+            ></p-button>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Nombre de la Etapa</th>
+            <th class="!text-center">Código</th>
+            <th>Descripción</th>
+            <th class="!text-center">Etapa Previa Necesaria</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-educationStage>
+          <tr
+            [pSelectableRow]="educationStage"
+          >
+            <td>{{educationStage.name}}</td>
+            <td class="!text-center">{{educationStage.code}}</td>
+            <td>{{educationStage.description}}</td>
+            <td class="!text-center">{{getEducationStageCode(educationStage.previousStageId)}}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+    <p-tabpanel value="1">
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
