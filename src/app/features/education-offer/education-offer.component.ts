@@ -18,7 +18,10 @@ import {EducationStage} from '../../shared/models/education-stage.model';
   styleUrl: './education-offer.component.scss'
 })
 export class EducationOfferComponent implements OnInit{
-  stages: EducationStage[] = [];
+  stages = [
+    {id: 1, type: "Etapa Básica", description: "Lorem ipsum dolor alea iacta est, valeri mane", name: "Acogida al Scouter", isEnabled: true},
+    {id: 2, type: "Etapa Intermedia", description: "Lorem ipsum dolor alea iacta est, valeri mane", name: "Educador Scout", isEnabled: false}
+  ];
 
   courses = [
     { id: 1, name: 'Matemáticas', description: 'Curso básico de álgebra', isEnabled: true },
