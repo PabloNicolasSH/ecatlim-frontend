@@ -7,6 +7,7 @@ import {Button} from 'primeng/button';
 import {ModuleTypePipe} from '../../shared/pipes/module-type.pipe';
 import {Fieldset} from 'primeng/fieldset';
 import {ScrollPanel} from 'primeng/scrollpanel';
+import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'primeng/accordion';
 
 @Component({
   selector: 'app-education-stage-detail',
@@ -15,7 +16,11 @@ import {ScrollPanel} from 'primeng/scrollpanel';
     ModuleTypePipe,
     Button,
     Fieldset,
-    ScrollPanel
+    ScrollPanel,
+    Accordion,
+    AccordionPanel,
+    AccordionHeader,
+    AccordionContent
   ],
   templateUrl: './education-stage-detail.component.html',
   standalone: true,
@@ -47,5 +52,9 @@ export class EducationStageDetailComponent implements OnInit{
 
   hasLessonBlock(module: any){
     return Array.isArray(module?.lessonBlocks) && module.lessonBlocks.length > 0;
+  }
+
+  getPreviousStageCode(previousStageId: number | undefined) {
+    return "";
   }
 }
