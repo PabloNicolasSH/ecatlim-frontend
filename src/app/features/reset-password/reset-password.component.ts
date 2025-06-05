@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {UserService} from '../../shared/services/user.service';
+import {UserService} from '../../shared/services/user-and-entity/user.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Button} from 'primeng/button';
 import {FloatLabel} from 'primeng/floatlabel';

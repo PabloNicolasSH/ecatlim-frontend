@@ -5,10 +5,10 @@ import {Button} from 'primeng/button';
 import {FloatLabel} from 'primeng/floatlabel';
 import {InputText} from 'primeng/inputtext';
 import {Select} from 'primeng/select';
-import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {ScoutGroupService} from '../../shared/services/user-and-entity/scout-group.service';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {Checkbox} from 'primeng/checkbox';
-import {PendingUserService} from '../../shared/services/pending-user.service';
+import {PendingUserService} from '../../shared/services/user-and-entity/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {MessageService} from 'primeng/api';
 

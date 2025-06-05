@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {Button} from 'primeng/button';
 import {User} from '../../shared/models/user.model';
-import {UserService} from '../../shared/services/user.service';
+import {UserService} from '../../shared/services/user-and-entity/user.service';
 import {LowerCasePipe, UpperCasePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {UserModalMeEditComponent} from '../user-modal-me-edit/user-modal-me-edit.component';

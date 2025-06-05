@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {EducationStageService} from '../../shared/services/education-stage.service';
+import {EducationStageService} from '../../shared/services/education/education-stage.service';
 import {EducationStage} from '../../shared/models/education-stage.model';
 import {DecimalPipe} from '@angular/common';
 import {Button} from 'primeng/button';

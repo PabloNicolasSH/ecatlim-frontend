@@ -2,7 +2,7 @@ import {Component, inject, OnInit} from '@angular/core';
 import {Button} from "primeng/button";
 import {TableModule} from "primeng/table";
 import {ScoutGroup} from '../../shared/models/scout-group.model';
-import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {ScoutGroupService} from '../../shared/services/user-and-entity/scout-group.service';
 
 @Component({
   selector: 'app-entity-list',

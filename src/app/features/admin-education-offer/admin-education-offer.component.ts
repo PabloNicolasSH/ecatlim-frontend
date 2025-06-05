@@ -3,7 +3,7 @@ import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {TableModule} from 'primeng/table';
 import {Button} from 'primeng/button';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
-import {EducationStageService} from '../../shared/services/education-stage.service';
+import {EducationStageService} from '../../shared/services/education/education-stage.service';
 import {EducationStage} from '../../shared/models/education-stage.model';
 
 @Component({

@@ -1,12 +1,12 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {User} from '../models/user.model';
-import {environment} from '../../../environments/environment';
-import {UserForm} from '../models/user-form.model';
-import {ResetPassword} from '../../features/reset-password/models/reset-password.model';
-import {UserMeForm} from '../models/user-me-form.model';
-import {ChangePassword} from '../../features/reset-password/models/change-password.model';
+import {User} from '../../models/user.model';
+import {environment} from '../../../../environments/environment';
+import {UserForm} from '../../models/user-form.model';
+import {ResetPassword} from '../../../features/reset-password/models/reset-password.model';
+import {UserMeForm} from '../../models/user-me-form.model';
+import {ChangePassword} from '../../../features/reset-password/models/change-password.model';
 
 @Injectable({
   providedIn: 'root'

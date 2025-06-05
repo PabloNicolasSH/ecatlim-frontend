@@ -3,7 +3,7 @@ import {Card} from 'primeng/card';
 import {PrimeTemplate} from 'primeng/api';
 import {Button} from 'primeng/button';
 import {RouterLink} from '@angular/router';
-import {EducationStageService} from '../../shared/services/education-stage.service';
+import {EducationStageService} from '../../shared/services/education/education-stage.service';
 import {EducationStage} from '../../shared/models/education-stage.model';
 
 @Component({

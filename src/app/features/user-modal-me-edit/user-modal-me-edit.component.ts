@@ -4,7 +4,7 @@ import {Dialog} from "primeng/dialog";
 import {FloatLabel} from "primeng/floatlabel";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {InputText} from "primeng/inputtext";
-import {UserService} from '../../shared/services/user.service';
+import {UserService} from '../../shared/services/user-and-entity/user.service';
 import {MessageService} from 'primeng/api';
 import {User} from '../../shared/models/user.model';
 import {UserForm} from '../../shared/models/user-form.model';

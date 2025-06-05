@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {Toast} from 'primeng/toast';
-import {UserService} from './shared/services/user.service';
+import {UserService} from './shared/services/user-and-entity/user.service';
 
 @Component({
   selector: 'app-root',
