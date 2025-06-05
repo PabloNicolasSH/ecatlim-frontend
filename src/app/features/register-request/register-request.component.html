@@ -1,0 +1,92 @@
+<div class="flex flex-row w-full h-full">
+    <div class="flex flex-1 flex-col items-center justify-center">
+      <div class="text-center">
+        <img src="assets/logo.jpeg" alt="Logo" class="mx-auto">
+        <h1 class="font-bold">Aula Virtual</h1>
+        <h1 class="font-semibold">ECATLIM</h1>
+      </div>
+      <p>¿Ya tienes una cuenta?
+        <a routerLink="/login"
+           style="font-style: inherit;
+                text-decoration-line: underline;"
+        >Inicia sesión</a></p>
+      <form (ngSubmit)="register()" [formGroup]="registerForm">
+        <div class="flex flex-col items-center mt-5">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="name"
+              pInputText
+              formControlName="name"
+              type="text"
+              class="w-full"
+            />
+            <label for="name">Nombre</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="w-full mt-4">
+            <input
+              id="surname"
+              pInputText
+              formControlName="surname"
+              type="text"
+              class="w-full"
+            />
+            <label for="surname">Apellidos</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="w-full mt-4">
+            <input
+              id="nif"
+              pInputText
+              formControlName="nif"
+              type="text"
+              class="w-full"
+            />
+            <label for="nif">DNI/Documento de identificación</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="w-full mt-4">
+            <input
+              id="email"
+              pInputText
+              formControlName="email"
+              type="text"
+              class="w-full"
+            />
+            <label for="email">Correo electrónico</label>
+          </p-floatlabel>
+          <p-select
+            class="mt-4 w-full"
+            [options]="scoutGroups"
+            optionLabel="name"
+            formControlName="selectedScoutGroup"
+            [checkmark]="true"
+            placeholder="Selecciona una entidad de procedencia"
+          >
+          </p-select>
+          <div class="mt-2">
+            <p-checkbox
+              id="privacy"
+              formControlName="checkbox"
+              binary
+            ></p-checkbox>
+            <label for="privacy" class="ml-2">He leído y acepto la
+              <a
+                routerLink="/politica-privacidad"
+                style="font-style: inherit;
+                text-decoration-line: underline;">política de privacidad</a>
+            </label>
+          </div>
+
+          <p-button
+            class="mt-3"
+            severity="primary"
+            label="Solicitar una cuenta"
+            icon="pi pi-send "
+            [loading]="loading"
+            type="submit"
+          ></p-button>
+        </div>
+      </form>
+  </div>
+</div>
+<div class="ms-6 hashtags">
+  <h2><b>E</b>SCUELA <b>C</b>ANARIA de <b>A</b>NIMACIÓN en el <b>T</b>IEMPO <b>L</b>IBRE <b>I</b>NSIGNIA de <b>M</b>ADERA</h2>
+</div>

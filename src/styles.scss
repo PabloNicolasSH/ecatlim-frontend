@@ -1,1 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+@layer tailwind, primeng;
+
+@layer tailwind {
+  @import "tailwindcss";
+}
+
+*{
+  font-family: "Droid Sans", sans-serif;
+}
+
+h1{
+  font-size: 36px;
+  color: var(--p-orange-500);
+}
+
+h2{
+  font-size: 24px;
+}
+
+.p-tieredmenu-overlay{
+  left: unset !important;
+  right: 0 !important;
+}
+
+.p-panelmenu-panel {
+  border-style: none;
+}
+
+label, span, th {
+  &.required:after {
+    content: "*";
+    font-weight: bold;
+    color: red;
+    margin-left: 4px;
+  }
+}
+
+.title-2{
+  color: var(--p-amber-600);
+  font-size: x-large;
+}
+

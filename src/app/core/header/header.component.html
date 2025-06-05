@@ -1,0 +1,111 @@
+<header class="flex items-center justify-between border-b border-gray-300 px-6 py-4">
+  <div class="flex items-center space-x-4">
+    <p-button
+      (onClick)="onMenuClick()"
+      icon="pi pi-bars"
+      label="Menú"
+      severity="secondary"
+      variant="text"
+    >
+    </p-button>
+    <h1 class="text-xl font-semibold"><a routerLink="/home">ECATLIM</a></h1>
+  </div>
+  <div class="flex items-center space-x-3">
+
+    @if (messages.length > 0) {
+      <p-overlay-badge [value]="messages?.length" severity="info">
+        <p-button
+          icon="pi pi-comments"
+          severity="secondary"
+          rounded
+        ></p-button>
+      </p-overlay-badge>
+    } @else {
+      <p-button
+        icon="pi pi-comments"
+        severity="secondary"
+        rounded
+      ></p-button>
+    }
+
+    @if (notifies.length > 0) {
+      <p-overlay-badge [value]="notifies?.length" severity="danger">
+        <p-button
+          (onClick)="toggle($event)"
+          icon="pi pi-bell"
+          severity="secondary"
+          rounded
+        ></p-button>
+      </p-overlay-badge>
+    } @else {
+      <p-button
+        (onClick)="toggle($event)"
+        icon="pi pi-bell"
+        severity="secondary"
+        rounded
+      ></p-button>
+    }
+    <p-splitbutton
+      (onClick)="router.navigateByUrl('/app/perfil')"
+      [model]="userOptions"
+      severity="secondary"
+      text
+    >
+      <ng-template #content>
+        <span class="flex items-center font-bold">
+          <p-avatar [label]="userFirstLetter()" size="normal" shape="circle"/>
+          <span style="margin-left: 0.75rem">{{ user.name }} {{ user.surname }}</span>
+        </span>
+      </ng-template>
+    </p-splitbutton>
+  </div>
+</header>
+
+<p-drawer
+  [(visible)]="sidebarVisible"
+  [closable]="false"
+  class="items-center"
+>
+  <ng-template #header>
+    <div class="flex flex-row items-center justify-between shrink-0 w-full">
+      <span class="inline-flex items-center gap-2">
+          <svg width="31" height="33" viewBox="0 0 31 33" fill="none" xmlns="http://www.w3.org/2000/svg"
+               class="block mx-auto">
+              <path d="..."/>
+          </svg>
+          <span class="font-semibold text-2xl text-primary">ECATLIM</span>
+      </span>
+      <span>
+          <p-button
+            type="button"
+            (onClick)="sidebarVisible = false"
+            icon="pi pi-times"
+            rounded="true"
+            outlined="true"
+            severity="secondary">
+          </p-button>
+      </span>
+    </div>
+  </ng-template>
+  <p-panelMenu [model]="sidebarMenu"></p-panelMenu>
+  <ng-template #footer>
+    <div class="text-center">
+      <p-divider></p-divider>
+      <div class="flex flex-col">
+        <p-button routerLink="/politica-privacidad" label="Política de Privacidad" severity="secondary" text></p-button>
+        <a class="font-bold" href="mailto:ecatlim@scoutsdecanarias.org">ecatlim&#64;scoutsdecanarias.org</a>
+        <a class="flex font-bold items-center justify-center gap-1" href="https://www.instagram.com/ecatlim/" target="_blank"><i class="pi pi-instagram"></i> &#64;ecatlim</a>
+      </div>
+    </div>
+  </ng-template>
+</p-drawer>
+
+<p-popover #op>
+  @if (notifies.length > 0) {
+    @for (notify of notifies; track $index) {
+
+    }
+  } @else {
+    <p>No tiene notificaciones nuevas</p>
+  }
+</p-popover>

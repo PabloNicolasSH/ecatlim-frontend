@@ -1,0 +1,55 @@
+.hours-table {
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th,
+  td {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border: 1px solid #ccc;
+  }
+
+  thead th:not(:first-child) {
+    background-color: var(--p-amber-300);
+    color: #232323;
+  }
+
+  thead tr:first-child th:first-child {
+    border: none;
+  }
+
+  thead tr:first-child th:last-child {
+    border-top-right-radius: 8px;
+  }
+
+  thead tr:first-child th:nth-child(2) {
+    border-top-left-radius: 8px;
+  }
+
+  tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+  }
+
+  tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+  }
+
+  tbody tr:first-child td:first-child {
+    border-top-left-radius: 8px;
+  }
+
+  tbody td:first-child {
+    background-color: var(--p-amber-300);
+    color: #232323;
+  }
+
+  th {
+    background-color: #ffffff;
+    font-weight: bold;
+  }
+
+  i.pi {
+    margin-right: 0.5rem;
+    color: var(--p-cyan-400);
+  }
+}

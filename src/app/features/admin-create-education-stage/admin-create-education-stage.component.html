@@ -1,0 +1,397 @@
+<div class="ps-12 pe-12">
+  <div class="flex flex-row justify-between items-center">
+    <h1 class="font-bold">Crear Etapa Formativa</h1>
+    <p-button
+      severity="secondary"
+      routerLink="/app/admin/oferta-educativa"
+    >
+      Ir a la Oferta Educativa
+    </p-button>
+  </div>
+  <div class="mt-3">
+    <p-tabs value="0">
+      <div class="flex flex-row justify-between items-center">
+        <p-tablist>
+          <p-tab value="0">Crear Etapa Formativa</p-tab>
+          <p-tab value="1">Crear Módulos</p-tab>
+          <p-tab value="2">Crear Bloques Formativos</p-tab>
+        </p-tablist>
+        <p-button
+          severity="info"
+          icon="pi pi-info-circle"
+          label="Ayuda sobre 'Crear Etapas'"
+          (onClick)="showDialog()"
+          rounded
+          outlined
+        ></p-button>
+      </div>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <form [formGroup]="educationStageForm" (ngSubmit)="onSubmitEducationStage()">
+            <div class="flex flex-col">
+              <div class="flex flex-row gap-2 mt-2 w-full">
+                <div class="basis-1/5">
+                  <p-floatlabel variant="on">
+                    <input
+                      id="name"
+                      pInputText
+                      formControlName="name"
+                      type="text"
+                      class="w-full"
+                    />
+                    <label for="name" class="required">Nombre de la etapa</label>
+                  </p-floatlabel>
+                </div>
+                <div class="basis-1/5">
+                  <p-floatlabel variant="on">
+                    <input
+                      id="code"
+                      pInputText
+                      formControlName="code"
+                      type="text"
+                      class="w-full"
+                    />
+                    <label for="code" class="required">Código de distinción</label>
+                  </p-floatlabel>
+                </div>
+                <div class="basis-1/5">
+                  <p-floatlabel variant="on">
+                    <input
+                      id="stageOnlineHours"
+                      pInputText
+                      formControlName="onlineHours"
+                      type="number"
+                      class="w-full"
+                    />
+                    <label for="stageOnlineHours" class="required">Número de horas en formato online</label>
+                  </p-floatlabel>
+                </div>
+                <div class="basis-1/5">
+                  <p-floatlabel variant="on">
+                    <input
+                      id="stageContactHours"
+                      pInputText
+                      formControlName="contactHours"
+                      type="number"
+                      class="w-full"
+                    />
+                    <label for="stageContactHours" class="required">Número de horas en formato presencial</label>
+                  </p-floatlabel>
+                </div>
+                <div class="basis-1/5">
+                  <p-floatlabel variant="on">
+                    <input
+                      id="stagePracticalHours"
+                      pInputText
+                      formControlName="practicalHours"
+                      type="number"
+                      class="w-full"
+                    />
+                    <label for="stagePracticalHours" class="required">Número de horas de prácticas</label>
+                  </p-floatlabel>
+                </div>
+              </div>
+              <div class="mt-4">
+                <p-floatlabel variant="on">
+                    <textarea
+                      pInputText
+                      id="description"
+                      formControlName="description"
+                      rows="4"
+                      type="text" class="w-full"></textarea>
+                  <label for="description" class="required">Descripción de la Etapa</label>
+                </p-floatlabel>
+              </div>
+              <div class="flex flex-row items-center mt-2">
+                <div class="me-2">
+                  <span>¿Es necesario haber superado alguna etapa anterior?</span>
+                </div>
+                <p-checkbox
+                  id="previousStageRequired"
+                  formControlName="previousStageRequired"
+                  [binary]="true"
+                ></p-checkbox>
+              </div>
+              @if (educationStageForm.get("previousStageRequired")?.value === true) {
+                <div class="flex flex-row items-center mt-3">
+                  <div class="me-2">
+                    <span>¿Cuál es la etapa previa necesaria?</span>
+                  </div>
+                  <p-select
+                    id="preEducationStage"
+                    formControlName="preEducationStage"
+                    [options]="educationStages"
+                    optionLabel="name"
+                    placeholder="Selecciona una Etapa previa necesaria"
+                  ></p-select>
+                </div>
+              }
+              <div class="flex justify-end">
+                <p-button label="Crear Etapa" icon="pi pi-plus" type="submit" [loading]="loading"/>
+              </div>
+            </div>
+          </form>
+        </p-tabpanel>
+        <p-tabpanel value="1">
+          <form [formGroup]="modulesForm" (ngSubmit)="onSubmitModules()">
+            <div class="flex flex-row justify-between items-center mb-2">
+              <div class="flex flex-col">
+                <p class="mb-3">Los módulos se crean todos para la etapa formativa seleccionada. Cuando decida cambiar guarde
+                  primero y cambie de etapa.</p>
+                <p-select
+                  id="educationStage"
+                  formControlName="selectedEducationStage"
+                  [options]="educationStages"
+                  optionLabel="name"
+                  placeholder="Selecciona una Etapa Formativa"
+                  class="w-80"
+                ></p-select>
+              </div>
+              @if (modulesForm.get('selectedEducationStage')?.value) {
+                <app-hours-metre
+                  [hours]="calculateEducationStageAllocatedHours()"
+                  [maxLimits]="{
+                    online: educationStageOnlineHours,
+                    contact: educationStageContactHours,
+                    practices: educationStagePracticalHours
+                  }"
+                  [show]="['online', 'contact', 'practices']"
+                />
+              }
+            </div>
+              <p-scroll-panel #moduleScrollPanel [style]="{ width: '100%', height: '420px' }" >
+                  <div formArrayName="modules">
+                      @for (module of modules.controls; track module; let i = $index) {
+                          <div [formGroupName]="i" class="mt-3 p-3 bg-[var(--p-surface-50)] rounded-lg">
+                              <div class="flex flex-row justify-between">
+                                  <h2>Módulo {{ module.get("name")?.value || "Nuevo" }}</h2>
+                                  @if (modules.length > 1) {
+                                      <p-button severity="danger" (onClick)="removeModule(i)">Eliminar Módulo</p-button>
+                                  }
+                              </div>
+                              <div class="flex flex-row w-full gap-2 mt-2">
+                                  <div class="basis-1/4">
+                                      <p-floatlabel variant="on">
+                                          <input
+                                                  id="moduleName"
+                                                  pInputText
+                                                  formControlName="name"
+                                                  type="text"
+                                                  class="w-full"
+                                          />
+                                          <label for="moduleName" class="required">Nombre del módulo</label>
+                                      </p-floatlabel>
+                                  </div>
+                                  <div class="basis-1/4">
+                                      <p-floatlabel variant="on">
+                                          <input
+                                                  id="moduleOnlineHours"
+                                                  pInputText
+                                                  formControlName="onlineHours"
+                                                  type="number"
+                                                  class="w-full"
+                                          />
+                                          <label for="moduleOnlineHours" class="required">Número de horas en formato online</label>
+                                      </p-floatlabel>
+                                  </div>
+                                  <div class="basis-1/4">
+                                      <p-floatlabel variant="on">
+                                          <input
+                                                  id="moduleContactHours"
+                                                  pInputText
+                                                  formControlName="contactHours"
+                                                  type="number"
+                                                  class="w-full"
+                                          />
+                                          <label for="moduleContactHours" class="required">Número de horas en formato presencial</label>
+                                      </p-floatlabel>
+                                  </div>
+                                  <div class="basis-1/4">
+                                      <p-select
+                                              id="moduleType"
+                                              formControlName="type"
+                                              [options]="moduleTypes"
+                                              placeholder="Selecciona un Tipo de Módulo"
+                                              class="w-full"
+                                              appendTo="body"
+                                      ></p-select>
+                                  </div>
+                              </div>
+                              <div class="mt-4">
+                                  <p-floatlabel variant="on">
+                    <textarea
+                            pInputText
+                            id="moduleDescription"
+                            formControlName="description"
+                            rows="4"
+                            type="text" class="w-full"></textarea>
+                                      <label for="moduleDescription" class="required">Descripción del Módulo</label>
+                                  </p-floatlabel>
+                              </div>
+                          </div>
+                      }
+                  </div>
+              </p-scroll-panel>
+            <div class="flex flex-row justify-between mt-4">
+              <p-button severity="secondary" (onClick)="addModule()">Añadir módulo</p-button>
+              <p-button type="submit" [loading]="loading">Guardar</p-button>
+            </div>
+          </form>
+        </p-tabpanel>
+        <p-tabpanel value="2">
+          <form [formGroup]="lessonBlockForm" (ngSubmit)="onSubmitLessonBlocks()">
+            <div class="flex flex-row justify-between items-center gap-1 mb-2">
+              <div class="flex flex-col">
+                <p>
+                  Los bloques funcionan como los módulos, se crean todos para el módulo formativo seleccionado.
+                  Cuando decida cambiar, guarde primero y cambie el módulo al que pertenece el o los bloques.
+                </p>
+                <p-select
+                  [options]="groupedModulesList"
+                  formControlName="selectedModule"
+                  optionLabel="name"
+                  placeholder="Selecciona un Módulo Formativo"
+                  [group]="true"
+                  [filter]="true"
+                  filterBy="name"
+                  class="w-80 mt-1"
+                ></p-select>
+              </div>
+              @if (lessonBlockForm.get('selectedModule')?.value){
+                <app-hours-metre
+                  [hours]="calculateModuleAllocatedHours()"
+                  [maxLimits]="{
+                    online: moduleOnlineHours,
+                    contact: moduleContactHours,
+                    practices: 0 }"
+                  [show]="['online', 'contact']"
+                />
+              }
+            </div>
+              <p-scroll-panel #lessonScrollPanel [style]="{ width: '100%', height: '420px' }" >
+                <div formArrayName="lessonBlocks">
+                  @for (lb of lessonBlocks.controls; track lb; let index = $index) {
+                    <div [formGroupName]="index" class="mt-3 p-3 bg-[var(--p-surface-50)] rounded-lg">
+                      <div class="flex flex-row justify-between">
+                          <h2>Bloque {{ lb.get("lbName")?.value || "Nuevo"}}</h2>
+                          @if (lessonBlocks.length > 1) {
+                              <p-button severity="danger" (onClick)="removeLessonBlock(index)">Eliminar Módulo</p-button>
+                          }
+                      </div>
+                      <div class="flex flex-row w-full gap-2 mt-4">
+                        <div class="basis-1/4">
+                          <p-floatlabel variant="on">
+                            <input
+                              id="lessonBlockName"
+                              pInputText
+                              formControlName="lbName"
+                              type="text"
+                              class="w-full"
+                            />
+                            <label for="lessonBlockName" class="required">Nombre del bloque</label>
+                          </p-floatlabel>
+                        </div>
+                        <div class="basis-1/4">
+                          <p-floatlabel variant="on">
+                            <input
+                              id="lessonBlockId"
+                              pInputText
+                              formControlName="lessonBlockId"
+                              type="number"
+                              class="w-full"
+                            />
+                            <label for="lessonBlockId" class="required">Número de bloque</label>
+                          </p-floatlabel>
+                        </div>
+                        <div class="basis-1/4">
+                          <p-floatlabel variant="on">
+                            <input
+                              id="lessonBlockOnlineHours"
+                              pInputText
+                              formControlName="lbOnlineHours"
+                              type="number"
+                              class="w-full"
+                            />
+                            <label for="lessonBlockOnlineHours" class="required">Número de horas en formato online</label>
+                          </p-floatlabel>
+                        </div>
+                        <div class="basis-1/4">
+                          <p-floatlabel variant="on">
+                            <input
+                              id="lessonBlockContactHours"
+                              pInputText
+                              formControlName="lbContactHours"
+                              type="number"
+                              class="w-full"
+                            />
+                            <label for="lessonBlockContactHours" class="required">Número de horas en formato
+                              presencial</label>
+                          </p-floatlabel>
+                        </div>
+                      </div>
+                      <div class="mt-4">
+                        <p-floatlabel variant="on">
+                        <textarea
+                          pInputText
+                          id="lessonBlockDescription"
+                          formControlName="lbDescription"
+                          rows="4"
+                          type="text" class="w-full"></textarea>
+                          <label for="lessonBlockDescription" class="required">Descripción del Bloque Formativo</label>
+                        </p-floatlabel>
+                      </div>
+                      <div class="flex flex-row items-center">
+                        <p class="me-3">¿El bloque es convalidable?</p>
+                        <p-checkbox
+                          formControlName="recognizable"
+                          [binary]="true"
+                        ></p-checkbox>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </p-scroll-panel>
+            <div class="flex flex-row justify-between mt-2">
+              <p-button severity="secondary" (onClick)="addLessonBlock()">Añadir bloque</p-button>
+              <p-button type="submit" [loading]="loading">Guardar</p-button>
+            </div>
+          </form>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+<p-dialog header="¿Cómo funciona la creación de la Etapa Formativa?" [modal]="true" [(visible)]="visible" [style]="{width: '75vw'}">
+  <p>
+    La creación de una <strong>Oferta Educativa</strong> se organiza de forma jerárquica y estructurada, permitiendo una planificación
+    clara de los contenidos formativos. Este proceso sigue un ciclo que parte desde una visión global hasta el desglose más detallado de la formación.
+  </p>
+  <h2>1. Etapa de Formación</h2>
+  <p>
+    La <strong>Etapa de Formación</strong> representa el nivel más general de la oferta educativa. Define un bloque formativo amplio,
+    como por ejemplo "Formación Básica" o en el caso del Sistema Federal de Formación "Acogida al Scouter". Es el primer paso en la planificación.
+  </p>
+  <h2>2. Módulos</h2>
+  <p>
+    Cada etapa se divide en varios <strong>Módulos</strong>, que agrupan contenidos específicos dentro de esa etapa.
+    Un módulo puede representar una asignatura o un conjunto temático coherente. En el caso del Sistema Federal de Formación que seguimos,
+    muchas veces vamos a hablar de módulos teóricos o prácticos asociados a cada etapa. Pero algunos ejemplos podrían ser:
+  </p>
+  <ul class="list-disc pl-5">
+    <li>Prácticas de Acogida al Scouter</li>
+    <li>Evaluación del proceso enseñanza-aprendizaje</li>
+    <li>Políticas y Programación de actividades</li>
+  </ul>
+  <h2>3. Bloques Formativos</h2>
+  <p>
+    Dentro de cada módulo, se encuentran los <strong>Bloques Formativos</strong>. Estos son los elementos más concretos de la formación,
+    y suelen corresponder a unidades de aprendizaje, temas o competencias específicas. Por ejemplo:</p>
+  <ul class="list-disc pl-5">
+    <li>Educación en la diversidad</li>
+    <li>Técnicas de dirección, selección, acogida. Motivación y acompañamiento de scouters</li>
+    <li>Seguridad y primeros auxilios</li>
+  </ul>
+  <h2>Resumen del Ciclo</h2>
+  <p>El ciclo de creación sigue esta secuencia:</p>
+  <p class="text-center"><strong>Etapa de Formación</strong> → <strong>Módulos</strong> → <strong>Bloques Formativos</strong></p>
+</p-dialog>

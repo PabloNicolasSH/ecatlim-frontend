@@ -1,0 +1,41 @@
+.profile-card{
+  background-color: var(--p-amber-100);
+  border-radius: 1.5rem;
+}
+
+.contact-card{
+  background-color: var(--p-amber-300);
+  border-radius: 1.5rem;
+}
+
+.group-card{
+  background-color: var(--p-yellow-100);
+  border-radius: 1.5rem;
+}
+
+.extra-info-card{
+  background-color: var(--p-yellow-200);
+  border-radius: 1.5rem;
+}
+
+.progress-card{
+  background-color: var(--p-cyan-200);
+  border-radius: 1.5rem;
+}
+
+.course-card{
+  background-color: var(--p-sky-200);
+  border-radius: 1.5rem;
+}
+
+.education-stage-card{
+  background-color: var(--p-teal-200);
+  border-radius: 1.5rem;
+}
+
+.profile-avatar{
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}

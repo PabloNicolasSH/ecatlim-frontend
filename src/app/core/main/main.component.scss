@@ -1,0 +1,6 @@
+.content-container {
+  padding: 20px;
+  @media screen and (max-width: 576px) {
+    padding: 15px 5px;
+  }
+}

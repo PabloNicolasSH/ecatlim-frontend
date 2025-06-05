@@ -1,0 +1,57 @@
+<h1 class="font-bold">Entidades</h1>
+<p>
+  En la tabla a continuación se muestran todas las entidades de las que proceden las personas que reciben formación en la ECATLIM.
+</p>
+<p-table
+  #dt
+  [value]="entities"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [paginator]="true"
+  stripedRows
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <p>Actualmente se cuenta con <span class="font-black">{{entities.length}} </span> @if (entities.length == 1) {
+        entidad
+      } @else {entidades}</p>
+      <p-button
+        icon="pi pi-plus"
+        label="Añadir Entidad"
+      ></p-button>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th>Nombre de la Entidad</th>
+      <th>Correo Electrónico</th>
+      <th>Código de Provincia</th>
+      <th>Tipo de Entidad</th>
+      <th></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-entity>
+    <tr>
+      <td>{{entity.name}} {{entity.scoutGroupId}}</td>
+      <td>{{entity.email}}</td>
+      <td>{{entity.provinceId}}</td>
+      <td>Grupo Scout</td>
+      <td class="flex gap-2 justify-end">
+        <p-button
+          icon="pi pi-pen-to-square"
+          label="Editar"
+          [rounded]="true"
+          severity="info"
+          outlined
+        ></p-button>
+        <p-button
+          icon="pi pi-trash"
+          label="Eliminar"
+          [rounded]="true"
+          severity="danger"
+          outlined
+        ></p-button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

@@ -1,0 +1,191 @@
+<h1 class="font-bold">Usuarios</h1>
+<p-tabs value="0">
+  <p-tablist>
+    <p-tab value="0">Usuarios Activos</p-tab>
+    <p-tab value="1">Usuarios Inactivos</p-tab>
+    <p-tab value="2">Solicitudes de Alta</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="0">
+      <p-table
+        #dt
+        [value]="users"
+        [rows]="25"
+        [paginator]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p>Actualmente se cuenta con <span class="font-black">{{users.length}} </span> @if (users.length == 1) {
+              usuario <span class="text-green-600 font-bold"> activo</span>
+            } @else {usuarios <span class="text-green-600 font-bold"> activos</span>}</p>
+            <p-button
+              (onClick)="showDialog()"
+              icon="pi pi-plus"
+              label="Añadir Usuario"
+            ></p-button>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Apellidos, Nombre</th>
+            <th>Correo Electrónico</th>
+            <th>Grupo Scout</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th>
+              <p-columnFilter
+                type="text"
+                field="fullName"
+                placeholder="Buscar por nombre"
+                ariaLabel="Filter Name"
+              ></p-columnFilter>
+            </th>
+            <th></th>
+            <th>
+            </th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-user>
+          <tr>
+            <td>{{user.surname}}, {{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td>@if (user.scoutGroup != null) {
+              {{user.scoutGroup.name}}
+            }</td>
+            <td class="flex gap-2 justify-end">
+              <p-button
+                icon="pi pi-pen-to-square"
+                label="Editar"
+                [rounded]="true"
+                (onClick)="openEditDialog(user)"
+                severity="info"
+                outlined
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                label="Desactivar"
+                [rounded]="true"
+                (onClick)="confirmDialog($event, 'Deactivate', user)"
+                severity="danger"
+                outlined
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+    <p-tabpanel value="1">
+      <p-table
+        #dt
+        [value]="inactiveUsers"
+        [rows]="25"
+        [paginator]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p>En la base de datos hay <span class="font-black">{{inactiveUsers.length}}</span> @if (inactiveUsers.length == 1) {
+              usuario <span class="text-red-500 font-bold"> inactivo</span>
+            } @else { usuarios <span class="text-red-500 font-bold"> inactivos</span>}</p>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Apellidos, Nombre</th>
+            <th>Correo Electrónico</th>
+            <th>Grupo Scout</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-user>
+          <tr>
+            <td>{{user.surname}}, {{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td>@if (user.scoutGroup != null) {
+              {{user.scoutGroup.name}}
+            }</td>
+            <td class="flex gap-2 justify-end">
+              <p-button
+                icon="pi pi-pen-to-square"
+                label="Editar"
+                [rounded]="true"
+                (onClick)="openEditDialog(user)"
+                severity="info"
+                outlined
+              ></p-button>
+              <p-button
+                icon="pi pi-history"
+                label="Reactivar"
+                [rounded]="true"
+                (onClick)="confirmDialog($event, '', user)"
+                severity="success"
+                outlined
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+    <p-tabpanel value="2">
+      <p-table
+        #dt
+        [value]="pendingUserRequests"
+        [rows]="25"
+        [paginator]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p>En la base de datos hay <span class="font-black">{{pendingUserRequests.length}}</span> @if (pendingUserRequests.length == 1) {
+              solicitud
+            } @else { solicitudes }de alta en el aula virtual</p>
+          </div>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Apellidos, Nombre</th>
+            <th>DNI/Documento de identificación</th>
+            <th>Correo Electrónico</th>
+            <th>Grupo Scout de Procedencia</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-pendingUser>
+          <tr>
+            <td>{{pendingUser.surname}}, {{pendingUser.name}}</td>
+            <td>{{pendingUser.nif}}</td>
+            <td>{{pendingUser.email}}</td>
+            <td>@if (pendingUser.scoutGroup != null) {
+              {{pendingUser.scoutGroup.name}}
+            }</td>
+            <td class="flex gap-2 justify-end">
+              <p-button
+                icon="pi pi-user-plus"
+                (onClick)="confirmDialog($event,'Create User', undefined , pendingUser)"
+                severity="info"
+                rounded
+                outlined
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                (onClick)="confirmDialog($event, 'Delete request', undefined, pendingUser)"
+                severity="danger"
+                rounded
+                outlined
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
+<app-user-modal-add-edit
+  (userUpdated)="loadUsers()"
+  [(visible)]="visible"
+  [userToEdit]="userToEdit"
+  [dialogMode]="dialogMode"
+></app-user-modal-add-edit>
+<p-confirm-dialog
+  styleClass="max-w-[40rem]"
+/>

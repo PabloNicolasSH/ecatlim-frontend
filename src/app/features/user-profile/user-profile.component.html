@@ -1,0 +1,53 @@
+<h1>Mi Perfil</h1>
+<div class="flex flex-row gap-2">
+  <div class="flex flex-col basis-1/2 p-4">
+    <div class="grid grid-cols-9 grid-rows-5 gap-2">
+      <div class="col-span-3 row-span-5 profile-card p-2 flex flex-col items-center justify-center text-center">
+        <img src="{{user.avatarUrl}}" alt="Foto de Perfil de {{user.name}}" class="profile-avatar mt-2"/>
+        <h2 class="mt-2 font-bold">{{ user.name }}<br>{{ user.surname }}</h2>
+        <div class="mt-3 flex flex-col gap-2 w-auto">
+          <p-button styleClass="w-full" (onClick)="visible  = true" rounded>Editar mis Datos</p-button>
+          <p-button class="mb-2" routerLink="/cambiar-contraseña" rounded outlined>Cambiar mi Contraseña</p-button>
+        </div>
+      </div>
+      <div class="col-span-3 row-span-3 col-start-4 contact-card p-3 flex flex-col justify-center">
+        <h2 class="font-bold text-center">Información de Contacto</h2>
+        <p><i class="pi pi-envelope"></i> {{user.email}}</p>
+        <p><i class="pi pi-phone"></i> {{user.phone}}</p>
+      </div>
+      <div class="col-span-3 row-span-3 col-start-7 extra-info-card p-4 flex flex-col justify-center">
+        <h2 class="font-bold text-center">Datos de mi Grupo/Entidad</h2>
+        <p><b>Nombre:</b> {{user.scoutGroup.name}}</p>
+        <p><b>ID de provincia:</b> {{user.scoutGroup.provinceId}}</p>
+        <p><b>Mi censo:</b> {{user.census}}</p>
+      </div>
+      <div class="col-span-6 row-span-2 col-start-4 row-start-4 group-card p-4">
+        <h2 class="font-bold text-center">Información Personal</h2>
+        <p><i class="pi pi-file"></i><b> DNI/NIE: </b>{{user.nif}}</p>
+        <p><i class="pi pi-map-marker"></i> @if (userAddress !== '') {
+          {{userAddress}}
+        } @else {
+          No tiene dirección
+        } </p>
+      </div>
+    </div>
+    <div class="progress-card p-4 mt-10 h-full">
+      <h2 class="font-bold">Mis Logros y Certificados</h2>
+    </div>
+  </div>
+  <div class="flex flex-col basis-1/2 p-4">
+    <div class="flex flex-col gap-2">
+      <div class="course-card p-4 h-1/2">
+        <h2 class="font-bold">Mis Etapas de Formación</h2>
+      </div>
+      <div class="education-stage-card p-4 h-1/2">
+        <h2 class="font-bold">Mis Cursos</h2>
+      </div>
+    </div>
+  </div>
+</div>
+<app-user-modal-me-edit
+  (userUpdated)="updateUser()"
+  [(visible)]="visible"
+  [userToEdit]="user"
+></app-user-modal-me-edit>
