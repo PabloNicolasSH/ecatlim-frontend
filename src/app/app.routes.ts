@@ -19,6 +19,8 @@ import {
 } from './features/admin-create-education-stage/admin-create-education-stage.component';
 import {EducationStageDetailComponent} from './features/education-stage-detail/education-stage-detail.component';
 import {EducationOfferComponent} from './features/education-offer/education-offer.component';
+import {ChatComponent} from './features/chat/chat.component';
+import {ChatListComponent} from './features/chat-list/chat-list.component';
 
 export const routes: Routes = [
   {
@@ -63,6 +65,14 @@ export const routes: Routes = [
       {
         path: "home",
         component: HomeComponent
+      },
+      {
+        path: "chat",
+        component: ChatListComponent
+      },
+      {
+        path: "chat/:id",
+        component: ChatComponent
       },
       {
         path: "informacion-general",

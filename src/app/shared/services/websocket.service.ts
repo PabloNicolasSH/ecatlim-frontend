@@ -1,7 +1,9 @@
-import {Injectable} from '@angular/core';
-import {Client} from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import {inject, Injectable} from '@angular/core';
+import {Client, IMessage} from '@stomp/stompjs';
 import {environment} from '../../../environments/environment';
+import {BehaviorSubject, Observable} from "rxjs";
+import {ChatMessage} from "../models/chat-message.model";
+import {HttpClient} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
@@ -10,31 +12,76 @@ export class WebsocketService {
 
   private stompClient: Client = new Client();
 
-  connect() {
+  private isConnected = false;
+  private pendingSubscriptions: number[] = [];
+
+  private chatStreams = new Map<number, BehaviorSubject<ChatMessage[]>>();
+
+  protected readonly http = inject(HttpClient);
+
+  constructor() {
+    this.initConnection();
+  }
+
+  initConnection() {
     const token = localStorage.getItem('token');
-    const socket = new SockJS(`${environment.apiUrl}/websocket?token=${token}`);
 
     this.stompClient = new Client({
-      webSocketFactory: () => socket,
+      brokerURL: `${environment.webSocketUrl}/ws?token=${token}`,
       reconnectDelay: 5000,
-      debug: (str) => console.log('STOMP DEBUG', str)
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+      debug: () => {},
+      onConnect: () =>{
+        this.isConnected = true;
+        this.pendingSubscriptions.forEach(chatId => this.subscribeToChat(chatId));
+        this.pendingSubscriptions = [];
+      } ,
+      onDisconnect: () => {},
+      onStompError: () => {},
     });
-
-    this.stompClient.onConnect = () => {
-      this.stompClient.subscribe('/user/queue/messages', () => {});
-    }
-
-    this.stompClient.onStompError = (frame) => {
-      console.error('STOMP ERROR:', frame);
-    }
 
     this.stompClient.activate();
   }
 
-  sendMessage(to: string, message: string){
+  disconnect(): void {
+    this.stompClient.deactivate().then(r => {});
+  }
+
+  sendMessage(to: number, message: string){
     this.stompClient.publish({
-      destination: '/chat.send',
+      destination: `/app/chat/${to}/send`,
       body: JSON.stringify({to, message})
     });
+  }
+
+  joinChat(chatId: number): void {
+    if (this.chatStreams.has(chatId)) return;
+
+    this.chatStreams.set(chatId, new BehaviorSubject<ChatMessage[]>([]));
+
+    if (this.isConnected) {
+      this.subscribeToChat(chatId);
+    } else {
+      this.pendingSubscriptions.push(chatId);
+    }
+  }
+
+  private subscribeToChat(chatId: number): void {
+    this.stompClient.subscribe(`/topic/chat/${chatId}`, (msg: IMessage) => {
+      const message = JSON.parse(msg.body) as ChatMessage;
+      const stream = this.chatStreams.get(chatId);
+      if (stream) {
+        const current = stream.getValue();
+        stream.next([...current, message]);
+      }
+    });
+  }
+
+  getMessagesForChat(chatId: number): Observable<ChatMessage[]> {
+    if (!this.chatStreams.has(chatId)) {
+      this.joinChat(chatId);
+    }
+    return this.chatStreams.get(chatId)!.asObservable();
   }
 }

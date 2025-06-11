@@ -1,0 +1,81 @@
+<div class="flex flex-row gap-2  h-[85vh]">
+  <div class="flex flex-col basis-1/4 h-full rounded-lg overflow-y-auto p-3 border bg-[var(--p-surface-50)]">
+    <div class="flex flex-row justify-between items-center">
+      <h1>Chats</h1>
+      <div>
+        <p-select
+          [options]="users"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Nuevo Chat"
+          (onChange)="selectUserToCreateChat($event)"
+          class="w-52"
+        >
+          <ng-template #item let-user>
+            <div>{{ user.name }}</div>
+          </ng-template>
+          <ng-template #dropdownicon>
+            <i class="pi pi-envelope"></i>
+          </ng-template>
+          <ng-template #header>
+            <div class="font-medium font-semibold p-3">Nuevo chat</div>
+          </ng-template>
+          <ng-template #footer>
+            <div class="p-3 flex flex-row justify-center">
+              <p-button
+                label="Nuevo Grupo"
+                icon="pi pi-users"
+                (onClick)="createGroupChat()"
+                class="w-full"
+                outlined
+              />
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+    </div>
+    <div class="mt-3">
+      @for (chat of chats; track chat.id) {
+        <div
+          class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-[var(--p-surface-100)] justify-between"
+          [class.bg-[var(--p-primary-100)]]="selectedChat?.id === chat.id"
+          (click)="selectChat(chat)"
+        >
+          <div class="flex flex-row items-center gap-4">
+            <p-avatar
+              [label]="userFirstLetter(getNameToShow(chat.chatMembers))"
+              size="normal"
+              shape="circle"
+            />
+            <div class="truncate">
+              <span class="font-large">{{ chat.name || getNameToShow(chat.chatMembers) }}</span>
+            </div>
+          </div>
+          @if (chat.unreadMessagesCount > 0) {
+            <p-badge badgeSize="small"/>
+          }
+        </div>
+      }
+    </div>
+  </div>
+  <div class="flex basis-3/4">
+    @if (selectedChat != null) {
+      <app-chat
+        [selectedChat]="selectedChat"
+        class="w-full">
+      </app-chat>
+    }
+  </div>
+</div>
+
+<p-dialog header="Nuevo Grupo" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }">
+  <span class="p-text-secondary block mb-8">Información para el grupo.</span>
+  <div class="flex items-center gap-4 mb-4">
+    <label for="username" class="font-semibold w-24">Nombre</label>
+    <input pInputText id="username" class="flex-auto" autocomplete="off" />
+  </div>
+  <div class="flex justify-end gap-2">
+    <p-button label="Cancel" severity="secondary" (click)="visible = false" />
+    <p-button label="Save" (click)="visible = false" />
+  </div>
+</p-dialog>
