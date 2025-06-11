@@ -1,6 +1,6 @@
 import {Component, inject, ViewChild} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
-import {MenuItem, MenuItemCommandEvent} from 'primeng/api';
+import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
 import {OverlayBadge} from 'primeng/overlaybadge';
@@ -11,6 +11,7 @@ import {Avatar} from 'primeng/avatar';
 import {Profile} from '../../shared/models/profile.model';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
+import {ChatService} from '../../shared/services/chat.service';
 
 @Component({
   selector: 'app-header',
@@ -30,23 +31,26 @@ import {Divider} from 'primeng/divider';
 })
 export class HeaderComponent {
 
+  protected readonly chatService = inject(ChatService);
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
 
   @ViewChild('op') op!: Popover;
-  @ViewChild('drawerRef') drawerRef!: Drawer;
 
   userOptions!: MenuItem[];
   user!: Profile;
   sidebarVisible: boolean = false;
 
-  messages: string[] = ["Parche la chupa de locos"];
   notifies: string[] = [];
   sidebarMenu!: MenuItem[];
+  unreadMessages: number = 0;
 
   constructor() {
     this.createUserOptions();
     this.createSidebarMenu();
+    this.chatService.getUnreadMessagesCount().subscribe((count: Object) => {
+      this.unreadMessages = Object.values(count).reduce((sum, currentValue) => sum + currentValue, 0);
+    })
   }
 
   toggle(event: any){
