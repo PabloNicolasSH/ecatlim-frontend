@@ -5,12 +5,14 @@ import {Observable, tap} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
 import {User} from '../../shared/models/user.model';
+import {WebsocketService} from '../../shared/services/websocket.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
+  private readonly websocketService = inject(WebsocketService);
   protected readonly http = inject(HttpClient);
   protected readonly router = inject(Router)
 
@@ -24,6 +26,7 @@ export class AuthService {
           email: res.email,
           role: res.role
         }));
+        this.websocketService.initConnection();
       })
     )
   }
@@ -32,6 +35,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('me');
     this.router.navigateByUrl('/login');
+    this.websocketService.disconnect();
   }
 
   isAuthenticated(): boolean {
