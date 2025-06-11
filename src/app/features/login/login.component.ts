@@ -8,6 +8,7 @@ import {Router, RouterLink} from '@angular/router';
 import {UserToLog} from '../../core/auth/user-to-log.model';
 import {AuthService} from '../../core/auth/auth.service';
 import {UserService} from '../../shared/services/user-and-entity/user.service';
+import {WebsocketService} from '../../shared/services/websocket.service';
 
 @Component({
   selector: 'app-login',
