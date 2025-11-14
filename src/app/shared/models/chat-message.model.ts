@@ -1,7 +1,9 @@
+import {SimpleUser} from './user.model';
+
 export interface ChatMessage {
   id?: number;
-  from: { email: string };
-  to: { email: string };
+  from: SimpleUser;
+  to: number;
   message: string;
   timestamp: string;
   isRead?: boolean;
