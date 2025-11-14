@@ -1,4 +1,4 @@
-<div class="flex flex-col h-[85vh] bg-[var(--p-surface-50)] rounded-lg overflow-hidden border shadow-md relative">
+<div class="flex flex-col h-[85vh] bg-[var(--p-surface-50)] rounded-2xl overflow-hidden border shadow-md relative">
 
   <div
     #scrollContainer
@@ -30,7 +30,7 @@
       @if (isFirstOfDay(i, message)) {
         <div class="flex justify-center my-3">
           <div class="px-3 py-1 rounded-full text-xs bg-[var(--p-surface-200)] text-[var(--p-text-color-secondary)]">
-            {{ formatDate(message) }}
+            {{ message.ts | date:"EEEE, d 'de' MMMM":undefined: "es"}}
           </div>
         </div>
       }
@@ -80,11 +80,7 @@
               'justify-start': !isMine(message)
             }"
             >
-              <span>{{ formatTime(message) }}</span>
-
-              @if (isMine(message) && message.read) {
-                <span>Leído</span>
-              }
+              <span>{{ message.ts | date:'HH:mm' }}</span>
             </div>
           </div>
         </div>
@@ -92,7 +88,7 @@
     }
     @if (showScrollToBottom) {
       <button
-        (click)="scrollToBottomSmooth()"
+        (click)="scrollToBottom()"
         class="scroll-bottom-btn"
       >
         <i class="pi pi-arrow-down text-white text-base"></i>

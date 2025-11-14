@@ -11,18 +11,28 @@ import { UserService } from '../../shared/services/user-and-entity/user.service'
 import { ChatService } from '../../shared/services/chat.service';
 import { Avatar } from 'primeng/avatar';
 import { Badge } from 'primeng/badge';
+import {DatePipe, NgClass} from '@angular/common';
+import {MultiSelect} from 'primeng/multiselect';
+import {PrimeTemplate} from 'primeng/api';
+import {SelectButton} from 'primeng/selectbutton';
 
 @Component({
   selector: 'app-chat-list',
+  standalone: true,
   imports: [
     ChatComponent,
-    Button,
-    Select,
     FormsModule,
-    Dialog,
-    InputText,
     Avatar,
-    Badge
+    Badge,
+    NgClass,
+    DatePipe,
+    Select,
+    InputText,
+    Button,
+    Dialog,
+    MultiSelect,
+    PrimeTemplate,
+    SelectButton
   ],
   templateUrl: './chat-list.component.html',
   styleUrl: './chat-list.component.scss'
@@ -38,20 +48,37 @@ export class ChatListComponent implements OnInit {
 
   visible = false;
 
+  newChatVisible = false;
+  newChatMode: 'private' | 'group' = 'private';
+
+  modeOptions = [
+    { label: 'Individual', value: 'private' },
+    { label: 'Grupo', value: 'group' }
+  ];
+
+  selectedUserIdForPrivate: number | null = null;
+
+  groupName = '';
+  groupDescription = '';
+  selectedGroupUserIds: number[] = [];
+
   ngOnInit(): void {
     this.loadUsers();
     this.loadChats();
-
-    this.chatService.getUnreadMessagesCount().subscribe((count: Record<string, number>) => {
-      this.chats = this.chats.map(chat => ({
-        ...chat,
-        unreadMessagesCount: count[chat.id] ?? 0
-      }));
-    });
   }
 
   selectChat(chat: Chat) {
     this.selectedChat = chat;
+    if (chat.id){
+      this.chatService.markChatAsRead(chat.id).subscribe({
+        next: () => {
+          this.chats = this.chats.map(c =>
+            c.id === chat.id ? { ...c, unreadMessagesCount: 0 } : c
+          );
+          this.refreshUnreadCounts();
+        }
+      });
+    }
   }
 
   private loadUsers() {
@@ -66,22 +93,17 @@ export class ChatListComponent implements OnInit {
     this.chatService.getAllChats().subscribe({
       next: chats => {
         this.chats = chats;
+        this.refreshUnreadCounts();
       }
     });
   }
 
-  createGroupChat() {
-    this.visible = true;
-  }
-
-  selectUserToCreateChat($event: SelectChangeEvent) {
-    const newChat: Chat = {
-      id: 0,
-      chatMembers: this.users.filter(user => user.id === $event.value),
-      unreadMessagesCount: 0
-    };
-    this.chatService.createChat(newChat).subscribe(() => {
-      this.loadChats();
+  private refreshUnreadCounts() {
+    this.chatService.getUnreadMessagesCount().subscribe((count: Record<number, number>) => {
+      this.chats = this.chats.map(chat => ({
+        ...chat,
+        unreadMessagesCount: chat.id != null ? (count[chat.id] ?? 0) : 0
+      }));
     });
   }
 
@@ -95,5 +117,75 @@ export class ChatListComponent implements OnInit {
 
   userFirstLetter(nameToShow: string) {
     return nameToShow?.at(0);
+  }
+
+  openNewChatDialog() {
+    this.newChatMode = 'private';
+    this.selectedUserIdForPrivate = null;
+    this.groupName = '';
+    this.groupDescription = '';
+    this.selectedGroupUserIds = [];
+    this.newChatVisible = true;
+  }
+
+  closeNewChatDialog() {
+    this.newChatVisible = false;
+  }
+
+  canCreateNewChat(): boolean {
+    if (this.newChatMode === 'private') {
+      return this.selectedUserIdForPrivate != null;
+    }
+    return !!this.groupName?.trim() && this.selectedGroupUserIds.length >= 1;
+  }
+
+  createNewChat() {
+    if (this.newChatMode === 'private') {
+      this.createPrivateChat();
+    } else {
+      this.createGroupChat();
+    }
+  }
+
+  private createPrivateChat() {
+    if (this.selectedUserIdForPrivate == null) return;
+
+    const member = this.users.find(u => u.id === this.selectedUserIdForPrivate);
+    if (!member) return;
+
+    const newChat: Chat = {
+      chatMembers: [member],
+      unreadMessagesCount: 0
+    };
+
+    this.chatService.createChat(newChat).subscribe({
+      next: () => {
+        this.newChatVisible = false;
+        this.loadChats();
+      }
+    });
+  }
+
+  private createGroupChat() {
+    const members = this.users.filter(u => {
+      if (u.id){
+        this.selectedGroupUserIds.includes(u.id)
+      }
+    });
+
+    const newChat: Chat = {
+      id: 0,
+      chatMembers: members,
+      unreadMessagesCount: 0,
+      name: this.groupName,
+      description: this.groupDescription
+    };
+
+    this.chatService.createChat(newChat).subscribe({
+      next: () => {
+        this.newChatVisible = false;
+        this.loadChats();
+      }
+    });
   }
 }

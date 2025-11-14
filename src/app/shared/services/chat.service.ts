@@ -32,6 +32,10 @@ export class ChatService {
     return this.http.get<Chat[]>(`${environment.apiUrl}/chat/allMyChats`);
   }
 
+  markChatAsRead(chatId: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/chat/${chatId}/mark-read`, {});
+  }
+
   getUnreadMessagesCount() {
     return this.http.get<Record<string, number>>(`${environment.apiUrl}/chat/unread-chats`);
   }

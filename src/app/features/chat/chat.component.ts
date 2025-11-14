@@ -27,7 +27,8 @@ import {Skeleton} from 'primeng/skeleton';
     FormsModule,
     Avatar,
     Button,
-    Skeleton
+    Skeleton,
+    DatePipe
   ],
   providers: [DatePipe],
   templateUrl: './chat.component.html',
@@ -67,7 +68,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
   ngAfterViewChecked(): void {
     if (this.pendingScrollToBottom && !this.loadingOlder && this.scrollContainer) {
-      this.scrollToBottomSmooth();
+      this.scrollToBottom();
       this.pendingScrollToBottom = false;
     }
   }
@@ -80,6 +81,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
   }
 
   loadInitialHistory(): void {
+    if (!this.selectedChat.id) return;
     this.chatService.getChatHistory(this.selectedChat.id, 0, this.pageSize)
       .subscribe((msgs: ChatMessage[]) => {
         this.messages = msgs
@@ -92,7 +94,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
   }
 
   loadOlderMessages(): void {
-    if (this.allHistoryLoaded || this.loadingOlder) return;
+    if (this.allHistoryLoaded || this.loadingOlder || !this.selectedChat.id) return;
 
     this.loadingOlder = true;
 
@@ -123,9 +125,9 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
 
   startListeningWs(): void {
-    if (this.wsSub) {
-      this.wsSub.unsubscribe();
-    }
+    if (this.wsSub) {this.wsSub.unsubscribe();}
+
+    if (!this.selectedChat.id) return;
 
     this.wsSub = this.websocketService
       .getMessagesForChat(this.selectedChat.id)
@@ -143,11 +145,21 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
   decorateMessage(msg: ChatMessage): any {
     const fromUser = msg.from;
 
-    const ts = new Date(msg.timestamp);
+    let ts: Date;
+
+    if (msg.timestamp) {
+      ts = new Date(msg.timestamp);
+      if (isNaN(ts.getTime())) {
+        ts = new Date();
+      }
+    } else {
+      ts = new Date();
+    }
 
     return {
       ...msg,
       ts,
+      isMine: this.isMine(msg),
       dayKey: ts.toISOString().substring(0, 10),
       localId: msg.id ?? crypto.randomUUID(),
       fromId: fromUser.id,
@@ -157,7 +169,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
   send(): void {
     const text = this.newMessage.trim();
-    if (!text) return;
+    if (!text || !this.selectedChat.id) return;
 
     this.websocketService.sendMessage(this.selectedChat.id, text);
     this.newMessage = '';
@@ -170,12 +182,12 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
     this.shouldAutoScroll = distanceToBottom < 30;
     this.showScrollToBottom = distanceToBottom > 200;
 
-    if(el.scrollTop === 0 && !this.loadingOlder && !this.allHistoryLoaded){
+    if(el.scrollTop < 10 && !this.loadingOlder && !this.allHistoryLoaded){
       this.loadOlderMessages();
     }
   }
 
-  scrollToBottomSmooth() {
+  scrollToBottom() {
     const el = this.scrollContainer.nativeElement;
     el.scrollTo({
       top: el.scrollHeight,
@@ -207,14 +219,5 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
     if (index === 0) return true;
     const prev = this.messages[index - 1];
     return prev.dayKey !== message.dayKey;
-  }
-
-  formatTime(message: any): string {
-    return this.datePipe.transform(message.ts, 'HH:mm') ?? '';
-  }
-
-  formatDate(message: any): string {
-    return this.datePipe.transform(message.ts,
-      "EEEE, d 'de' MMMM", 'es-ES') ?? '';
   }
 }

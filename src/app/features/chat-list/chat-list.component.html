@@ -1,81 +1,220 @@
-<div class="flex flex-row gap-2  h-[85vh]">
-  <div class="flex flex-col basis-1/4 h-full rounded-lg overflow-y-auto p-3 border bg-[var(--p-surface-50)]">
-    <div class="flex flex-row justify-between items-center">
-      <h1>Chats</h1>
-      <div>
-        <p-select
-          [options]="users"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Nuevo Chat"
-          (onChange)="selectUserToCreateChat($event)"
-          class="w-52"
-        >
-          <ng-template #item let-user>
-            <div>{{ user.name }}</div>
-          </ng-template>
-          <ng-template #dropdownicon>
-            <i class="pi pi-envelope"></i>
-          </ng-template>
-          <ng-template #header>
-            <div class="font-medium font-semibold p-3">Nuevo chat</div>
-          </ng-template>
-          <ng-template #footer>
-            <div class="p-3 flex flex-row justify-center">
-              <p-button
-                label="Nuevo Grupo"
-                icon="pi pi-users"
-                (onClick)="createGroupChat()"
-                class="w-full"
-                outlined
-              />
-            </div>
-          </ng-template>
-        </p-select>
+<div class="flex h-[85vh] gap-3">
+
+  <div class="flex flex-col basis-1/4 h-full rounded-2xl overflow-hidden border bg-[var(--p-surface-0)] shadow-sm">
+    <div class="flex items-center justify-between px-3 py-2 border-b bg-[var(--p-surface-50)]">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-comments text-sm text-[var(--p-primary-500)]"></i>
+        <h2 class="text-sm text-[var(--p-primary-500)] font-semibold">Chats</h2>
       </div>
+
+      <button
+        type="button"
+        class="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs
+               bg-[var(--p-primary-500)] text-white hover:bg-[var(--p-primary-600)] transition-colors"
+        (click)="openNewChatDialog()"
+      >
+        <i class="pi pi-plus"></i>
+        <span>Nuevo</span>
+      </button>
     </div>
-    <div class="mt-3">
+
+    <div class="mt-2 flex-1 overflow-y-auto px-2 pb-2">
+
+      @if (chats.length === 0) {
+        <div class="h-full flex items-center justify-center text-xs text-[var(--p-text-color-secondary)] text-center px-4">
+          No tienes ningún chat todavía.<br/>
+          Crea uno con el botón "Nuevo".
+        </div>
+      }
+
       @for (chat of chats; track chat.id) {
         <div
-          class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-[var(--p-surface-100)] justify-between"
-          [class.bg-[var(--p-primary-100)]]="selectedChat?.id === chat.id"
+          class="flex flex-col rounded-xl px-3 py-2 cursor-pointer transition-all duration-150 mb-1.5
+                 hover:bg-[var(--p-primary-200)]"
+          [ngClass]="{
+            'bg-[var(--p-primary-50)] border-[var(--p-primary-200)] shadow-sm':
+              selectedChat?.id === chat.id
+          }"
           (click)="selectChat(chat)"
         >
-          <div class="flex flex-row items-center gap-4">
+          <div class="flex items-center gap-3">
+
             <p-avatar
               [label]="userFirstLetter(getNameToShow(chat.chatMembers))"
               size="normal"
               shape="circle"
-            />
-            <div class="truncate">
-              <span class="font-large">{{ chat.name || getNameToShow(chat.chatMembers) }}</span>
+              styleClass="shadow-sm"
+            ></p-avatar>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-medium text-sm truncate">
+                  {{ chat.name || getNameToShow(chat.chatMembers) }}
+                </span>
+
+                @if (chat.lastMessageAt) {
+                  <span class="text-[0.65rem] text-[var(--p-text-color-secondary)] whitespace-nowrap">
+                    {{ chat.lastMessageAt | date:'HH:mm' }}
+                  </span>
+                }
+              </div>
+
+              <div class="flex items-center justify-between gap-2 mt-0.5">
+                <span class="text-[0.72rem] text-[var(--p-text-color-secondary)] truncate">
+                  {{ chat.lastMessagePreview || 'Sin mensajes todavía' }}
+                </span>
+
+                @if (chat.unreadMessagesCount > 0) {
+                  <p-badge
+                    [value]="chat.unreadMessagesCount"
+                    badgeSize="small"
+                    styleClass="bg-[var(--p-primary-500)] text-white text-[0.7rem]"
+                  ></p-badge>
+                }
+              </div>
             </div>
           </div>
-          @if (chat.unreadMessagesCount > 0) {
-            <p-badge badgeSize="small"/>
-          }
         </div>
       }
+
     </div>
   </div>
+
   <div class="flex basis-3/4">
     @if (selectedChat != null) {
       <app-chat
         [selectedChat]="selectedChat"
-        class="w-full">
-      </app-chat>
+        class="w-full"
+      ></app-chat>
+    } @else {
+      <div class="flex flex-1 items-center justify-center text-sm text-[var(--p-text-color-secondary)] border rounded-2xl bg-[var(--p-surface-0)]">
+        Selecciona un chat de la lista para empezar a hablar o crea uno nuevo.
+      </div>
     }
   </div>
+
 </div>
 
-<p-dialog header="Nuevo Grupo" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }">
-  <span class="p-text-secondary block mb-8">Información para el grupo.</span>
-  <div class="flex items-center gap-4 mb-4">
-    <label for="username" class="font-semibold w-24">Nombre</label>
-    <input pInputText id="username" class="flex-auto" autocomplete="off" />
-  </div>
-  <div class="flex justify-end gap-2">
-    <p-button label="Cancel" severity="secondary" (click)="visible = false" />
-    <p-button label="Save" (click)="visible = false" />
+<p-dialog
+  header="Nuevo chat"
+  [(visible)]="newChatVisible"
+  [modal]="true"
+  styleClass="w-[32rem]"
+  [closable]="true"
+  [draggable]="false"
+>
+  <div class="flex flex-col gap-4">
+
+    <div class="flex justify-center mb-3">
+      <p-selectButton
+        [options]="modeOptions"
+        [(ngModel)]="newChatMode"
+        optionLabel="label"
+        optionValue="value"
+      ></p-selectButton>
+    </div>
+
+    @if (newChatMode === 'private') {
+      <div class="flex flex-col gap-3">
+        <span class="text-xs text-[var(--p-text-color-secondary)]">
+          Elige la persona con la que quieres chatear.
+        </span>
+
+        <p-select
+          appendTo="body"
+          [options]="users"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Selecciona un usuario"
+          [(ngModel)]="selectedUserIdForPrivate"
+          class="w-full"
+          [filter]="true"
+          filterPlaceholder="Buscar usuario..."
+        >
+          <ng-template #item let-user>
+            <div class="flex items-center gap-2 text-sm">
+              <p-avatar
+                [label]="user.name?.at(0)"
+                size="normal"
+                shape="circle"
+              ></p-avatar>
+              <span>{{ user.name }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+    }
+
+    @if (newChatMode === 'group') {
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium">Nombre del grupo</label>
+          <input
+            pInputText
+            type="text"
+            class="w-full text-sm"
+            placeholder="Ej. Equipo de coordinación"
+            [(ngModel)]="groupName"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium">Descripción (opcional)</label>
+          <input
+            pInputText
+            type="text"
+            class="w-full text-xs"
+            placeholder="Propósito del grupo..."
+            [(ngModel)]="groupDescription"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium">Miembros</label>
+          <p-multiSelect
+            appendTo="body"
+            [options]="users"
+            optionLabel="name"
+            optionValue="id"
+            [(ngModel)]="selectedGroupUserIds"
+            [filter]="true"
+            display="chip"
+            class="w-full text-sm"
+            placeholder="Añadir miembros"
+          >
+            <ng-template let-user pTemplate="item">
+              <div class="flex items-center gap-2 text-sm">
+                <p-avatar
+                  [label]="user.name?.at(0)"
+                  size="normal"
+                  shape="circle"
+                ></p-avatar>
+                <span>{{ user.name }}</span>
+              </div>
+            </ng-template>
+
+            <ng-template let-user pTemplate="selectedItem">
+              <span>{{ user.name }}</span>
+            </ng-template>
+          </p-multiSelect>
+        </div>
+      </div>
+    }
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        size="small"
+        (onClick)="closeNewChatDialog()"
+      ></p-button>
+      <p-button
+        label="Crear chat"
+        size="small"
+        [disabled]="!canCreateNewChat()"
+        (onClick)="createNewChat()"
+      ></p-button>
+    </div>
+
   </div>
 </p-dialog>
