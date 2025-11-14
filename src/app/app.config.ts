@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {ApplicationConfig, provideAppInitializer, provideZoneChangeDetection} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -9,6 +9,8 @@ import {MyPreset} from './mypreset'
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {tokenInterceptor} from './core/auth/token.interceptor';
 import {ConfirmationService, MessageService} from 'primeng/api';
+import {registerLocaleData} from '@angular/common';
+import localeEs from '@angular/common/locales/es'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([tokenInterceptor])),
     provideAnimationsAsync(),
+    provideAppInitializer(() => {registerLocaleData(localeEs, "es")}),
     providePrimeNG({
       theme : {
         preset: MyPreset,
