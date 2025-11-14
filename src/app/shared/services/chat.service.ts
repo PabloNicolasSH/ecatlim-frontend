@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {ChatMessage} from '../models/chat-message.model';
 import {environment} from '../../../environments/environment';
 import {Chat} from '../models/chat.model';
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,16 @@ export class ChatService {
 
   protected readonly http = inject(HttpClient);
 
-  getChatHistory(chatId: number | undefined){
-    return this.http.get<ChatMessage[]>(`${environment.apiUrl}/chat/${chatId}`);
+  getChatHistory(chatId: number, page = 0, size = 30): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(
+      `${environment.apiUrl}/chat/${chatId}/messages`,
+      {
+        params: {
+          page,
+          size
+        }
+      }
+    );
   }
 
   createChat(chat: Chat){

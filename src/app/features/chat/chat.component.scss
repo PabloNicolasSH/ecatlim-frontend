@@ -4,3 +4,99 @@ div{
     border-color: var(--p-amber-500);
   }
 }
+
+.bubble {
+  position: relative;
+  display: inline-block;
+  max-width: 85ch;
+  border-radius: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+  white-space: normal;
+  word-break: normal;
+}
+
+
+.bubble-mine {
+  background-color: var(--p-primary-400);
+  color: white;
+}
+
+.bubble-other {
+  background-color: white;
+  color: black;
+  border: 1px solid #e5e7eb;
+}
+
+.bubble-first.bubble-mine {
+  border-bottom-right-radius: 0.4rem;
+}
+
+.bubble-first.bubble-other {
+  border-bottom-left-radius: 0.4rem;
+}
+
+
+.bubble-first.bubble-mine::after,
+.bubble-first.bubble-other::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.bubble-first.bubble-mine::after {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--p-primary-400);
+  transform: rotate(45deg);
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.15);
+}
+
+
+.bubble-first.bubble-other::after {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  transform: rotate(45deg);
+  box-shadow: -2px 2px 3px rgba(0,0,0,0.1);
+}
+
+.scroll-bottom-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--p-primary-400);
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+  z-index: 20;
+}
+
+.scroll-bottom-btn:hover {
+  transform: scale(1.05);
+}
+
+.date-separator {
+  font-size: 0.7rem;
+  color: var(--p-text-color-secondary);
+  background-color: var(--p-surface-200);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+}

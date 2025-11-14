@@ -1,9 +1,9 @@
-import {inject, Injectable} from '@angular/core';
-import {Client, IMessage} from '@stomp/stompjs';
-import {environment} from '../../../environments/environment';
-import {BehaviorSubject, Observable} from "rxjs";
-import {ChatMessage} from "../models/chat-message.model";
-import {HttpClient} from "@angular/common/http";
+import { inject, Injectable } from '@angular/core';
+import { Client, IMessage } from '@stomp/stompjs';
+import { environment } from '../../../environments/environment';
+import { Observable, Subject } from 'rxjs';
+import { ChatMessage } from '../models/chat-message.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class WebsocketService {
   private isConnected = false;
   private pendingSubscriptions: number[] = [];
 
-  private chatStreams = new Map<number, BehaviorSubject<ChatMessage[]>>();
+  private chatStreams = new Map<number, Subject<ChatMessage>>();
 
   protected readonly http = inject(HttpClient);
 
@@ -32,12 +32,14 @@ export class WebsocketService {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       debug: () => {},
-      onConnect: () =>{
+      onConnect: () => {
         this.isConnected = true;
         this.pendingSubscriptions.forEach(chatId => this.subscribeToChat(chatId));
         this.pendingSubscriptions = [];
-      } ,
-      onDisconnect: () => {},
+      },
+      onDisconnect: () => {
+        this.isConnected = false;
+      },
       onStompError: () => {},
     });
 
@@ -45,43 +47,39 @@ export class WebsocketService {
   }
 
   disconnect(): void {
-    this.stompClient.deactivate().then(r => {});
+    this.stompClient.deactivate().then(() => {});
   }
 
-  sendMessage(to: number, message: string){
+  sendMessage(chatId: number, message: string): void {
     this.stompClient.publish({
-      destination: `/app/chat/${to}/send`,
-      body: JSON.stringify({to, message})
+      destination: `/app/chat/${chatId}/send`,
+      body: JSON.stringify({ message })
     });
   }
 
-  joinChat(chatId: number): void {
-    if (this.chatStreams.has(chatId)) return;
-
-    this.chatStreams.set(chatId, new BehaviorSubject<ChatMessage[]>([]));
-
-    if (this.isConnected) {
-      this.subscribeToChat(chatId);
-    } else {
-      this.pendingSubscriptions.push(chatId);
+  private ensureStream(chatId: number): Subject<ChatMessage> {
+    if (!this.chatStreams.has(chatId)) {
+      this.chatStreams.set(chatId, new Subject<ChatMessage>());
+      if (this.isConnected) {
+        this.subscribeToChat(chatId);
+      } else {
+        this.pendingSubscriptions.push(chatId);
+      }
     }
+    return this.chatStreams.get(chatId)!;
   }
 
   private subscribeToChat(chatId: number): void {
+    const stream = this.chatStreams.get(chatId);
+    if (!stream) return;
+
     this.stompClient.subscribe(`/topic/chat/${chatId}`, (msg: IMessage) => {
       const message = JSON.parse(msg.body) as ChatMessage;
-      const stream = this.chatStreams.get(chatId);
-      if (stream) {
-        const current = stream.getValue();
-        stream.next([...current, message]);
-      }
+      stream.next(message);
     });
   }
 
-  getMessagesForChat(chatId: number): Observable<ChatMessage[]> {
-    if (!this.chatStreams.has(chatId)) {
-      this.joinChat(chatId);
-    }
-    return this.chatStreams.get(chatId)!.asObservable();
+  getMessagesForChat(chatId: number): Observable<ChatMessage> {
+    return this.ensureStream(chatId).asObservable();
   }
 }
