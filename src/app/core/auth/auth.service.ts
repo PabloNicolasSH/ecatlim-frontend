@@ -24,7 +24,8 @@ export class AuthService {
           name: res.name,
           surname: res.surname,
           email: res.email,
-          role: res.role
+          role: res.role,
+          id: res.id
         }));
         this.websocketService.initConnection();
       })
