@@ -5,6 +5,27 @@
     class="flex-1 overflow-y-auto flex flex-col bg-[var(--p-surface-50)] px-20 pt-4 pb-2"
     (scroll)="onScroll()"
   >
+    @if (loadingOlder) {
+      <div class="flex justify-center mb-3">
+        <div class="flex flex-col gap-2 w-full max-w-xl">
+
+          <div class="flex gap-2 justify-start">
+            <p-skeleton shape="circle" size="2rem"></p-skeleton>
+            <p-skeleton width="60%" height="1.2rem" borderRadius="999px"></p-skeleton>
+          </div>
+
+          <div class="flex gap-2 justify-end">
+            <p-skeleton width="55%" height="1.2rem" borderRadius="999px"></p-skeleton>
+          </div>
+
+          <div class="flex gap-2 justify-start">
+            <p-skeleton shape="circle" size="2rem"></p-skeleton>
+            <p-skeleton width="45%" height="1.2rem" borderRadius="999px"></p-skeleton>
+          </div>
+        </div>
+      </div>
+    }
+
     @for (message of messages; track trackByMessage(message); let i = $index) {
       @if (isFirstOfDay(i, message)) {
         <div class="flex justify-center my-3">
@@ -15,13 +36,14 @@
       }
 
       <div
-        class="flex"
+        class="flex message-row"
         [ngClass]="{
           'justify-end': isMine(message),
           'justify-start': !isMine(message),
           'mt-3 mb-1': isFirstOfGroup(i, message),
           'mt-0.5 mb-0.5': !isFirstOfGroup(i, message)
         }"
+        [attr.id]="'msg-' + message.localId"
       >
         <div
           class="flex items-center gap-2"

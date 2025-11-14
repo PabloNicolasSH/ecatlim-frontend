@@ -18,6 +18,7 @@ import {ChatService} from '../../shared/services/chat.service';
 import {User} from '../../shared/models/user.model';
 import {Subscription} from 'rxjs';
 import {ChatMessage} from '../../shared/models/chat-message.model';
+import {Skeleton} from 'primeng/skeleton';
 
 @Component({
   selector: 'app-chat',
@@ -25,7 +26,8 @@ import {ChatMessage} from '../../shared/models/chat-message.model';
     NgClass,
     FormsModule,
     Avatar,
-    Button
+    Button,
+    Skeleton
   ],
   providers: [DatePipe],
   templateUrl: './chat.component.html',
@@ -64,7 +66,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    if (this.pendingScrollToBottom) {
+    if (this.pendingScrollToBottom && !this.loadingOlder && this.scrollContainer) {
       this.scrollToBottomSmooth();
       this.pendingScrollToBottom = false;
     }
@@ -94,12 +96,9 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
     this.loadingOlder = true;
 
-    const el = this.scrollContainer.nativeElement;
-    const prevScrollHeight = el.scrollHeight;
-
     this.chatService.getChatHistory(this.selectedChat.id, this.currentPage + 1, this.pageSize)
       .subscribe((msgs: ChatMessage[]) => {
-        if (msgs.length === 0) {
+        if (!msgs.length) {
           this.loadingOlder = false;
           this.allHistoryLoaded = true;
           return;
@@ -113,11 +112,6 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
         ];
 
         this.currentPage++;
-
-        queueMicrotask(() => {
-          const newScrollHeight = el.scrollHeight;
-          el.scrollTop += newScrollHeight - prevScrollHeight;
-        });
 
         if (msgs.length < this.pageSize) {
           this.allHistoryLoaded = true;
