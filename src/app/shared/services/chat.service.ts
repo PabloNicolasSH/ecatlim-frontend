@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ChatMessage} from '../models/chat-message.model';
 import {environment} from '../../../environments/environment';
-import {Chat} from '../models/chat.model';
+import {Chat, NewChatForm} from '../models/chat.model';
 import {Observable} from 'rxjs';
 
 @Injectable({
@@ -24,7 +24,7 @@ export class ChatService {
     );
   }
 
-  createChat(chat: Chat){
+  createChat(chat: NewChatForm){
     return this.http.post<Chat>(`${environment.apiUrl}/chat/add`, chat);
   }
 

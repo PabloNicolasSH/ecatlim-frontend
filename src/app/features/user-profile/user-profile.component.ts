@@ -12,11 +12,8 @@ import {RouterLink} from '@angular/router';
   selector: 'app-user-profile',
   imports: [
     Button,
-    LowerCasePipe,
-    UpperCasePipe,
     FormsModule,
     UserModalMeEditComponent,
-    UserModalAddEditComponent,
     RouterLink
   ],
   templateUrl: './user-profile.component.html',

@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ChatComponent } from '../chat/chat.component';
-import { Chat } from '../../shared/models/chat.model';
+import {Chat, NewChatForm} from '../../shared/models/chat.model';
 import { Button } from 'primeng/button';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -150,12 +150,11 @@ export class ChatListComponent implements OnInit {
   private createPrivateChat() {
     if (this.selectedUserIdForPrivate == null) return;
 
-    const member = this.users.find(u => u.id === this.selectedUserIdForPrivate);
+    const member = this.selectedUserIdForPrivate;
     if (!member) return;
 
-    const newChat: Chat = {
-      chatMembers: [member],
-      unreadMessagesCount: 0
+    const newChat: NewChatForm = {
+      chatMembers: [member]
     };
 
     this.chatService.createChat(newChat).subscribe({
@@ -167,16 +166,10 @@ export class ChatListComponent implements OnInit {
   }
 
   private createGroupChat() {
-    const members = this.users.filter(u => {
-      if (u.id){
-        this.selectedGroupUserIds.includes(u.id)
-      }
-    });
+    const members =  this.selectedGroupUserIds;
 
-    const newChat: Chat = {
-      id: 0,
+    const newChat: NewChatForm = {
       chatMembers: members,
-      unreadMessagesCount: 0,
       name: this.groupName,
       description: this.groupDescription
     };

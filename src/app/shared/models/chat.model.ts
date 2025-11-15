@@ -10,3 +10,9 @@ export interface Chat {
   lastMessagePreview?: string;
   lastMessageAt?: string;
 }
+
+export interface NewChatForm {
+  name?: string;
+  description?: string;
+  chatMembers: number[];
+}
