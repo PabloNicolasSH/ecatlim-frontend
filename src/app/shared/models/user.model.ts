@@ -20,5 +20,6 @@ export interface User {
 export interface SimpleUser {
   id: number;
   name: string;
+  surname: string;
   email: string;
 }

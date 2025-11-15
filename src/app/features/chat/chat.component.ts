@@ -182,7 +182,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
     this.shouldAutoScroll = distanceToBottom < 30;
     this.showScrollToBottom = distanceToBottom > 200;
 
-    if(el.scrollTop < 10 && !this.loadingOlder && !this.allHistoryLoaded){
+    if(el.scrollTop < 1 && !this.loadingOlder && !this.allHistoryLoaded){
       this.loadOlderMessages();
     }
   }

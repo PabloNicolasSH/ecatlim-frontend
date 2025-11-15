@@ -4,7 +4,7 @@ import {Chat, NewChatForm} from '../../shared/models/chat.model';
 import { Button } from 'primeng/button';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../shared/models/user.model';
+import {SimpleUser, User} from '../../shared/models/user.model';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { UserService } from '../../shared/services/user-and-entity/user.service';
@@ -44,7 +44,7 @@ export class ChatListComponent implements OnInit {
 
   selectedChat!: Chat;
   chats: Chat[] = [];
-  users: User[] = [];
+  users: SimpleUser[] = [];
 
   visible = false;
 
@@ -82,9 +82,9 @@ export class ChatListComponent implements OnInit {
   }
 
   private loadUsers() {
-    this.userService.getUsers().subscribe({
+    this.userService.getSimpleUsersInfo().subscribe({
       next: users => {
-        this.users = users;
+        this.users = users.filter(user => user.id !== JSON.parse(<string>localStorage.getItem('me')).id);
       }
     });
   }

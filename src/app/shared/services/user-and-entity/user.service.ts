@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {User} from '../../models/user.model';
+import {SimpleUser, User} from '../../models/user.model';
 import {environment} from '../../../../environments/environment';
 import {UserForm} from '../../models/user-form.model';
 import {ResetPassword} from '../../../features/reset-password/models/reset-password.model';
@@ -17,6 +17,10 @@ export class UserService {
 
   getUsers(): Observable<User[]>{
     return this.http.get<User[]>(`${environment.apiUrl}/user/admin/allActives`);
+  }
+
+  getSimpleUsersInfo(): Observable<SimpleUser[]>{
+    return this.http.get<SimpleUser[]>(`${environment.apiUrl}/user/simpleUsersInfo`);
   }
 
   getInactiveUsers(): Observable<User[]>{
