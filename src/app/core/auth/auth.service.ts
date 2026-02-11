@@ -16,6 +16,12 @@ export class AuthService {
   protected readonly http = inject(HttpClient);
   protected readonly router = inject(Router)
 
+  constructor() {
+    if (this.isAuthenticated()){
+      this.websocketService.initConnection(this.getToken()!);
+    }
+  }
+
   login(userToLog: UserToLog): Observable<any>{
     return this.http.post(`${environment.apiUrl}/auth/login`, userToLog).pipe(
       tap((res:any) => {
@@ -27,7 +33,7 @@ export class AuthService {
           role: res.role,
           id: res.id
         }));
-        this.websocketService.initConnection();
+        this.websocketService.initConnection(res.token);
       })
     )
   }

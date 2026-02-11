@@ -19,13 +19,7 @@ export class WebsocketService {
 
   protected readonly http = inject(HttpClient);
 
-  constructor() {
-    this.initConnection();
-  }
-
-  initConnection() {
-    const token = localStorage.getItem('token');
-
+  initConnection(token: string) {
     this.stompClient = new Client({
       brokerURL: `${environment.webSocketUrl}/ws?token=${token}`,
       reconnectDelay: 5000,
