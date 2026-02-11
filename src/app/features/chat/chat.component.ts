@@ -19,6 +19,7 @@ import {User} from '../../shared/models/user.model';
 import {Subscription} from 'rxjs';
 import {ChatMessage} from '../../shared/models/chat-message.model';
 import {Skeleton} from 'primeng/skeleton';
+import {ChatInputComponent} from '../chat-input/chat-input.component';
 
 @Component({
   selector: 'app-chat',
@@ -26,9 +27,9 @@ import {Skeleton} from 'primeng/skeleton';
     NgClass,
     FormsModule,
     Avatar,
-    Button,
     Skeleton,
-    DatePipe
+    DatePipe,
+    ChatInputComponent
   ],
   providers: [DatePipe],
   templateUrl: './chat.component.html',
@@ -40,7 +41,6 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
   private websocketService = inject(WebsocketService);
   private chatService = inject(ChatService);
-  private datePipe = inject(DatePipe);
 
   userMe: User = JSON.parse(localStorage.getItem('me')!);
 
@@ -219,5 +219,10 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
     if (index === 0) return true;
     const prev = this.messages[index - 1];
     return prev.dayKey !== message.dayKey;
+  }
+
+  onMessageSent(text: string) {
+    if (!text || !this.selectedChat.id) return;
+    this.websocketService.sendMessage(this.selectedChat.id, text);
   }
 }

@@ -70,9 +70,7 @@
               'bubble-first': isFirstOfGroup(i, message)
             }"
           >
-            <div>
-              {{ message.message }}
-            </div>
+            <div>{{message.message}}</div>
             <div
               class="flex items-center gap-1 mt-1 text-[0.70rem] opacity-70"
               [ngClass]="{
@@ -96,14 +94,8 @@
     }
   </div>
 
-  <div class="flex items-center gap-2 p-3 border-t bg-white">
-    <input
-      class="flex-1 px-4 py-2 border rounded-full focus:outline-none"
-      placeholder="Escribe un mensaje..."
-      type="text"
-      [(ngModel)]="newMessage"
-      (keydown.enter)="send()"
-    />
-    <p-button icon="pi pi-send" class="rounded-full px-4" (onClick)="send()" rounded></p-button>
-  </div>
+  <app-chat-input
+    [disabled]="!selectedChat"
+    (sendMessage)="onMessageSent($event)"
+  ></app-chat-input>
 </div>

@@ -1,0 +1,17 @@
+<div class="w-full border-t border-gray-200 p-3 flex flex-col gap-2 bg-white"
+     [class.opacity-60]="disabled">
+
+  <div class="flex items-center gap-2">
+    <textarea
+      #messageArea
+      class="flex-1 resize-none rounded-lg px-3 py-2 text-sm
+         border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400
+         min-h-[40px] max-h-[120px] overflow-y-auto"
+      placeholder="Escribe un mensaje..."
+      [(ngModel)]="messageContent"
+      (keydown.enter)="onSend(); $event.preventDefault()"
+      [disabled]="disabled"
+    ></textarea>
+    <p-button icon="pi pi-send" class="rounded-full px-4" (onClick)="onSend()" rounded></p-button>
+  </div>
+</div>

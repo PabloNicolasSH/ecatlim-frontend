@@ -12,8 +12,9 @@ div{
   border-radius: 0.85rem;
   padding: 0.4rem 0.75rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.12);
-  white-space: normal;
-  word-break: normal;
+  white-space: break-spaces;
+  word-break: break-all;
+  hyphens: auto;
 }
 
 
