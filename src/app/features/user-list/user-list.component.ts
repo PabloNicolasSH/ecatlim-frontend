@@ -26,8 +26,7 @@ import {ScoutGroupService} from '../../shared/services/scout-group.service';
     Button,
     UserModalAddEditComponent,
     ConfirmDialog,
-    FormsModule,
-    MultiSelect
+    FormsModule
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'
