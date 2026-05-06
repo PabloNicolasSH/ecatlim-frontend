@@ -13,7 +13,7 @@
   <div class="flex items-center space-x-3">
 
     @if (messages.length > 0) {
-      <p-overlay-badge [value]="messages?.length" severity="info">
+      <p-overlay-badge [value]="messages.length" severity="info">
         <p-button
           icon="pi pi-comments"
           severity="secondary"
@@ -29,7 +29,7 @@
     }
 
     @if (notifies.length > 0) {
-      <p-overlay-badge [value]="notifies?.length" severity="danger">
+      <p-overlay-badge [value]="notifies.length" severity="danger">
         <p-button
           (onClick)="toggle($event)"
           icon="pi pi-bell"
