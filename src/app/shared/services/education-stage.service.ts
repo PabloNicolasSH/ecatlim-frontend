@@ -26,8 +26,4 @@ export class EducationStageService {
   getEducationOffer(): Observable<EducationStageCard[]> {
     return this.http.get<EducationStageCard[]>(`${environment.apiUrl}/education-stage/offer`);
   }
-
-  enrollInStage(stageId: number): Observable<EducationStageCard> {
-    return this.http.post<EducationStageCard>(`${environment.apiUrl}/education-stage/${stageId}/enroll`, {});
-  }
 }

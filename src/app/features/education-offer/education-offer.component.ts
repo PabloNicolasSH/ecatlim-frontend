@@ -8,6 +8,7 @@ import {Tag} from 'primeng/tag';
 import {NgClass} from '@angular/common';
 import {EducationStageStatusPipe} from '../../shared/pipes/education-stage-status.pipe';
 import {MessageService} from 'primeng/api';
+import {EnrollmentService} from '../../shared/services/enrollment.service';
 
 @Component({
   selector: 'app-education-offer',
@@ -28,6 +29,7 @@ export class EducationOfferComponent implements OnInit{
   loading: boolean = false;
 
   protected readonly educationStageService = inject(EducationStageService);
+  protected readonly enrollmentService = inject(EnrollmentService);
   protected readonly messageService = inject(MessageService);
 
   ngOnInit(): void {
@@ -62,7 +64,7 @@ export class EducationOfferComponent implements OnInit{
 
   enrollInStage(id: number) {
     this.loading = true;
-    this.educationStageService.enrollInStage(id)
+    this.enrollmentService.enrollInStage(id)
       .subscribe({
         next: (enrolledStage) => {
           this.stages = this.stages.map(stage =>
