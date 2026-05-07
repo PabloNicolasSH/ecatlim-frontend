@@ -17,6 +17,7 @@ import {LessonBlock} from '../../shared/models/lesson-block.model';
 import {Dialog} from "primeng/dialog";
 import {ScrollPanel} from "primeng/scrollpanel";
 import {HoursMetreComponent} from "../../shared/components/hours-metre/hours-metre.component";
+import {map, switchMap} from 'rxjs';
 
 @Component({
   selector: 'app-admin-create-education-stage',
@@ -85,8 +86,32 @@ export class AdminCreateEducationStageComponent implements OnInit{
   }
 
   private load() {
-    this.loadEducationStages();
-    this.loadModules();
+    this.educationStageService.getEducationStages().pipe(
+      switchMap(stages => {
+        this.educationStages = stages;
+
+        return this.moduleService.getAll();
+      }),
+      map(modules => {
+        this.modulesList = modules;
+        return this.createGroupedModulesList(this.educationStages, modules);
+      })
+    ).subscribe({
+      next: (groupedList) => {
+        this.groupedModulesList = groupedList;
+      }
+    });
+  }
+
+  private createGroupedModulesList(stages: any[], modules: any[]) {
+    return stages.map(stage => {
+      const modulesInStage = modules.filter(m => m.educationStage === stage.id);
+      return {
+        label: stage.name,
+        value: stage.name,
+        items: modulesInStage
+      };
+    }).filter(group => group.items.length > 0);
   }
 
   private initializeForms() {
@@ -122,10 +147,11 @@ export class AdminCreateEducationStageComponent implements OnInit{
             summary: "Creado con éxito",
             detail: "Se ha creado exitosamente la nueva etapa formativa"
           });
-          this.loadEducationStages();
+          this.load();
           this.initializeEducationStageForm();
         },
         error: error => {
+          this.loading = false;
           this.messageService.add({
             severity: "error",
             summary: "Error",
@@ -134,14 +160,6 @@ export class AdminCreateEducationStageComponent implements OnInit{
         }
       });
     }
-  }
-
-  private loadEducationStages() {
-    this.educationStageService.getEducationStages().subscribe({
-      next: educationStages => {
-        this.educationStages = educationStages;
-      }
-    });
   }
 
   private initializeModulesForm() {
@@ -235,7 +253,7 @@ export class AdminCreateEducationStageComponent implements OnInit{
             detail: "Se han creado exitosamente los nuevos módulos del bloque formativo " + educationStage.name
           });
           this.initializeModulesForm();
-          this.loadModules();
+          this.load();
           this.loading = false;
         },
         error: err => {
@@ -250,26 +268,6 @@ export class AdminCreateEducationStageComponent implements OnInit{
     } else {
       this.modulesForm.markAllAsTouched();
     }
-  }
-
-  private loadModules(){
-    this.moduleService.getAll().subscribe({
-      next: modules => {
-        this.modulesList = modules;
-        this.createGroupedModulesList();
-      }
-    });
-  }
-
-  private createGroupedModulesList() {
-    this.groupedModulesList = this.educationStages.map(stage => {
-      const modulesInStage = this.modulesList.filter(m => m.educationStage === stage.id);
-      return {
-        label: stage.name,
-        value: stage.name,
-        items: modulesInStage
-      };
-    }).filter(group => group.items.length > 0);
   }
 
   private initializeLessonBlockForm() {
@@ -291,11 +289,11 @@ export class AdminCreateEducationStageComponent implements OnInit{
 
   private createLessonBlockGroup(): FormGroup {
     return this.formBuilder.group({
-      lbName: ['', Validators.required],
-      lbDescription: [''],
+      name: ['', Validators.required],
+      description: [''],
       lessonBlockId: ['', Validators.required],
-      lbOnlineHours: [0, [Validators.required, Validators.min(0)]],
-      lbContactHours: [0, [Validators.required, Validators.min(0)]],
+      onlineHours: [0, [Validators.required, Validators.min(0)]],
+      contactHours: [0, [Validators.required, Validators.min(0)]],
       recognizable: [false]
     });
   }

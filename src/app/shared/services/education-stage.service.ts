@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {EducationStage} from '../models/education-stage.model';
+import {EducationStage, EducationStageCard} from '../models/education-stage.model';
 import {environment} from '../../../environments/environment';
 
 @Injectable({
@@ -21,5 +21,9 @@ export class EducationStageService {
 
   getEducationStageWithModulesAndLessonBlocks(id: number) {
     return this.http.get<EducationStage>(`${environment.apiUrl}/education-stage/${id}`);
+  }
+
+  getEducationOffer(): Observable<EducationStageCard[]> {
+    return this.http.get<EducationStageCard[]>(`${environment.apiUrl}/education-stage/offer`);
   }
 }

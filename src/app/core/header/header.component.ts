@@ -109,8 +109,8 @@ export class HeaderComponent {
             }
           },
           {
-            label: 'Mis Etapas y Cursos', icon: 'pi pi-book', command: () => {
-              this.router.navigateByUrl('');
+            label: 'Mi Progreso', icon: 'pi pi-book', command: () => {
+              this.router.navigateByUrl('/app/mi-progreso');
               this.sidebarVisible = false;
             }
           }

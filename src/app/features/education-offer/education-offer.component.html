@@ -1,80 +1,92 @@
-<div class="pe-12 ps-12">
-  <h1 class="font-bold mb-4">Oferta Educativa</h1>
-  <div class="flex flex-col gap-2">
-    <h2 class="title-2 font-bold">Etapas</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      @for (stage of stages; track stage.id) {
-        <div class="relative group flex flex-col h-full">
-          <p-card class="flex flex-col h-full justify-between"
-            [style]="{ overflow: 'hidden' }"
-            [styleClass]="stage.isEnabled? 'h-full' : 'pointer-events-none h-full'"
-          >
-            <ng-template #header>
-              <img alt="Card image" class="w-full object-cover h-40" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
-            </ng-template>
-            <ng-template #title>
-              <div class="flex justify-between items-center">
-                <span class="font-bold">{{ stage.name }}</span>
-                @if (!stage.isEnabled) {
-                  <i class="pi pi-lock text-red-500 text-lg"></i>
+<div class="pe-12 ps-12 py-8 min-h-screen">
+  <div class="mb-10">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Oferta Educativa</h1>
+    <p class="text-gray-600 text-lg">Gestiona tu progresión en la ECATLIM.</p>
+  </div>
+
+  <div class="flex flex-col gap-12">
+    <div>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="p-2 rounded-lg">
+          <i class="pi pi-map text-white text-xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">Etapas de Formación Scout</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @for (stage of stages; track stage.id) {
+          <div class="relative group h-full flex flex-col">
+            <p-card
+              class="h-full"
+              styleClass="h-full border-t-4 shadow-sm transition-all duration-300 flex flex-col"
+              [ngClass]="stage.isEnabled ? 'border-primary-500' : 'border-gray-300 bg-gray-50'"
+              [style]="{ height: '100%', display: 'flex', 'flex-direction': 'column' }"
+            >
+              <ng-template #title>
+                <div class="flex justify-between items-start gap-2">
+                  <span class="font-bold text-xl text-gray-800 leading-tight">{{ stage.name }}</span>
+                  <p-tag
+                    [severity]="getSeverity(stage.status)"
+                    [value]="stage.status | educationStageStatus"
+                    [icon]="getIcon(stage.status)">
+                  </p-tag>
+                </div>
+                <span class="text-xs font-bold uppercase tracking-widest text-primary-600">{{ stage.type }}</span>
+              </ng-template>
+
+              <div class="flex flex-col h-full">
+                <p class="text-sm text-gray-600 leading-relaxed">
+                  {{ stage.description }}
+                </p>
+
+                @if (stage.isEnabled) {
+                  <div class="flex gap-2 w-full pt-4 mt-auto text-center">
+                    @if (stage.status === 'ENROLLED' || stage.status === 'IN_PROGRESS' || stage.status === 'COMPLETED') {
+                      <p-button
+                        label="Ir a 'Mi Progreso'"
+                        icon="pi pi-play"
+                        severity="success"
+                        routerLink="/app/mi-progreso"
+                        class="flex-1"
+                      ></p-button>
+                    } @else {
+                      <p-button
+                        label="Inscribirme"
+                        icon="pi pi-user-plus"
+                        (onClick)="enrollInStage(stage.id)"
+                        class="flex-1"
+                        [loading]="loading"
+                      ></p-button>
+                    }
+                  </div>
+                } @else {
+                  <div class="flex gap-2 w-full pt-4 mt-auto text-center">
+                    <p-button
+                      label="Inscribirme"
+                      icon="pi pi-lock"
+                      severity="secondary"
+                      disabled
+                      (onClick)="enrollInStage(stage.id)"
+                      class="flex-1"
+                      [loading]="loading"
+                    ></p-button>
+                  </div>
                 }
               </div>
-            </ng-template>
-            <ng-template #subtitle>
-              <span class="text-sm text-gray-500">{{ stage.type }}</span>
-            </ng-template>
-            <p class="px-4 pb-4 text-sm text-gray-700 flex-grow">
-              {{stage.description}}
-            </p>
-            @if (stage.isEnabled) {
-              <ng-template #footer>
-                <div class="flex flex-row justify-evenly">
-                  <p-button
-                    label="Leer más"
-                    icon="pi pi-info-circle"
-                    severity="info"
-                    routerLink="{{stage.id}}"
-                  ></p-button>
-                  <p-button
-                    label="Inscribirme"
-                    icon="pi pi-check"
-                    (onClick)="enrollInStage(stage.id)"
-                  ></p-button>
+            </p-card>
+
+            @if (!stage.isEnabled) {
+              <div class="absolute inset-0 z-10 bg-gray-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-center items-center p-6 text-center rounded-lg">
+                <div class="p-3 shadow-lg mb-4">
+                  <i class="pi pi-lock text-red-500 text-2xl"></i>
                 </div>
-              </ng-template>
+                <p class="text-white font-bold mb-6 drop-shadow-md">
+                  Esta etapa requiere completar la anterior
+                </p>
+              </div>
             }
-          </p-card>
-          @if (!stage.isEnabled) {
-            <div
-              class="absolute inset-0 rounded-lg bg-gray-600 bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white text-center px-4">
-              <p class="mb-2 text-sm">No puedes inscribirte en esta etapa,<br />pero puedes descubrir más de ella si quieres.</p>
-              <p-button
-                label="Leer más"
-                icon="pi pi-info-circle"
-                class="!opacity-100"
-              ></p-button>
-            </div>
-          }
-        </div>
-      }
-    </div>
-    <h2 class="title-2 font-bold mb-2 mt-4">Cursos</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      @for (course of courses; track course.id) {
-        <p-card [styleClass]="course.isEnabled ? '' : 'relative opacity-50 pointer-events-none'">
-          <ng-template pTemplate="header">
-            <div class="flex items-center justify-between p-4">
-              <span class="font-bold text-lg">{{ course.name }}</span>
-              @if (!course.isEnabled) {
-                <i class="pi pi-lock text-red-500 text-xl"></i>
-              }
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            {{ course.description }}
-          </ng-template>
-        </p-card>
-      }
+          </div>
+        }
+      </div>
     </div>
   </div>
 </div>

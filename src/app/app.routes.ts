@@ -19,6 +19,9 @@ import {
 } from './features/admin-create-education-stage/admin-create-education-stage.component';
 import {EducationStageDetailComponent} from './features/education-stage-detail/education-stage-detail.component';
 import {EducationOfferComponent} from './features/education-offer/education-offer.component';
+import {
+  UserEducationStagesProgressComponent
+} from './features/user-education-stages-progress/user-education-stages-progress.component';
 
 export const routes: Routes = [
   {
@@ -75,6 +78,10 @@ export const routes: Routes = [
       {
         path: "oferta-educativa",
         component: EducationOfferComponent
+      },
+      {
+        path: "mi-progreso",
+        component: UserEducationStagesProgressComponent
       },
       {
         path: "admin/usuarios",
