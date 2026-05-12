@@ -61,7 +61,7 @@ export class UserModalAddEditComponent implements OnInit{
   ngOnInit(): void {
     this.initializeForm();
     this.getScoutGroups();
-    this.roles = ["ADMIN", "MANAGEMENT" , "EVENT_DIRECTOR" , "TRAINER" , "STUDENT"]
+    this.roles = [Role.ADMIN, Role.EVENT_DIRECTOR, Role.MANAGEMENT, Role.STUDENT, Role.TRAINER]
   }
 
   private initializeForm() {
