@@ -1,4 +1,4 @@
-import {Component, inject, ViewChild} from '@angular/core';
+import {Component, computed, HostListener, inject, signal, ViewChild, WritableSignal} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
 import {MenuItem, MenuItemCommandEvent} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
@@ -11,6 +11,7 @@ import {Avatar} from 'primeng/avatar';
 import {Profile} from '../../shared/models/profile.model';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
+import {Notification} from '../../shared/models/notification.model';
 
 @Component({
   selector: 'app-header',
@@ -36,21 +37,60 @@ export class HeaderComponent {
   @ViewChild('op') op!: Popover;
   @ViewChild('drawerRef') drawerRef!: Drawer;
 
-  userOptions!: MenuItem[];
+  baseUserOptions!: MenuItem[];
   user!: Profile;
   sidebarVisible: boolean = false;
 
-  messages: string[] = ["Parche la chupa de locos"];
-  notifies: string[] = [];
+  windowWidth = signal(window.innerWidth);
+
+  messages = signal(["¿Vienes al curso de Agosto?"]);
+  notifies: WritableSignal<Notification[]> = signal([]);
   sidebarMenu!: MenuItem[];
+
+  userOptions = computed(() => {
+    if (this.windowWidth() < 768) {
+      return [
+        {
+          label: `Mensajes (${this.messages().length})`,
+          icon: 'pi pi-comments',
+          command: () => this.openMessages()
+        },
+        {
+          label: `Notificaciones (${this.notifies().length})`,
+          icon: 'pi pi-bell',
+          command: (event: any) => this.toggleNotifications(event)
+        },
+        { separator: true },
+        ...this.baseUserOptions
+      ];
+    }
+    return this.baseUserOptions;
+  });
 
   constructor() {
     this.createUserOptions();
     this.createSidebarMenu();
   }
 
-  toggle(event: any){
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.windowWidth.set(window.innerWidth);
+  }
+
+  openMessages() {
+    console.log('Abriendo chat...');
+  }
+
+  toggleNotifications(event?: any) {
     this.op.toggle(event)
+  }
+
+  handleNotifyClick(notify: Notification) {
+
+  }
+
+  markAllAsRead() {
+    this.notifies.set([]);
   }
 
   onMenuClick() {
@@ -59,7 +99,7 @@ export class HeaderComponent {
 
   private createUserOptions() {
     this.user = this.authService.getProfile();
-    this.userOptions = [
+    this.baseUserOptions = [
       {
         label: 'Mi Perfil',
         command: () => {this.router.navigateByUrl('/app/perfil')}
@@ -71,6 +111,10 @@ export class HeaderComponent {
         command: () => {this.authService.logout()}
       }
     ];
+  }
+
+  userFirstLetter() {
+    return this.user.name.at(0);
   }
 
   private createSidebarMenu() {
@@ -93,7 +137,11 @@ export class HeaderComponent {
       },
       {
         label: 'Calendario de la Escuela',
-        icon: "pi pi-calendar"
+        icon: "pi pi-calendar",
+        command: () => {
+          this.router.navigateByUrl('/app/calendario');
+          this.sidebarVisible = false;
+        }
       },
       {
         label: 'La Biblioteca',
@@ -122,10 +170,6 @@ export class HeaderComponent {
     }
   }
 
-  userFirstLetter() {
-    return this.user.name.at(0);
-  }
-
   private addAdminOptions() {
     this.sidebarMenu.push({
       label: 'Administración',
@@ -142,7 +186,10 @@ export class HeaderComponent {
             this.router.navigateByUrl('/app/admin/formacion');
             this.sidebarVisible = false;
           }},
-        {label: 'Eventos Formativos', icon: "pi pi-calendar"}
+        {label: 'Eventos Formativos', icon: "pi pi-calendar", command: () => {
+          this.router.navigateByUrl('/app/admin/eventos-formativos');
+          this.sidebarVisible = false;
+        }}
       ]
     });
   }
