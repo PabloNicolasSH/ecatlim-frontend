@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@theme {
+  --color-ecatlim: var(--p-orange-500);
+}
