@@ -1,8 +1,11 @@
+import {EducationSession} from './education-session.model';
+
 export interface TimelineItem {
   id?: number;
+  title: string;
+  description?: string;
   startTime: Date;
   endTime: Date;
-  type: 'FORMATIVE' | 'BREAK';
-  lessonBlockTitle?: string;
-  trainerName?: string;
+  itemType: 'FORMATIVE' | 'LOGISTIC';
+  educationSession?: EducationSession;
 }

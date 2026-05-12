@@ -2,3 +2,27 @@
   height: calc(100vh - 130px);
   overflow: hidden;
 }
+
+::ng-deep .custom-scheduler-dialog {
+  .p-dialog-header {
+    border-bottom: 1px solid #f3f4f6;
+    padding: 1.5rem;
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+
+  .p-dialog-content {
+    padding: 0 1.5rem 1rem 1.5rem;
+  }
+
+  .p-dialog-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid #f3f4f6;
+    border-radius: 0 0 1.5rem 1.5rem;
+  }
+
+  .p-multiselect-chip {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border-radius: 6px !important;
+  }
+}

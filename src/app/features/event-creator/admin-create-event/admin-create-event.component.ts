@@ -4,7 +4,7 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {FloatLabel} from 'primeng/floatlabel';
 import {Select} from 'primeng/select';
 import {InputText} from 'primeng/inputtext';
-import {MessageService, PrimeTemplate} from 'primeng/api';
+import {MessageService, PrimeTemplate, SelectItemGroup} from 'primeng/api';
 import {Button} from 'primeng/button';
 import {DatePicker} from 'primeng/datepicker';
 import {MultiSelect} from 'primeng/multiselect';
@@ -43,9 +43,10 @@ export class AdminCreateEventComponent implements OnInit{
 
   eventForm!: FormGroup;
   step: number = 1;
+  savedTimeline: any[] = [];
 
   directors: User[] = [];
-  availableBlocks: LessonBlock[] = [];
+  availableBlocks: SelectItemGroup[] = [];
 
   pendingBlocks: any[] = [];
   loading: boolean = false;
@@ -92,9 +93,45 @@ export class AdminCreateEventComponent implements OnInit{
     this.lessonBlockService.getAll()
       .subscribe({
         next: (blocks) => {
-          this.availableBlocks = blocks;
+          this.availableBlocks = this.groupedBlocksByCode(blocks);
         }
       });
+  }
+
+  private groupedBlocksByCode(blocks: LessonBlock[]) {
+    const labels: { [key: string]: string } = {
+      'AS': 'Acogida al Scouter (AS)',
+      'ES': 'Educador/a Scout (ES)',
+      'CS': 'Coordinador/a Scout (CS)'
+    };
+
+    const groups = blocks.reduce((acc, block) => {
+      const match = block.code?.match(/^B[FP]([A-Z]{2})/);
+      const groupKey = match ? match[1] : 'OTROS';
+
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
+      }
+      acc[groupKey].push(block);
+      return acc;
+    }, {} as { [key: string]: LessonBlock[] });
+
+    const result = Object.keys(groups).map(key => ({
+      label: labels[key] || 'Otros Bloques',
+      value: key,
+      items: [...groups[key]]
+        .sort((a, b) => (a.code || '').localeCompare((b.code || ''), undefined, {
+          numeric: true,
+          sensitivity: 'base'
+        }))
+        .map(b => ({
+          label: `${b.code}`,
+          value: b
+        }))
+    }));
+
+    const order = ['AS', 'ES', 'CS'];
+    return result.sort((a, b) => order.indexOf(a.value) - order.indexOf(b.value));
   }
 
   onBlockSelectionChange(event: any) {
@@ -117,15 +154,27 @@ export class AdminCreateEventComponent implements OnInit{
 
   goToScheduling() {
     if (this.eventForm.valid) {
-      this.pendingBlocks = this.eventForm.value.selectedBlocks.map((block: any) => (
-        {
+      const selectedBlocks = this.eventForm.value.selectedBlocks.map((block: any) => ({
         id: block.id,
         title: block.name,
+        code: block.code,
         totalHours: block.contactHours,
         remainingHours: block.contactHours,
         assignedHours: 0,
-        color: this.getRandomColor()
+        color: this.getRandomColor(),
+        itemType: 'FORMATIVE'
       }));
+
+      const logisticBlock = {
+        id: 9999,
+        title: 'Gestión y Logística',
+        code: 'LOG',
+        assignedHours: 0,
+        color: '#64748b',
+        itemType: 'LOGISTIC'
+      };
+
+      this.pendingBlocks = [logisticBlock, ...selectedBlocks];
       this.step = 2;
     }
   }
@@ -169,13 +218,21 @@ export class AdminCreateEventComponent implements OnInit{
     });
   }
 
+  handleBack(events: any[]) {
+    this.savedTimeline = events;
+    this.step = 1;
+  }
+
   private getRandomColor(): string {
     const presetColors = [
-      '#b45309',
-      '#f9bb42',
-      '#c68753',
-      '#15803d',
-      '#059669'
+      '#8c4007', '#b45309', '#92400e', '#78350f',
+      '#a16207', '#c2410c', '#9a3412', '#b45309',
+      '#c68753', '#854d0e', '#064e3b', '#14532d',
+      '#15803d', '#166534', '#065f46', '#047857',
+      '#059669', '#064e3b', '#0f766e', '#115e59',
+      '#7f1d1d', '#991b1b', '#b91c1c', '#dc2626',
+      '#9233ea', '#7c3aed', '#c026d3', '#9d174d',
+      '#be123c', '#881337'
     ];
     return presetColors[Math.floor(Math.random() * presetColors.length)];
   }

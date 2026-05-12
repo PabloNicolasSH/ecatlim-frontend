@@ -84,33 +84,42 @@
           <div class="flex flex-col">
             <p class="text-cyan-900 font-bold mb-3">Contenido Educativo</p>
             <div class="flex flex-col md:flex-row gap-1.5 w-full">
-              <div class="flex flex-col md:flex-row w-full">
                 <p-floatlabel variant="on" class="flex-1">
                   <p-multi-select
                     id="blocks"
                     [options]="availableBlocks"
                     formControlName="selectedBlocks"
                     display="chip"
+                    [group]="true"
+                    [filter]="true"
+                    filterBy="label"
                     appendTo="body"
-                    styleClass="w-full"
-                    required
+                    styleClass="w-full custom-multiselect-x"
+                    scrollHeight="200px"
+                    [maxSelectedLabels]="20"
                     (onChange)="onBlockSelectionChange($event)"
+                    required
                   >
+                    <ng-template let-group pTemplate="group">
+                      <div class="flex align-items-center font-bold py-1">
+                        <span>{{ group.label }}</span>
+                      </div>
+                    </ng-template>
                     <ng-template let-block pTemplate="item">
                       <div class="flex align-items-center">
-                        <span>{{ block.lessonBlockId }} - {{ block.name }}</span>
+                        <span class="mr-2 text-primary font-semibold">{{ block.value.code }}</span>
+                        <span>{{ block.value.name }}</span>
                       </div>
                     </ng-template>
                   </p-multi-select>
                   <label for="blocks">Bloques a impartir</label>
                 </p-floatlabel>
-              </div>
-              <div class="flex flex-col md:flex-row gap-6 w-full">
-                <p-floatlabel variant="on" class="flex-1">
-                  <textarea id="description" pTextarea formControlName="description" rows="1" class="w-full min-h-11.5"></textarea>
-                  <label for="description">Descripción del evento</label>
-                </p-floatlabel>
-              </div>
+            </div>
+            <div class="flex flex-col md:flex-row gap-6 w-full mt-3">
+              <p-floatlabel variant="on" class="flex-1">
+                <textarea id="description" pTextarea formControlName="description" rows="3" class="w-full min-h-11.5"></textarea>
+                <label for="description">Descripción del evento</label>
+              </p-floatlabel>
             </div>
           </div>
         </div>
@@ -148,5 +157,10 @@
 }
 
 @if (step === 2) {
-  <app-event-scheduler [basicInfo]="eventForm.value" [pendingBlocks]="pendingBlocks" (onBack)="step = 1"></app-event-scheduler>
+  <app-event-scheduler
+    [basicInfo]="eventForm.value"
+    [pendingBlocks]="pendingBlocks"
+    [initialTimeline]="savedTimeline"
+    (onBack)="handleBack($event)"
+  ></app-event-scheduler>
 }

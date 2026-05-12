@@ -7,4 +7,5 @@ export interface LessonBlock {
   contactHours: number;
   recognizable: boolean;
   moduleId: number;
+  code?: string;
 }
