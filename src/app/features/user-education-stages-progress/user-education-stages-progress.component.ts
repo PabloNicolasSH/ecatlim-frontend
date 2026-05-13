@@ -1,10 +1,15 @@
 import {Component, computed, inject, signal} from '@angular/core';
 import {EnrollmentService} from '../../shared/services/enrollment.service';
 import {Enrollment} from '../../shared/models/enrollment.model';
+import {Button} from 'primeng/button';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-user-education-stages-progress',
-  imports: [],
+  imports: [
+    Button,
+    RouterLink
+  ],
   templateUrl: './user-education-stages-progress.component.html',
   styleUrl: './user-education-stages-progress.component.scss'
 })

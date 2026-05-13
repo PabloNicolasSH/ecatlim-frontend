@@ -12,7 +12,7 @@ import {PendingUser} from '../../shared/models/pending-user.model';
 import {FormsModule} from '@angular/forms';
 import {MultiSelect} from 'primeng/multiselect';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
-import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 
 @Component({
   selector: 'app-user-list',
@@ -35,7 +35,7 @@ export class UserListComponent implements OnInit {
 
   protected readonly userService = inject(UserService);
   protected readonly pendingUserService = inject(PendingUserService);
-  protected readonly scoutGroupService = inject(ScoutGroupService);
+  protected readonly scoutGroupService = inject(EntityService);
   protected readonly confirmationService = inject(ConfirmationService);
   protected readonly messageService = inject(MessageService);
   protected readonly filterService = inject(FilterService);
@@ -259,7 +259,7 @@ export class UserListComponent implements OnInit {
   }
 
   private loadScoutGroups() {
-    this.scoutGroupService.getScoutGroups().subscribe({
+    this.scoutGroupService.getEntities().subscribe({
       next: value => {
         this.scoutGroups = value;
       }

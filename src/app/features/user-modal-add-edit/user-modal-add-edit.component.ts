@@ -3,7 +3,7 @@ import {Dialog} from 'primeng/dialog';
 import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Select} from 'primeng/select';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
@@ -31,7 +31,7 @@ import {MessageService, PrimeTemplate} from 'primeng/api';
 export class UserModalAddEditComponent implements OnInit{
 
   protected readonly formBuilder = inject(FormBuilder);
-  protected readonly scoutGroupService = inject(ScoutGroupService);
+  protected readonly scoutGroupService = inject(EntityService);
   protected readonly userService = inject(UserService);
   protected readonly messageService = inject(MessageService);
 
@@ -82,7 +82,7 @@ export class UserModalAddEditComponent implements OnInit{
   }
 
   private getScoutGroups() {
-    this.scoutGroupService.getScoutGroups().subscribe({
+    this.scoutGroupService.getEntities().subscribe({
       next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
     })
   }
