@@ -1,22 +1,25 @@
-import { AfterViewInit, Component, EventEmitter, inject, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { CalendarOptions } from '@fullcalendar/core';
+import {AfterViewInit, Component, EventEmitter, inject, Input, OnInit, Output, signal, ViewChild} from '@angular/core';
+import {CalendarOptions} from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
-import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
-import { DatePipe, JsonPipe } from '@angular/common';
-import { ProgressBar } from 'primeng/progressbar';
-import { Button } from 'primeng/button';
-import { MessageService, PrimeTemplate } from 'primeng/api';
-import { HoursPipe } from '../../../shared/pipes/hours.pipe';
-import { Dialog } from 'primeng/dialog';
-import { InputText } from 'primeng/inputtext';
-import { Textarea } from 'primeng/textarea';
-import { FormsModule } from '@angular/forms';
-import { Tooltip } from 'primeng/tooltip';
-import { EventService } from '../../../shared/services/event.service';
+import interactionPlugin, {Draggable} from '@fullcalendar/interaction'
+import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
+import {DatePipe, JsonPipe} from '@angular/common';
+import {ProgressBar} from 'primeng/progressbar';
+import {Button} from 'primeng/button';
+import {MessageService, PrimeTemplate} from 'primeng/api';
+import {HoursPipe} from '../../../shared/pipes/hours.pipe';
+import {Dialog} from 'primeng/dialog';
+import {InputText} from 'primeng/inputtext';
+import {Textarea} from 'primeng/textarea';
+import {FormsModule} from '@angular/forms';
+import {Tooltip} from 'primeng/tooltip';
+import {EventService} from '../../../shared/services/event.service';
 import {TimelineItem} from '../../../shared/models/timeline-item.model';
 import {MultiSelect} from 'primeng/multiselect';
+import {UserService} from '../../../shared/services/user.service';
+import {Role} from '../../../shared/models/role.model';
+import {User} from '../../../shared/models/user.model';
 
 @Component({
   selector: 'app-event-scheduler',
@@ -48,24 +51,24 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
 
   protected readonly messageService = inject(MessageService);
   protected readonly eventService = inject(EventService);
+  protected readonly userService = inject(UserService);
 
   displayModal: boolean = false;
   selectedEvent: any = null;
 
   tempTimelineItem: TimelineItem = this.getEmptyTimelineItem();
 
-  trainers: any[] = [];
+  trainers = signal<User[]>([]);
 
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'timeGridWeek',
     droppable: true,
     editable: true,
-    slotMinTime: '07:00:00',
+    slotMinTime: '08:00:00',
     slotMaxTime: '24:00:00',
     allDaySlot: false,
     locale: 'es',
-    firstDay: 1,
     buttonText: { day: "Vista por día", week: "Vista por semana" },
     customButtons: {
       goToStart: {
@@ -74,7 +77,10 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
       }
     },
     headerToolbar: { left: 'prev,next goToStart', center: 'title', right: 'timeGridDay,timeGridWeek' },
-    eventClick: (info) => this.handleEventClick(info),
+    eventClick: (info) => {
+      if (info.event.display === 'background'){return;}
+      this.handleEventClick(info)
+    },
     eventReceive: (info) => this.handleEventReceive(info),
     eventResize: (info) => this.handleEventChange(info),
     eventDrop: (info) => this.handleEventChange(info),
@@ -86,6 +92,11 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
     });
 
     this.addCalendarOptions();
+
+    this.userService.getUsersByRole(Role.TRAINER)
+      .subscribe({
+          next: trainers => {this.trainers.set(trainers);}
+      });
   }
 
   ngAfterViewInit() {
@@ -94,9 +105,14 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
 
   addCalendarOptions() {
     if (this.basicInfo.startDate && this.basicInfo.endDate) {
+      const startDate = new Date(this.basicInfo.startDate);
+      const dayOfWeek = startDate.getDay();
+      const endDate = new Date(this.basicInfo.endDate);
+
       this.calendarOptions = {
         ...this.calendarOptions,
-        initialDate: this.basicInfo.startDate,
+        initialDate: startDate,
+        firstDay: dayOfWeek,
         validRange: {
           start: this.basicInfo.startDate,
           end: this.basicInfo.endDate
@@ -106,10 +122,25 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
           end: this.basicInfo.endDate
         }
       }
+
+      const backgroundEvents = this.generateBackgroundEvents(startDate, endDate);
+      this.initialTimeline = this.adjustEventsToRange(this.initialTimeline, startDate, endDate);
+
+      this.calendarOptions.eventSources = [
+        {
+          events: this.initialTimeline || [],
+          id: 'timelineSource'
+        },
+        {
+          events: backgroundEvents,
+          display: 'background',
+          backgroundColor: '#f0f0f0',
+          id: 'backgroundSource'
+        }
+      ];
     }
 
-    if (this.initialTimeline && this.initialTimeline.length > 0) {
-      this.calendarOptions.events = this.initialTimeline;
+    if (this.initialTimeline?.length > 0) {
       setTimeout(() => {
         const blockIds = [...new Set(this.initialTimeline
           .filter(e => e.extendedProps?.id)
@@ -117,6 +148,78 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
         blockIds.forEach(id => this.updateInventory(id as number));
       }, 100);
     }
+  }
+
+  private generateBackgroundEvents(startDate: Date, endDate: Date): any[] {
+    const startOfDayOne = new Date(startDate);
+    startOfDayOne.setHours(0, 0, 0, 0);
+
+    const endOfLastDay = new Date(endDate);
+    endOfLastDay.setHours(23, 59, 59, 999);
+
+    return [
+      {
+        start: startOfDayOne,
+        end: startDate,
+        allDay: false,
+        display: 'background',
+        backgroundColor: '#d1d1d1',
+        borderColor: '#d1d1d1',
+        editable: false,
+        draggable: false,
+        clickable: false,
+        resizable: false,
+        droppable: false
+      },
+      {
+        start: endDate,
+        end: endOfLastDay,
+        allDay: false,
+        display: 'background',
+        backgroundColor: '#d1d1d1',
+        borderColor: '#d1d1d1',
+        editable: false,
+        draggable: false,
+        clickable: false,
+        resizable: false,
+        droppable: false
+      }
+    ];
+  }
+
+  private adjustEventsToRange(events: any[], rangeStart: Date, rangeEnd: Date): any[] {
+    if (!events || events.length === 0) return [];
+
+    return events.map(event => {
+      if (event.display === 'background') return event;
+
+      const eStart = new Date(event.start);
+      const eEnd = new Date(event.end);
+      const duration = eEnd.getTime() - eStart.getTime();
+
+      let newStart = new Date(eStart);
+      let newEnd = new Date(eEnd);
+
+      if (eStart < rangeStart) {
+        newStart = new Date(rangeStart);
+        newEnd = new Date(newStart.getTime() + duration);
+      }
+
+      if (newEnd > rangeEnd) {
+        newEnd = new Date(rangeEnd);
+        newStart = new Date(newEnd.getTime() - duration);
+
+        if (newStart < rangeStart) {
+          newStart = new Date(rangeStart);
+        }
+      }
+
+      return {
+        ...event,
+        start: newStart,
+        end: newEnd
+      };
+    });
   }
 
   private getEmptyTimelineItem(): TimelineItem {
@@ -182,24 +285,24 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
 
   saveSessionDetails() {
     const props = this.selectedEvent.extendedProps;
-    let finalTitle = this.tempTimelineItem.title;
+    let newTitle = this.tempTimelineItem.title;
 
     if (this.tempTimelineItem.itemType === 'FORMATIVE' && props.code) {
-      if (!finalTitle.startsWith(props.code)) {
-        finalTitle = `${props.code} ${finalTitle}`;
+      if (!newTitle.startsWith(props.code)) {
+        newTitle = `${props.code} ${newTitle}`;
       }
     }
 
-    this.selectedEvent.setProp('title', finalTitle);
-    this.selectedEvent.setExtendedProps({
-      ...props,
-      description: this.tempTimelineItem.description,
-      itemType: this.tempTimelineItem.itemType,
-      educationSession: this.tempTimelineItem.educationSession
-    });
+    this.selectedEvent.setProp('title', newTitle);
+    this.selectedEvent.setExtendedProp('description', this.tempTimelineItem.description);
+    this.selectedEvent.setExtendedProp('itemType', this.tempTimelineItem.itemType);
+    this.selectedEvent.setExtendedProp('educationSession', this.tempTimelineItem.educationSession);
+
+    if (props.id) {
+      this.updateInventory(props.id);
+    }
 
     this.displayModal = false;
-    this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Ítem de cronograma guardado' });
   }
 
   private updateInventory(blockId: number) {
@@ -254,7 +357,6 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
     }
 
     this.displayModal = false;
-    this.messageService.add({ severity: 'info', summary: 'Copiado', detail: 'Evento replicado' });
   }
 
   duplicateEvent() {
@@ -262,9 +364,7 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
     const calendarApi = this.fullCalendar.getApi();
 
     const newStart = new Date(event.start);
-    newStart.setMinutes(newStart.getMinutes() + 30);
     const newEnd = new Date(event.end);
-    newEnd.setMinutes(newEnd.getMinutes() + 30);
 
     calendarApi.addEvent({
       title: event.title,
@@ -280,7 +380,6 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
     }
 
     this.displayModal = false;
-    this.messageService.add({ severity: 'success', summary: 'Duplicado', detail: 'Copia creada' });
   }
 
   private handleEventReceive(info: any) {
@@ -304,14 +403,16 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
     const calendarApi = this.fullCalendar.getApi();
     const events = calendarApi.getEvents();
 
-    const timelineItems: TimelineItem[] = events.map(e => ({
-      title: e.title,
-      description: e.extendedProps['description'],
-      startTime: e.start!,
-      endTime: e.end!,
-      itemType: e.extendedProps['itemType'],
-      educationSession: e.extendedProps['educationSession']
-    }));
+    const timelineItems: TimelineItem[] = events
+      .filter(e => e.display !== 'background' && e.extendedProps['id'])
+      .map(e => ({
+        title: e.title,
+        description: e.extendedProps['description'],
+        startTime: e.start!,
+        endTime: e.end!,
+        itemType: e.extendedProps['itemType'],
+        educationSession: e.extendedProps['educationSession']
+      }));
 
     const eventDto = {
       ...this.basicInfo,
@@ -328,14 +429,16 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
 
   goBack() {
     const calendarApi = this.fullCalendar.getApi();
-    const currentEvents = calendarApi.getEvents().map(e => ({
-      title: e.title,
-      start: e.start,
-      end: e.end,
-      backgroundColor: e.backgroundColor,
-      borderColor: e.borderColor,
-      extendedProps: e.extendedProps
-    }));
+    const currentEvents = calendarApi.getEvents()
+      .filter(e => e.display !== 'background' && e.extendedProps['id'])
+      .map(e => ({
+        title: e.title,
+        start: e.start,
+        end: e.end,
+        backgroundColor: e.backgroundColor,
+        borderColor: e.borderColor,
+        extendedProps: e.extendedProps
+      }));
     this.onBack.emit(currentEvents);
   }
 
