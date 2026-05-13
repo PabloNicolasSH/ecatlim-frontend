@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {Event, EventCalendar, EventForm} from '../models/event.model';
+import {Event, EventCalendar, EventDashboard, EventForm} from '../models/event.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,10 @@ export class EventService {
 
   getEventsForCalendar(): Observable<EventCalendar[]> {
     return this.http.get<EventCalendar[]>(`${environment.apiUrl}/events/user-calendar`);
+  }
+
+  getEventsForHome(): Observable<EventDashboard[]> {
+    return this.http.get<EventDashboard[]>(`${environment.apiUrl}/events/user-home`);
   }
 
   enroll(eventId: number): Observable<Event> {

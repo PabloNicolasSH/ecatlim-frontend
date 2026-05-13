@@ -31,3 +31,13 @@ export interface EventCalendar {
   isCurrentUserAttending?: boolean;
   canParticipate?: boolean;
 }
+
+export interface EventDashboard {
+  id?: number | undefined;
+  title: string;
+  startDate: Date;
+  location: string;
+  educationStageCode?: string;
+  isCurrentUserAttending?: boolean;
+  canParticipate?: boolean;
+}
