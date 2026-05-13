@@ -11,7 +11,7 @@ import {InputText} from 'primeng/inputtext';
 import {UserService} from '../../shared/services/user.service';
 import {UserForm} from '../../shared/models/user-form.model';
 import {Role} from '../../shared/models/role.model';
-import {MessageService} from 'primeng/api';
+import {MessageService, PrimeTemplate} from 'primeng/api';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -22,7 +22,8 @@ import {MessageService} from 'primeng/api';
     FloatLabel,
     Select,
     FormsModule,
-    InputText
+    InputText,
+    PrimeTemplate
   ],
   templateUrl: './user-modal-add-edit.component.html',
   styleUrl: './user-modal-add-edit.component.scss'
