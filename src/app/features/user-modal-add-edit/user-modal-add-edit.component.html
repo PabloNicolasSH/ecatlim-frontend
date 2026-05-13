@@ -2,153 +2,104 @@
   [(visible)]="visible"
   [modal]="true"
   [draggable]="false"
-  [style]="{width: '50vw'}"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [breakpoints]="{ '960px': '90vw', '425px': '100vw' }"
   appendTo="body"
 >
-  @if (dialogMode == 'Add') {
-    <ng-template #header>
-      <span class="font-bold whitespace-nowrap">Añadir un Nuevo Usuario</span>
-    </ng-template>
-  } @else if (dialogMode == 'Edit'){
-    <ng-template #header>
-      <div class="inline-flex items-start gap-2">
-        <span class="font-bold whitespace-nowrap">{{userToEdit.name}} {{userToEdit.surname}}</span>
+  <ng-template pTemplate="header">
+    @if (dialogMode == 'Add') {
+      <span class="font-bold text-xl">Añadir un Nuevo Usuario</span>
+    } @else {
+      <div class="flex flex-col">
+        <span class="font-bold text-xl">{{userToEdit.name}} {{userToEdit.surname}}</span>
+        <small class="text-surface-500">Actualice la información del usuario.</small>
       </div>
-    </ng-template>
-    <span class="text-surface-500 block mb-8">Actualice la información del usuario.</span>
-  }
-  <form #userForm (ngSubmit)="onSubmit()" [formGroup]="form" class="mt-2">
-    <div class="flex flex-col justify-between">
-      <div class="flex flex-row gap-2 w-full">
-        <div class="flex flex-col basis-1/2">
-          <p class="text-cyan-900 font-bold">Nombre y Apellidos</p>
-          <div class="flex flex-row gap-2 mt-2">
+    }
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="flex flex-col gap-3">
+          <p class="text-cyan-900 font-bold border-b border-gray-200">Nombre y Apellidos</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             <p-floatlabel variant="on">
-              <input
-                id="name"
-                pInputText
-                formControlName="name"
-                type="text"
-              />
+              <input id="name" pInputText formControlName="name" class="w-full" required/>
               <label for="name">Nombre</label>
             </p-floatlabel>
             <p-floatlabel variant="on">
-              <input
-                id="surname"
-                pInputText
-                formControlName="surname"
-                type="text"
-              />
+              <input id="surname" pInputText formControlName="surname" class="w-full" required/>
               <label for="surname">Apellidos</label>
             </p-floatlabel>
           </div>
         </div>
-        <div class="flex flex-col basis-1/2">
-          <p class="text-cyan-900 font-bold">Datos de Contacto</p>
-          <div class="flex flex-row mt-2 gap-2">
+
+        <div class="flex flex-col gap-3">
+          <p class="text-cyan-900 font-bold border-b border-gray-200">Datos de Contacto</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             <p-floatlabel variant="on">
-              <input
-                id="email"
-                pInputText
-                formControlName="email"
-                type="text"
-              />
-              <label for="email">Correo Electrónico</label>
+              <input id="email" pInputText formControlName="email" class="w-full" />
+              <label for="email">Correo</label>
             </p-floatlabel>
             <p-floatlabel variant="on">
-              <input
-                id="phone"
-                pInputText
-                formControlName="phone"
-                type="text"
-              />
-              <label for="phone">Teléfono/móvil</label>
+              <input id="phone" pInputText formControlName="phone" class="w-full" />
+              <label for="phone">Teléfono</label>
             </p-floatlabel>
           </div>
         </div>
       </div>
-      <p class="text-cyan-900 font-bold mt-4">Información Personal</p>
-      <div class="flex flex-row mt-2 gap-2 w-full">
-        <p-floatlabel variant="on" class="basis-1/4">
-          <input
-            id="census"
-            pInputText
-            formControlName="census"
-            type="number"
-            class="w-full"
-          />
-          <label for="census">Censo en su grupo scout</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
-          <p-select
-            id="role"
-            [options]="roles"
-            formControlName="selectedRole"
-            appendTo="body"
-            class="w-full"
-          />
-          <label for="role">Rol</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
-          <p-select
-            id="scoutGroup"
-            [options]="scoutGroups"
-            optionLabel="name"
-            formControlName="selectedScoutGroup"
-            appendTo="body"
-            class="w-full"
-          />
-          <label for="scoutGroup">Grupo Scout</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
-          <input
-            id="nif"
-            pInputText
-            formControlName="nif"
-            type="text"
-            class="w-full"
-          />
-          <label for="nif">DNI/NIE</label>
-        </p-floatlabel>
+
+      <div class="flex flex-col gap-3">
+        <p class="text-cyan-900 font-bold border-b border-gray-200">Información Personal</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+          <p-floatlabel variant="on">
+            <input id="census" pInputText formControlName="census" type="number" class="w-full" />
+            <label for="census">Censo</label>
+          </p-floatlabel>
+
+          <p-floatlabel variant="on">
+            <p-select id="role" [options]="roles" formControlName="selectedRole" appendTo="body" class="w-full" required/>
+            <label for="role">Rol</label>
+          </p-floatlabel>
+
+          <p-floatlabel variant="on">
+            <p-select id="scoutGroup" [options]="scoutGroups" optionLabel="name" formControlName="selectedScoutGroup" appendTo="body" class="w-full" />
+            <label for="scoutGroup">Grupo Scout</label>
+          </p-floatlabel>
+
+          <p-floatlabel variant="on">
+            <input id="nif" pInputText formControlName="nif" class="w-full" />
+            <label for="nif">DNI/NIE</label>
+          </p-floatlabel>
+        </div>
       </div>
-      <div class="flex flex-row mt-4 gap-2">
-        <p-floatlabel variant="on" class="basis-2/4">
-          <input
-            id="address"
-            pInputText
-            formControlName="address"
-            type="text"
-            class="w-full"
-          />
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-1.5">
+        <p-floatlabel variant="on" class="md:col-span-2">
+          <input id="address" pInputText formControlName="address" class="w-full" />
           <label for="address">Dirección Postal</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
-          <input
-            id="city"
-            pInputText
-            formControlName="city"
-            type="text"
-          />
-          <label for="city">Municipio de residencia</label>
+
+        <p-floatlabel variant="on" class="md:col-span-1">
+          <input id="city" pInputText formControlName="city" class="w-full" />
+          <label for="city">Municipio</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
-          <input
-            id="country"
-            pInputText
-            formControlName="country"
-            type="text"
-          />
+
+        <p-floatlabel variant="on" class="md:col-span-1">
+          <input id="country" pInputText formControlName="country" class="w-full" />
           <label for="country">País</label>
         </p-floatlabel>
       </div>
     </div>
-    <div class="mt-6 text-end w-full">
-      <p-button label="Cancelar" severity="danger" (onClick)="visible.set(false)" class="mr-3"/>
+
+    <div class="mt-8 flex flex-row justify-end gap-2">
+      <p-button label="Cancelar" severity="danger" [outlined]="true" (onClick)="visible.set(false)" class="w-full sm:w-auto"/>
       <p-button
         [label]="dialogMode=='Add'?'Añadir Usuario':'Guardar'"
-        [disabled]="!this.form.valid"
+        [disabled]="!form.valid"
         [loading]="loading"
         type="submit"
+        class="w-full sm:w-auto"
       />
     </div>
   </form>
