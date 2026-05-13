@@ -1,0 +1,82 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '90vw', maxWidth: '600px' }"
+  [breakpoints]="{ '960px': '90vw', '425px': '100vw' }"
+  appendTo="body"
+>
+  <ng-template pTemplate="header">
+    @if (dialogMode == 'Add') {
+      <div class="flex flex-col">
+        <span class="font-bold text-xl">Registrar Nueva Entidad</span>
+        <small class="text-surface-500">Introduzca los datos identificativos del grupo.</small>
+      </div>
+    } @else {
+      <div class="flex flex-col">
+        <span class="font-bold text-xl">Editar Entidad: {{entityToEdit.name}}</span>
+        <small class="text-surface-500">Modifique los parámetros de la entidad seleccionada.</small>
+      </div>
+    }
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-4">
+        <p class="text-cyan-900 font-bold border-b border-gray-200 pb-1">Identificación</p>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <p-floatlabel variant="on" class="sm:col-span-1">
+            <input id="groupNumber" pInputText formControlName="groupNumber" type="number" class="w-full"/>
+            <label for="groupNumber">Nº Entidad</label>
+          </p-floatlabel>
+
+          <p-floatlabel variant="on" class="sm:col-span-3">
+            <input id="name" pInputText formControlName="name" class="w-full" required/>
+            <label for="name">Nombre de la Entidad</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <p class="text-cyan-900 font-bold border-b border-gray-200 pb-1">Ubicación y Contacto</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-floatlabel variant="on">
+            <p-select
+              id="provinceId"
+              [options]="provinces"
+              optionLabel="name"
+              optionValue="id"
+              formControlName="provinceId"
+              appendTo="body"
+              class="w-full"
+              required
+            />
+            <label for="provinceId">Provincia / Delegación</label>
+          </p-floatlabel>
+
+          <p-floatlabel variant="on">
+            <input id="email" pInputText formControlName="email" type="email" class="w-full" required/>
+            <label for="email">Email Corporativo</label>
+          </p-floatlabel>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-col-reverse sm:flex-row justify-end gap-3">
+      <p-button
+        label="Descartar"
+        severity="danger"
+        [outlined]="true"
+        (onClick)="visible.set(false)"
+        class="w-full sm:w-auto"
+      />
+      <p-button
+        [label]="dialogMode=='Add'?'Dar de Alta':'Guardar Cambios'"
+        [disabled]="!form.valid"
+        [loading]="loading"
+        type="submit"
+        class="w-full sm:w-auto"
+      />
+    </div>
+  </form>
+</p-dialog>
