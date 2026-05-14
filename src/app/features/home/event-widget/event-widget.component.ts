@@ -11,7 +11,6 @@ import {RouterLink} from '@angular/router';
   imports: [
     DatePipe,
     Button,
-    Tag,
     RouterLink
   ],
   templateUrl: './event-widget.component.html',

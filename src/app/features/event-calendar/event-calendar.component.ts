@@ -54,7 +54,9 @@ export class EventCalendarComponent implements OnInit{
 
   upcomingEvents = computed(() => {
     const events = this.showingAllEvents() ? this.allEvents() : this.userEvents();
-    return [...events].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    return [...events]
+      .filter(e => new Date(e.startDate) >= new Date())
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   });
 
   calendarOptions: CalendarOptions = {
