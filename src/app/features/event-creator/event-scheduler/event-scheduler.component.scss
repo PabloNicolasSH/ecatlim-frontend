@@ -19,10 +19,31 @@
     border-top: 1px solid #f3f4f6;
     border-radius: 0 0 1.5rem 1.5rem;
   }
+}
 
-  .p-multiselect-chip {
-    background: #eff6ff !important;
-    color: #1d4ed8 !important;
-    border-radius: 6px !important;
+#inventory-footer {
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  &.bg-red-500 {
+    border-top: 1px solid transparent;
+    animation: pulseRed 1.5s infinite;
   }
+}
+
+@keyframes pulseRed {
+  0% { background-color: #ef4444; }
+  50% { background-color: #dc2626; }
+  100% { background-color: #ef4444; }
+}
+
+.scalein {
+  animation: scaleIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }

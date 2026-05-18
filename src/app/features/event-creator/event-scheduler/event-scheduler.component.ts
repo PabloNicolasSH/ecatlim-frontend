@@ -14,12 +14,12 @@ import {InputText} from 'primeng/inputtext';
 import {Textarea} from 'primeng/textarea';
 import {FormsModule} from '@angular/forms';
 import {Tooltip} from 'primeng/tooltip';
-import {EventService} from '../../../shared/services/event.service';
 import {TimelineItem} from '../../../shared/models/timeline-item.model';
 import {MultiSelect} from 'primeng/multiselect';
 import {UserService} from '../../../shared/services/user.service';
 import {Role} from '../../../shared/models/role.model';
 import {User} from '../../../shared/models/user.model';
+import {EventCreatorService} from '../event-creator.service';
 
 @Component({
   selector: 'app-event-scheduler',
@@ -47,16 +47,19 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
   @Input() pendingBlocks: any[] = [];
   @Input() initialTimeline!: any[];
   @Output() onBack = new EventEmitter<any[]>();
+  @Output() onSave = new EventEmitter<any[]>();
   @ViewChild('calendar') fullCalendar!: FullCalendarComponent;
 
   protected readonly messageService = inject(MessageService);
-  protected readonly eventService = inject(EventService);
   protected readonly userService = inject(UserService);
+  protected readonly eventCreatorService = inject(EventCreatorService);
 
   displayModal: boolean = false;
   selectedEvent: any = null;
 
   tempTimelineItem: TimelineItem = this.getEmptyTimelineItem();
+
+  isDraggingOverInventory = false;
 
   trainers = signal<User[]>([]);
 
@@ -69,17 +72,48 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
     slotMaxTime: '24:00:00',
     allDaySlot: false,
     locale: 'es',
-    buttonText: { day: "Vista por día", week: "Vista por semana" },
+    defaultTimedEventDuration: '01:00',
     customButtons: {
       goToStart: {
         text: "Inicio del Evento",
         click: () => this.resetToStartDate()
       }
     },
-    headerToolbar: { left: 'prev,next goToStart', center: 'title', right: 'timeGridDay,timeGridWeek' },
+    headerToolbar: { left: 'prev,next goToStart', center: 'title'},
     eventClick: (info) => {
       if (info.event.display === 'background'){return;}
       this.handleEventClick(info)
+    },
+    eventDragStart: (info) => {
+      const trashEl = document.getElementById('inventory-footer');
+
+      const onMouseMove = (e: MouseEvent) => {
+        const isOver = this.isEventOverElement(e, trashEl);
+        if (this.isDraggingOverInventory !== isOver) {
+          this.isDraggingOverInventory = isOver;
+        }
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      (info.el as any)._onMouseMove = onMouseMove;
+    },
+    eventDragStop: (info) => {
+      console.log("YA");
+      const onMouseMove = (info.el as any)._onMouseMove;
+      if (onMouseMove) window.removeEventListener('mousemove', onMouseMove);
+
+      const trashEl = document.getElementById('inventory-footer');
+      const wasDroppedOver = this.isEventOverElement(info.jsEvent, trashEl);
+
+      if (wasDroppedOver) {
+        const blockId = info.event.extendedProps["id"];
+        info.event.remove();
+
+        if (blockId) {
+          setTimeout(() => this.updateInventory(blockId), 0);
+        }
+      }
+      this.isDraggingOverInventory = false;
     },
     eventReceive: (info) => this.handleEventReceive(info),
     eventResize: (info) => this.handleEventChange(info),
@@ -405,26 +439,17 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
 
     const timelineItems: TimelineItem[] = events
       .filter(e => e.display !== 'background' && e.extendedProps['id'])
-      .map(e => ({
+      .map(e => (
+        {
         title: e.title,
         description: e.extendedProps['description'],
-        startTime: e.start!,
-        endTime: e.end!,
+        startTime: this.eventCreatorService.toLocalISO(e.start!) as any,
+        endTime: this.eventCreatorService.toLocalISO(e.end!) as any,
         itemType: e.extendedProps['itemType'],
         educationSession: e.extendedProps['educationSession']
       }));
 
-    const eventDto = {
-      ...this.basicInfo,
-      directorId: this.basicInfo.selectedDirector?.id,
-      lessonBlockIds: this.basicInfo.selectedBlocks.map((b: any) => b.id),
-      timelineItems: timelineItems
-    };
-
-    this.eventService.saveEvent(eventDto).subscribe({
-      next: () => this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Evento y cronograma guardados' }),
-      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' })
-    });
+    this.onSave.emit(timelineItems);
   }
 
   goBack() {
@@ -452,5 +477,17 @@ export class EventSchedulerComponent implements OnInit, AfterViewInit {
   private getRandomColor(): string {
     const colors = ['#be185d', '#4338ca', '#7f59bc', '#0369a1', '#0891b2'];
     return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  private isEventOverElement(jsEvent: MouseEvent, targetEl: HTMLElement | null) {
+    if (!targetEl) return false;
+
+    const rect = targetEl.getBoundingClientRect();
+    return (
+      jsEvent.clientX >= rect.left - 10 &&
+      jsEvent.clientX <= rect.right + 10 &&
+      jsEvent.clientY >= rect.top - 10 &&
+      jsEvent.clientY <= rect.bottom + 10
+    );
   }
 }

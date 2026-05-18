@@ -15,6 +15,9 @@ import {LessonBlockService} from '../../../shared/services/lesson-block.service'
 import {Role} from '../../../shared/models/role.model';
 import {User} from '../../../shared/models/user.model';
 import {LessonBlock} from '../../../shared/models/lesson-block.model';
+import {EventCreatorService} from '../event-creator.service';
+import {Router} from '@angular/router';
+import {TimelineItem} from '../../../shared/models/timeline-item.model';
 
 @Component({
   selector: 'app-admin-create-event',
@@ -40,6 +43,8 @@ export class AdminCreateEventComponent implements OnInit{
   protected readonly eventService = inject(EventService);
   protected readonly userService = inject(UserService);
   protected readonly lessonBlockService = inject(LessonBlockService);
+  protected readonly eventCreatorService = inject(EventCreatorService);
+  protected readonly router = inject(Router);
 
   eventForm!: FormGroup;
   step: number = 1;
@@ -50,6 +55,7 @@ export class AdminCreateEventComponent implements OnInit{
 
   pendingBlocks: any[] = [];
   loading: boolean = false;
+  eventId: number | undefined;
 
   protected defaultStartDate!: Date;
   protected defaultEndDate!: Date;
@@ -179,43 +185,65 @@ export class AdminCreateEventComponent implements OnInit{
     }
   }
 
+
   saveBasicEvent() {
     if (this.eventForm.invalid) return;
 
-    const formValue = this.eventForm.value;
+    this.loading = true;
+    const eventDto = this.prepareDto(false);
 
-    const eventDto = {
+    const request = this.eventId
+      ? this.eventService.updateEvent(this.eventId, eventDto)
+      : this.eventService.saveEvent(eventDto);
+
+    request.subscribe({
+      next: (res: any) => {
+        this.eventId = res.id;
+        this.messageService.add({ severity: 'success', summary: 'Evento Guardado', detail: 'El evento se ha creado correctamente sin cronograma.' });
+        this.loading = false;
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+        this.loading = false;
+      }
+    });
+  }
+
+  onFinishScheduler(timelineEvents: TimelineItem[]) {
+    this.loading = true;
+    this.savedTimeline = timelineEvents;
+
+    const eventDto = this.prepareDto(true);
+
+    const request = this.eventId
+      ? this.eventService.updateEvent(this.eventId, eventDto)
+      : this.eventService.saveEvent(eventDto);
+
+    request.subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Evento y cronograma guardados' });
+        this.router.navigate(['/app/admin/eventos']);
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al finalizar' });
+      }
+    });
+  }
+
+  private prepareDto(includeTimeline: boolean = false): any {
+    const formValue = this.eventForm.value;
+    return {
       title: formValue.title,
       description: formValue.description,
-      startDate: formValue.startDate,
-      endDate: formValue.endDate,
+      startDate: this.eventCreatorService.toLocalISO(formValue.startDate),
+      endDate: this.eventCreatorService.toLocalISO(formValue.endDate),
       location: formValue.location,
       organizer: formValue.organizer,
       directorId: formValue.selectedDirector?.id,
       lessonBlockIds: formValue.selectedBlocks.map((b: any) => b.id),
-      timelineItems: []
+      timelineItems: includeTimeline ? this.savedTimeline : []
     };
-
-    this.loading = true;
-
-    this.eventService.saveEvent(eventDto).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Evento Guardado',
-          detail: 'El evento se ha creado correctamente sin cronograma.'
-        });
-        this.loading = false;
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo guardar el evento.'
-        });
-        this.loading = false;
-      }
-    });
   }
 
   handleBack(events: any[]) {

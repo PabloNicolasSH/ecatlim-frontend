@@ -38,7 +38,7 @@
           <p class="text-cyan-900 font-bold border-b border-gray-200">Datos de Contacto</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             <p-floatlabel variant="on">
-              <input id="email" pInputText formControlName="email" class="w-full" />
+              <input id="email" pInputText formControlName="email" class="w-full" required/>
               <label for="email">Correo</label>
             </p-floatlabel>
             <p-floatlabel variant="on">
@@ -64,7 +64,7 @@
 
           <p-floatlabel variant="on">
             <p-select id="scoutGroup" [options]="scoutGroups" optionLabel="name" formControlName="selectedScoutGroup" appendTo="body" class="w-full" />
-            <label for="scoutGroup">Grupo Scout</label>
+            <label for="scoutGroup">Entidad</label>
           </p-floatlabel>
 
           <p-floatlabel variant="on">

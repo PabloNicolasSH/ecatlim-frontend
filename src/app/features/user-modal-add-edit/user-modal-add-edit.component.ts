@@ -45,7 +45,7 @@ export class UserModalAddEditComponent implements OnInit{
   protected loading: boolean = false;
 
   scoutGroups: ScoutGroup[] = [];
-  roles: Role[] = [];
+  roles: { label: string; value: Role }[] = [];
 
   constructor() {
     effect(() => {
@@ -62,7 +62,22 @@ export class UserModalAddEditComponent implements OnInit{
   ngOnInit(): void {
     this.initializeForm();
     this.getScoutGroups();
-    this.roles = [Role.ADMIN, Role.EVENT_DIRECTOR, Role.MANAGEMENT, Role.STUDENT, Role.TRAINER]
+
+    const RoleLabels: Record<string, string> = {
+      [Role.STUDENT]: "Persona en Formación",
+      [Role.TRAINER]: "Formador",
+      [Role.MANAGEMENT]: "Gestión",
+      [Role.EVENT_DIRECTOR]: "Director de Eventos",
+      [Role.ADMIN]: "Administrador",
+    };
+
+    this.roles = [Role.STUDENT, Role.TRAINER, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.ADMIN]
+      .map(role => {
+        return {
+          label: RoleLabels[role] || role,
+          value: role
+        }
+      });
   }
 
   private initializeForm() {

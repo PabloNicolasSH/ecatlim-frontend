@@ -40,6 +40,7 @@
                     formControlName="endDate"
                     appendTo="body"
                     styleClass="w-full"
+                    [minDate]="eventForm.value.startDate"
                     required
                     [showIcon]="true"
                     [showTime]="true"
@@ -162,5 +163,6 @@
     [pendingBlocks]="pendingBlocks"
     [initialTimeline]="savedTimeline"
     (onBack)="handleBack($event)"
+    (onSave)="onFinishScheduler($event)"
   ></app-event-scheduler>
 }

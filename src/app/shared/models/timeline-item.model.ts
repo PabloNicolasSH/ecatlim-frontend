@@ -1,4 +1,4 @@
-import {EducationSession} from './education-session.model';
+import {EducationSessionForm} from './education-session.model';
 
 export interface TimelineItem {
   id?: number;
@@ -7,5 +7,5 @@ export interface TimelineItem {
   startTime: Date;
   endTime: Date;
   itemType: 'FORMATIVE' | 'LOGISTIC';
-  educationSession?: EducationSession;
+  educationSession?: EducationSessionForm;
 }

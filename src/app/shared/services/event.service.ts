@@ -30,4 +30,8 @@ export class EventService {
   saveEvent(event: EventForm): Observable<Event> {
     return this.http.post<Event>(`${environment.apiUrl}/events/admin/add`, event);
   }
+
+  updateEvent(eventId: number, eventDto: EventForm) {
+    return this.http.put<Event>(`${environment.apiUrl}/events/admin/${eventId}`, eventDto);
+  }
 }

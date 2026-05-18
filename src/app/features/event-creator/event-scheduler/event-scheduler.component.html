@@ -1,14 +1,20 @@
 <div class="flex flex-col md:flex-row scheduler-container">
-  <div class="w-full md:w-80 bg-white border-r rounded-3xl border-gray-200 z-10 flex flex-col">
+  <div
+    class="w-full md:w-80 bg-white border-r rounded-3xl border-gray-200 z-10 flex flex-col transition-colors duration-200"
+    [class.bg-red-50]="isDraggingOverInventory"
+  >
     <div class="p-6 border-b border-gray-100">
       <div class="flex items-center justify-between mb-2">
         <h3 class="font-semibold text-ecatlim text-xl">Inventario de Bloques</h3>
         <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="goBack()" pTooltip="Volver al formulario"></p-button>
       </div>
-      <p class="text-xs text-gray-500">Arrastra bloques al calendario para repartir las horas lectivas.</p>
+      <p class="text-xs text-gray-500">Arrastra bloques al calendario o de vuelta aquí para eliminarlos.</p>
     </div>
 
-    <div id="external-events" class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div
+      id="external-events"
+      class="flex-1 overflow-y-auto p-4 space-y-4"
+    >
       @for (block of pendingBlocks; track block.id) {
         <div
           [attr.data-event]="block | json"
@@ -25,7 +31,6 @@
                 {{ block.title }}
               </span>
             }
-
           </div>
 
           <div class="flex justify-between items-center text-[10px] mb-1">
@@ -66,17 +71,33 @@
       }
     </div>
 
-    <div class="p-4 rounded-b-3xl border border-gray-200">
-      <div class="mt-4">
-        <p-button
-          label="Finalizar y Guardar"
-          severity="primary"
-          icon="pi pi-check"
-          class="w-full"
-          styleClass="w-full"
-          (onClick)="saveEventWithTimeline()"
-        />
-      </div>
+    <div
+      id="inventory-footer"
+      class="p-4 rounded-b-3xl border-t border-gray-200 transition-all duration-300"
+      [class.bg-red-500]="isDraggingOverInventory"
+      [class.shadow-inner]="isDraggingOverInventory"
+    >
+      @if (!isDraggingOverInventory) {
+        <div class="mt-4 flex flex-row gap-2 justify-center items-center">
+          <div>
+            <p-button
+              label="Guardar"
+              severity="primary"
+              class="w-full"
+              styleClass="w-full"
+              (onClick)="saveEventWithTimeline()"
+            />
+          </div>
+          <div>
+            <p>Papelera de Cronograma</p>
+          </div>
+        </div>
+      } @else {
+        <div class="h-17 flex flex-col items-center justify-center text-white animate-fadein scalein">
+          <i class="pi pi-trash text-2xl mb-1"></i>
+          <span class="text-[10px] font-black uppercase tracking-tighter">Soltar para descartar</span>
+        </div>
+      }
     </div>
   </div>
 
@@ -173,7 +194,6 @@
           >
             <ng-template let-trainer pTemplate="item">
               <div class="flex items-center gap-2">
-                <i class="pi pi-user text-blue-400"></i>
                 <span>{{ trainer.name }}</span>
               </div>
             </ng-template>
