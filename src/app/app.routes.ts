@@ -11,7 +11,7 @@ import {ResetPasswordComponent} from './features/reset-password/reset-password.c
 import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';
 import {InformationFormPagesComponent} from './core/information-form-pages/information-form-pages.component';
 import {GeneralInfoComponent} from './info-pages/general-info/general-info.component';
-import {AdminEducationalHomeComponent} from './features/admin-educational-home/admin-educational-home.component';
+import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 import {EntityListComponent} from './features/entity-list/entity-list.component';
 import {AdminEducationOfferComponent} from './features/admin-education-offer/admin-education-offer.component';
 import {
@@ -99,7 +99,7 @@ export const routes: Routes = [
       },
       {
         path: "admin/formacion",
-        component: AdminEducationalHomeComponent
+        component: DashboardComponent
       },
       {
         path: "admin/eventos-formativos",

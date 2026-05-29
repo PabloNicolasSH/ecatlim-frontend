@@ -1,0 +1,210 @@
+@if (dashboardData$ | async; as data) {
+  <div class="w-full max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-12 gap-6">
+
+      <section class="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="bg-white rounded-xl border border-[#d5c3b5]/30 flex flex-col justify-between hover:-translate-y-0.5 transition-transform p-4 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div class="p-2 bg-[#f9dec3] rounded-lg text-[#554430]">
+              <i class="pi pi-users text-lg"></i>
+            </div>
+            <div class="flex items-end gap-0.5 h-8 text-[#7f521d]">
+              <div class="w-1 bg-current rounded-t h-[40%]"></div>
+              <div class="w-1 bg-current rounded-t h-[60%]"></div>
+              <div class="w-1 bg-current rounded-t h-[50%]"></div>
+              <div class="w-1 bg-current rounded-t h-[80%]"></div>
+              <div class="w-1 bg-current rounded-t h-full"></div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm font-semibold text-[#51453a]">Alumnos Activos</p>
+            <h2 class="text-3xl font-bold text-[#7f521d]">{{ data.activeStudents | number }}</h2>
+            <p class="text-xs text-[#7f521d] mt-1 flex items-center gap-1">
+              <i class="pi pi-arrow-up-right text-[12px]"></i>
+              +{{ data.studentGrowthPercentage }}% <span class="text-[#51453a]/60 font-normal">vs. mes pasado</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#d5c3b5]/30 flex flex-col justify-between hover:-translate-y-0.5 transition-transform p-4 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div class="p-2 bg-[#eee1cb] rounded-lg text-[#4e4636]">
+              <i class="pi pi-calendar text-lg"></i>
+            </div>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm font-semibold text-[#51453a]">Próximo Evento</p>
+            <h2 class="text-2xl font-semibold text-[#7f521d] leading-tight mt-1 truncate">{{ data.nextEventName }}</h2>
+            <p class="text-xs text-[#51453a] mt-1 flex items-center gap-1">
+              <i class="pi pi-clock text-[12px]"></i>
+              {{ data.nextEventDate | date:"EEEE, d 'de' MMM.":"":"es-ES" | titlecase }}
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-[#d5c3b5]/30 flex flex-col justify-between hover:-translate-y-0.5 transition-transform p-4 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div class="p-2 bg-[#f9dec3] rounded-lg text-[#75614c]">
+              <i class="pi pi-graduation-cap text-lg"></i>
+            </div>
+            <div class="relative w-10 h-10">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle class="text-[#d5c3b5]/20" cx="18" cy="18" fill="none" r="16" stroke="currentColor" stroke-width="3"></circle>
+                <circle class="text-[#7f521d]" cx="18" cy="18" fill="none" r="16" stroke="currentColor"
+                        [attr.stroke-dasharray]="(data.averageGrade * 10) + ', 100'" stroke-linecap="round" stroke-width="3"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center text-xs text-[#7f521d] font-bold">{{ data.averageGrade }}</div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm font-semibold text-[#51453a]">Calificación Media</p>
+            <h2 class="text-3xl font-bold text-[#7f521d]">{{ data.averageGrade }}</h2>
+          </div>
+        </div>
+
+        <div class="col-span-1 md:col-span-3 bg-[#9c6a33] text-white p-6 rounded-xl shadow-sm relative overflow-hidden group">
+          <div class="relative z-10">
+            <h3 class="text-2xl font-semibold mb-2">Acciones Rápidas</h3>
+            <p class="text-sm opacity-90 mb-4 max-w-lg">Gestiona tu escuela de forma eficiente. Accede a las herramientas más utilizadas por los formadores.</p>
+            <div class="flex flex-wrap gap-2">
+              <p-button
+                (onClick)="addStudent()"
+                label="Nuevo Alumno"
+                icon="pi pi-plus-circle"
+                severity="secondary"
+                styleClass="!bg-white !text-[#7f521d] !font-semibold !text-sm !px-4 !py-2 !rounded-lg hover:!bg-[#ffdcbd] !transition-colors !border-none !shadow-none">
+              </p-button>
+              <p-button
+                (onClick)="createEvent()"
+                label="Crear Evento"
+                icon="pi pi-calendar-plus"
+                severity="secondary"
+                styleClass="!bg-white !text-[#7f521d] !font-semibold !text-sm !px-4 !py-2 !rounded-lg hover:!bg-[#ffdcbd] !transition-colors !border-none !shadow-none">
+              </p-button>
+            </div>
+          </div>
+          <div class="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+            <i class="pi pi-map-marker text-[240px]"></i>
+          </div>
+        </div>
+      </section>
+
+      <aside class="col-span-12 lg:col-span-4 space-y-6">
+        <div class="bg-[#7d7361] text-white p-6 rounded-xl shadow-sm border border-[#d5c3b5]/30">
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-xs uppercase tracking-wider opacity-80 font-bold">Próximos Eventos</span>
+          </div>
+          <div class="space-y-4">
+            @for (event of data.upcomingEvents; track event.title; let last = $last) {
+              <div class="group cursor-pointer">
+                <h4 class="text-sm font-bold">{{ event.title }}</h4>
+                <p class="text-xs opacity-80 mb-2">{{ event.dateRange }}</p>
+
+                @if (event.totalAttendees > 0) {
+                  <div class="flex items-center gap-3">
+                    <div class="flex -space-x-2">
+                      @for (avatar of event.avatarUrls; track avatar) {
+                        <img [src]="avatar" alt="Inscrito" class="w-6 h-6 rounded-full border border-[#7d7361]">
+                      }
+                    </div>
+                    <span class="text-xs">{{ event.totalAttendees }} inscritos</span>
+                  </div>
+                }
+
+                @if (!last) {
+                  <div class="h-px bg-white/10 mt-4"></div>
+                }
+              </div>
+            }
+          </div>
+          <button class="mt-6 w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-semibold text-sm transition-colors">
+            Ver todos los eventos
+          </button>
+        </div>
+      </aside>
+
+      <div class="col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="flex flex-col lg:flex-row gap-6 lg:col-span-12">
+
+          <div class="bg-[#f9dec3] text-[#554430] p-6 rounded-xl shadow-sm flex-1 flex flex-col justify-between lg:w-2/3">
+            <div>
+              <h4 class="text-2xl font-semibold mb-4">Gestión Académica</h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+
+                <a routerLink="/courses" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                  <div class="w-10 h-10 rounded-lg bg-[#9c6a33] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <i class="pi pi-book text-base"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-[#554430]">Oferta Educativa</span>
+                    <span class="text-xs opacity-75">Cursos y etapas formativa</span>
+                  </div>
+                </a>
+
+                <a routerLink="/students" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                  <div class="w-10 h-10 rounded-lg bg-[#7f521d] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <i class="pi pi-users text-base"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-[#554430]">Listado de Alumnos</span>
+                    <span class="text-xs opacity-75">Matrículas y progreso</span>
+                  </div>
+                </a>
+
+                <a routerLink="/events" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                  <div class="w-10 h-10 rounded-lg bg-[#7d7361] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <i class="pi pi-calendar text-base"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-[#554430]">Listado de Eventos</span>
+                    <span class="text-xs opacity-75">Calendario y configuración de actividades</span>
+                  </div>
+                </a>
+
+                <a routerLink="/trainers" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                  <div class="w-10 h-10 rounded-lg bg-[#51453a] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <i class="pi pi-id-card text-base"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-[#554430]">Formadores</span>
+                    <span class="text-xs opacity-75">Equipo de la ECATLIM</span>
+                  </div>
+                </a>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-xl overflow-hidden relative min-h-40 shadow-sm lg:w-1/3">
+            <img alt="Scout Nature" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQTWtq5zgm_cKU5H4HJiG6cfT_YffLFfhCzduJZPuUWcjPo9TajDYiH8uoBtHYhyZ7OYqLKqnkif67iddv7O_gH0VQKcsYw3uNWWrESIgMkVEPaj2sLjbZFt3qp0FXqo2mA42hR8pIDougqbABe8GDL9x0copi_aA_sPIfEyWm39EU0is8IeuVPcZM1NNPDxCzrskGxcb6jYqXw3VU3vTj-04MAbAHQY-CHWrW8oXb5PJzgSbiDt5kRoG583J5n3WBRo12ILDcm1w">
+            <div class="absolute inset-0 bg-linear-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+              <span class="text-white text-xs uppercase tracking-widest font-bold">Inspiration</span>
+              <p class="text-white text-sm italic font-medium">"Dejad el mundo un poco mejor de como lo encontrasteis."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+} @else {
+  <div class="w-full max-w-7xl mx-auto px-6 py-16 flex flex-col items-center justify-center text-center">
+    <div class="bg-white border border-[#d5c3b5]/40 rounded-2xl p-8 shadow-sm max-w-md">
+      <div class="w-16 h-16 bg-[#f9dec3]/50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#7f521d]">
+        <i class="pi pi-exclamation-triangle text-3xl animate-pulse"></i>
+      </div>
+      <h3 class="text-xl font-bold text-[#51453a] mb-2">Error de conexión</h3>
+      <p class="text-sm text-[#51453a]/80 mb-6">
+        No se ha podido sincronizar la información con el servidor de formación. Por favor, comprueba tu conexión a internet o reinténtalo más tarde.
+      </p>
+      <p-button
+        (onClick)="reloadDashboardData()"
+        label="Reintentar conexión"
+        icon="pi pi-refresh"
+        styleClass="p-button-primary rounded-xl text-sm px-4 py-2">
+      </p-button>
+    </div>
+  </div>
+}
