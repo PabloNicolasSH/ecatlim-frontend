@@ -13,4 +13,8 @@ export class LessonBlockService {
   createLessonBlocks(lessonBlocks: LessonBlock[]){
     return this.http.post<LessonBlock[]>(`${environment.apiUrl}/lesson-block/add`, lessonBlocks);
   }
+
+  getAll() {
+    return this.http.get<LessonBlock[]>(`${environment.apiUrl}/lesson-block/admin/all`);
+  }
 }

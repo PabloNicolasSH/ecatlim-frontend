@@ -3,7 +3,7 @@ import {Dialog} from 'primeng/dialog';
 import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Select} from 'primeng/select';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
@@ -31,7 +31,7 @@ import {MessageService, PrimeTemplate} from 'primeng/api';
 export class UserModalAddEditComponent implements OnInit{
 
   protected readonly formBuilder = inject(FormBuilder);
-  protected readonly scoutGroupService = inject(ScoutGroupService);
+  protected readonly scoutGroupService = inject(EntityService);
   protected readonly userService = inject(UserService);
   protected readonly messageService = inject(MessageService);
 
@@ -45,7 +45,7 @@ export class UserModalAddEditComponent implements OnInit{
   protected loading: boolean = false;
 
   scoutGroups: ScoutGroup[] = [];
-  roles: Role[] = [];
+  roles: { label: string; value: Role }[] = [];
 
   constructor() {
     effect(() => {
@@ -62,7 +62,22 @@ export class UserModalAddEditComponent implements OnInit{
   ngOnInit(): void {
     this.initializeForm();
     this.getScoutGroups();
-    this.roles = ["ADMIN", "MANAGEMENT" , "EVENT_DIRECTOR" , "TRAINER" , "STUDENT"]
+
+    const RoleLabels: Record<string, string> = {
+      [Role.STUDENT]: "Persona en Formación",
+      [Role.TRAINER]: "Formador",
+      [Role.MANAGEMENT]: "Gestión",
+      [Role.EVENT_DIRECTOR]: "Director de Eventos",
+      [Role.ADMIN]: "Administrador",
+    };
+
+    this.roles = [Role.STUDENT, Role.TRAINER, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.ADMIN]
+      .map(role => {
+        return {
+          label: RoleLabels[role] || role,
+          value: role
+        }
+      });
   }
 
   private initializeForm() {
@@ -82,7 +97,7 @@ export class UserModalAddEditComponent implements OnInit{
   }
 
   private getScoutGroups() {
-    this.scoutGroupService.getScoutGroups().subscribe({
+    this.scoutGroupService.getEntities().subscribe({
       next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
     })
   }

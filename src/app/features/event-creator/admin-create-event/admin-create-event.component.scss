@@ -1,0 +1,58 @@
+:host ::ng-deep .custom-multiselect-x {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+:host ::ng-deep .custom-multiselect-x .p-multiselect-label-container {
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+:host ::ng-deep .custom-multiselect-x .p-multiselect-label {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  white-space: normal !important;
+  padding-right: 25px !important;
+}
+
+.custom-chip {
+  background-color: var(--p-cyan-500);
+  color: white;
+  padding: 2px 4px 2px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.chip-text {
+  line-height: 1;
+}
+
+.remove-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.2s, transform 0.1s;
+  cursor: pointer;
+}
+
+.remove-icon-container:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.remove-icon-container i {
+  font-size: 0.6rem;
+  font-weight: bold;
+}

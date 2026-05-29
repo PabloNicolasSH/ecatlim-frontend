@@ -1,9 +1,5 @@
 @import "primeicons/primeicons.css";
-@layer tailwind, primeng;
-
-@layer tailwind {
-  @import "tailwindcss";
-}
+@layer primeng;
 
 *{
   font-family: "Droid Sans", sans-serif;
@@ -27,14 +23,16 @@ h2{
   border-style: none;
 }
 
-label, span, th {
-  &.required:after {
-    content: "*";
-    font-weight: bold;
+p-floatlabel:has(input[required]),
+p-floatlabel:has(p-select[required]),
+p-floatlabel:has(p-multi-select[required]) {
+  label::after {
+    content: " *";
     color: red;
-    margin-left: 4px;
+    font-weight: bold;
   }
 }
+
 
 .title-2{
   color: var(--p-amber-600);

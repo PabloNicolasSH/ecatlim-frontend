@@ -5,7 +5,7 @@ import {Button} from 'primeng/button';
 import {FloatLabel} from 'primeng/floatlabel';
 import {InputText} from 'primeng/inputtext';
 import {Select} from 'primeng/select';
-import {ScoutGroupService} from '../../shared/services/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {Checkbox} from 'primeng/checkbox';
 import {PendingUserService} from '../../shared/services/pending-user.service';
@@ -30,7 +30,7 @@ import {MessageService} from 'primeng/api';
 export class RegisterRequestComponent implements OnInit{
 
   private readonly formBuilder = inject(FormBuilder);
-  private readonly scoutGroupService = inject(ScoutGroupService);
+  private readonly scoutGroupService = inject(EntityService);
   private readonly pendingUserService = inject(PendingUserService);
   private readonly messageService = inject(MessageService);
 
@@ -49,7 +49,7 @@ export class RegisterRequestComponent implements OnInit{
       checkbox: [false, [Validators.requiredTrue]]
     })
 
-    this.scoutGroupService.getScoutGroups().subscribe({
+    this.scoutGroupService.getEntities().subscribe({
       next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
     })
   }

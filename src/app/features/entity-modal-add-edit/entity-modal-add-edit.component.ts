@@ -7,6 +7,7 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PrimeTemplate } from 'primeng/api';
+import {EntityService} from '../../shared/services/entity.service';
 
 @Component({
   selector: 'app-entity-modal-add-edit',
@@ -25,6 +26,7 @@ import { PrimeTemplate } from 'primeng/api';
 })
 export class EntityModalAddEditComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
+  private entityService = inject(EntityService);
 
   visible = model<boolean>(false);
   @Input() dialogMode: string | undefined;
@@ -73,7 +75,7 @@ export class EntityModalAddEditComponent implements OnInit, OnChanges {
   }
 
   onSubmit() {
-    if (this.form.valid) {
+    if (this.form.valid && this.dialogMode === 'Add' && !this.loading) {
       this.loading = true;
 
       const payload: ScoutGroup = {
@@ -82,11 +84,32 @@ export class EntityModalAddEditComponent implements OnInit, OnChanges {
         provinceId: Number(this.form.value.provinceId)
       };
 
-      setTimeout(() => {
-        this.entityUpdated.emit(payload);
-        this.loading = false;
-        this.visible.set(false);
-      }, 600);
+      this.entityService.addEntity(payload)
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.visible.set(false);
+            this.entityUpdated.emit(payload);
+          }
+        });
+
+    } else if (this.form.valid && this.dialogMode === 'Edit' && !this.loading) {
+      this.loading = true;
+
+      const payload: ScoutGroup = {
+        ...this.form.value,
+        groupNumber: Number(this.form.value.groupNumber),
+        provinceId: Number(this.form.value.provinceId)
+      }
+
+      this.entityService.updateEntity(this.entityToEdit.id!, payload)
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.visible.set(false);
+            this.entityUpdated.emit(payload);
+          }
+        });
     } else {
       this.form.markAllAsTouched();
     }

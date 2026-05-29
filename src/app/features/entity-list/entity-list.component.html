@@ -51,6 +51,7 @@
           label="Eliminar"
           [rounded]="true"
           severity="danger"
+          (onClick)="confirmDialog($event, entity)"
           outlined
         ></p-button>
       </td>
@@ -63,3 +64,6 @@
   [entityToEdit]="entityToEdit()"
   [dialogMode]="dialogMode()"
 ></app-entity-modal-add-edit>
+<p-confirm-dialog
+  [draggable]="false"
+  styleClass="max-w-[40rem]"/>
