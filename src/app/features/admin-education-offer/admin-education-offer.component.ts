@@ -45,4 +45,6 @@ export class AdminEducationOfferComponent implements OnInit{
     const educationStage = event.data;
     this.router.navigateByUrl("app/admin/oferta-educativa/detalle-etapa/" + educationStage.id);
   }
+
+  protected readonly history = history;
 }

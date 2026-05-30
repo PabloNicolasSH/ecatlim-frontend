@@ -5,6 +5,7 @@ import {DashboardService} from '../../dashboard.service';
 import {Observable} from 'rxjs';
 import {DashboardData} from '../../dashboard-data.model';
 import {Button} from 'primeng/button';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,7 +15,8 @@ import {Button} from 'primeng/button';
     AsyncPipe,
     Button,
     DatePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    RouterLink
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
