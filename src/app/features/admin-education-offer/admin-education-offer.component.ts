@@ -9,11 +9,6 @@ import {EducationStage} from '../../shared/models/education-stage.model';
 @Component({
   selector: 'app-admin-education-offer',
   imports: [
-    Tabs,
-    TabList,
-    Tab,
-    TabPanels,
-    TabPanel,
     TableModule,
     Button,
     RouterLink
