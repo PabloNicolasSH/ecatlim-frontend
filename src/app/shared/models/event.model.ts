@@ -4,6 +4,7 @@ export interface Event {
   id?: number;
   title: string;
   description?: string;
+  contents?: string;
   startDate: Date;
   endDate: Date;
   location: string;
@@ -30,6 +31,7 @@ export interface EventCalendar {
   educationStageCode?: string;
   isCurrentUserAttending?: boolean;
   canParticipate?: boolean;
+  status?: string;
 }
 
 export interface EventDashboard {

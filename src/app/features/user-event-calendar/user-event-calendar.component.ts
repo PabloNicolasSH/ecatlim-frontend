@@ -14,7 +14,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {map, switchMap, tap} from 'rxjs';
 
 @Component({
-  selector: 'app-event-calendar',
+  selector: 'app-user-event-calendar',
   imports: [
     FullCalendarModule,
     DatePipe,
@@ -24,10 +24,10 @@ import {map, switchMap, tap} from 'rxjs';
     PrimeTemplate,
     Chip
   ],
-  templateUrl: './event-calendar.component.html',
-  styleUrl: './event-calendar.component.scss'
+  templateUrl: './user-event-calendar.component.html',
+  styleUrl: './user-event-calendar.component.scss'
 })
-export class EventCalendarComponent implements OnInit{
+export class UserEventCalendarComponent implements OnInit{
 
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 

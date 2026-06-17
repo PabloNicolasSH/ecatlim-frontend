@@ -11,10 +11,10 @@ export class LessonBlockService {
   protected readonly http = inject(HttpClient);
 
   createLessonBlocks(lessonBlocks: LessonBlock[]){
-    return this.http.post<LessonBlock[]>(`${environment.apiUrl}/lesson-block/add`, lessonBlocks);
+    return this.http.post<LessonBlock[]>(`${environment.apiUrl}/lesson-block/admin/add`, lessonBlocks);
   }
 
   getAll() {
-    return this.http.get<LessonBlock[]>(`${environment.apiUrl}/lesson-block/admin/all`);
+    return this.http.get<LessonBlock[]>(`${environment.apiUrl}/lesson-block/all`);
   }
 }

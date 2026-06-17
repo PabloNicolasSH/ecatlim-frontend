@@ -8,4 +8,5 @@ export interface LessonBlock {
   recognizable: boolean;
   moduleId: number;
   code?: string;
+  educationStageId?: number;
 }

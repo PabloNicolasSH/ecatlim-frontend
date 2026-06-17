@@ -23,7 +23,8 @@ import {
   UserEducationStagesProgressComponent
 } from './features/user-education-stages-progress/user-education-stages-progress.component';
 import {AdminCreateEventComponent} from './features/event-creator/admin-create-event/admin-create-event.component';
-import {EventCalendarComponent} from './features/event-calendar/event-calendar.component';
+import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
+import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
 
 export const routes: Routes = [
   {
@@ -79,7 +80,7 @@ export const routes: Routes = [
       },
       {
         path: "calendario",
-        component: EventCalendarComponent
+        component: UserEventCalendarComponent
       },
       {
         path: "oferta-educativa",
@@ -103,6 +104,10 @@ export const routes: Routes = [
       },
       {
         path: "admin/eventos-formativos",
+        component: AdminEventCalendarComponent
+      },
+      {
+        path: "admin/eventos-formativos/crear-evento",
         component: AdminCreateEventComponent
       },
       {

@@ -18,6 +18,10 @@ import {LessonBlock} from '../../../shared/models/lesson-block.model';
 import {EventCreatorService} from '../event-creator.service';
 import {Router} from '@angular/router';
 import {TimelineItem} from '../../../shared/models/timeline-item.model';
+import {InputNumber} from 'primeng/inputnumber';
+import {NgClass} from '@angular/common';
+import {EducationStageService} from '../../../shared/services/education-stage.service';
+import {EducationStage} from '../../../shared/models/education-stage.model';
 
 @Component({
   selector: 'app-admin-create-event',
@@ -31,7 +35,9 @@ import {TimelineItem} from '../../../shared/models/timeline-item.model';
     DatePicker,
     MultiSelect,
     Textarea,
-    PrimeTemplate
+    PrimeTemplate,
+    InputNumber,
+    NgClass
   ],
   templateUrl: './admin-create-event.component.html',
   styleUrl: './admin-create-event.component.scss'
@@ -44,6 +50,7 @@ export class AdminCreateEventComponent implements OnInit{
   protected readonly userService = inject(UserService);
   protected readonly lessonBlockService = inject(LessonBlockService);
   protected readonly eventCreatorService = inject(EventCreatorService);
+  protected readonly educationStageService = inject(EducationStageService);
   protected readonly router = inject(Router);
 
   eventForm!: FormGroup;
@@ -51,7 +58,11 @@ export class AdminCreateEventComponent implements OnInit{
   savedTimeline: any[] = [];
 
   directors: User[] = [];
+  facilitators: User[] = [];
+
+  allBlocks: LessonBlock[] = [];
   availableBlocks: SelectItemGroup[] = [];
+  availableEducationStages: EducationStage[] = [];
 
   pendingBlocks: any[] = [];
   loading: boolean = false;
@@ -59,6 +70,12 @@ export class AdminCreateEventComponent implements OnInit{
 
   protected defaultStartDate!: Date;
   protected defaultEndDate!: Date;
+
+  notificationTargets = [
+    { label: 'Usuarios Interesados', value: 'INTERESTED_USERS' },
+    { label: 'Usuarios Disponibles', value: 'AVAILABLE_USERS' },
+    { label: 'Coordinadores de Formación', value: 'HEAD_OF_EDUCATION' }
+  ];
 
   constructor() {
     this.initializeForm();
@@ -74,18 +91,36 @@ export class AdminCreateEventComponent implements OnInit{
     end.setDate(end.getDate() + 2);
     end.setHours(15, 0, 0, 0);
     this.defaultEndDate = end;
+
+    this.eventForm.get('selectedEducationStage')?.valueChanges.subscribe((stage: EducationStage | null) => {
+      this.filterAndGroupBlocks(stage);
+      this.eventForm.get('selectedBlocks')?.setValue([]);
+    });
   }
 
   private initializeForm() {
     this.eventForm = this.formBuilder.group({
       title: ['', Validators.required],
+      shortname: ['', Validators.required],
       description: [''],
+      contents: ['', Validators.required],
       startDate: [null, Validators.required],
       endDate: [null, Validators.required],
       location: ['', Validators.required],
       organizer: ['ECATLIM', Validators.required],
       selectedDirector: [null, Validators.required],
-      selectedBlocks: [[], [Validators.required, Validators.minLength(1)]]
+      selectedFacilitators: [[], [Validators.required, Validators.minLength(1)]],
+      selectedEducationStage: [null, Validators.required],
+      selectedBlocks: [[], [Validators.required, Validators.minLength(1)]],
+      status: ['PENDING', Validators.required],
+
+      minParticipants: [1, [Validators.required, Validators.min(1)]],
+      dateOpenInscription: [null, Validators.required],
+      dateCloseInscription: [null, Validators.required],
+      cost: [0, [Validators.required, Validators.min(0)]],
+      transferBankNumber: ['', Validators.required],
+      transferCode: ['', Validators.required],
+      notificationTarget: [[], Validators.required]
     });
   }
 
@@ -96,12 +131,37 @@ export class AdminCreateEventComponent implements OnInit{
           this.directors = users;
         }
       });
+
+    this.userService.getUsersByRole(Role.TRAINER)
+      .subscribe({
+        next: (users) => {
+          this.facilitators = users;
+        }
+      });
+
+    this.educationStageService.getEducationStages()
+      .subscribe({
+        next: (stages) => {
+          this.availableEducationStages = stages;
+        }
+      })
+
     this.lessonBlockService.getAll()
       .subscribe({
         next: (blocks) => {
-          this.availableBlocks = this.groupedBlocksByCode(blocks);
+          this.allBlocks = blocks;
         }
       });
+  }
+
+  private filterAndGroupBlocks(stage: EducationStage | null) {
+    if (!stage) {
+      this.availableBlocks = [];
+      return;
+    }
+
+    const filtered = this.allBlocks.filter(block => block.educationStageId === stage.id);
+    this.availableBlocks = this.groupedBlocksByCode(filtered);
   }
 
   private groupedBlocksByCode(blocks: LessonBlock[]) {
@@ -158,35 +218,33 @@ export class AdminCreateEventComponent implements OnInit{
     }
   }
 
-  goToScheduling() {
-    if (this.eventForm.valid) {
-      const selectedBlocks = this.eventForm.value.selectedBlocks.map((block: any) => ({
-        id: block.id,
-        title: block.name,
-        code: block.code,
-        totalHours: block.contactHours,
-        remainingHours: block.contactHours,
-        assignedHours: 0,
-        color: this.getRandomColor(),
-        itemType: 'FORMATIVE'
-      }));
 
-      const logisticBlock = {
-        id: 9999,
-        title: 'Gestión y Logística',
-        code: 'LOG',
-        assignedHours: 0,
-        color: '#64748b',
-        itemType: 'LOGISTIC'
-      };
+  saveDraftEvent() {
+    if (this.eventForm.invalid) return;
 
-      this.pendingBlocks = [logisticBlock, ...selectedBlocks];
-      this.step = 2;
-    }
+    this.loading = true;
+    this.eventForm.patchValue({status: 'DRAFT'});
+    const eventDto = this.prepareDto(false);
+
+    const request = this.eventId
+      ? this.eventService.updateEvent(this.eventId, eventDto)
+      : this.eventService.saveEvent(eventDto);
+
+    request.subscribe({
+      next: (res: any) => {
+        this.eventId = res.id;
+        this.messageService.add({ severity: 'success', summary: 'Borrador Guardado', detail: 'El evento se ha guardado correctamente como Borrador.' });
+        this.loading = false;
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+        this.loading = false;
+        this.eventForm.patchValue({ status: 'PENDING' });
+      }
+    });
   }
 
-
-  saveBasicEvent() {
+  saveEvent() {
     if (this.eventForm.invalid) return;
 
     this.loading = true;
@@ -199,12 +257,13 @@ export class AdminCreateEventComponent implements OnInit{
     request.subscribe({
       next: (res: any) => {
         this.eventId = res.id;
-        this.messageService.add({ severity: 'success', summary: 'Evento Guardado', detail: 'El evento se ha creado correctamente sin cronograma.' });
+        this.messageService.add({ severity: 'success', summary: 'Evento Guardado', detail: 'El evento se ha guardado, para que sea visible, el director debe darle a publicar.' });
         this.loading = false;
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
         this.loading = false;
+        this.eventForm.patchValue({ status: 'PENDING' });
       }
     });
   }
@@ -235,20 +294,86 @@ export class AdminCreateEventComponent implements OnInit{
     const formValue = this.eventForm.value;
     return {
       title: formValue.title,
+      shortname: formValue.shortname,
       description: formValue.description,
+      contents: formValue.contents,
       startDate: this.eventCreatorService.toLocalISO(formValue.startDate),
       endDate: this.eventCreatorService.toLocalISO(formValue.endDate),
       location: formValue.location,
       organizer: formValue.organizer,
+      status: formValue.status,
       directorId: formValue.selectedDirector?.id,
+      facilitatorIds: formValue.selectedFacilitators.map((f:any) => f.id),
+      educationStageId: formValue.selectedEducationStage?.id,
       lessonBlockIds: formValue.selectedBlocks.map((b: any) => b.id),
-      timelineItems: includeTimeline ? this.savedTimeline : []
+      timelineItems: includeTimeline ? this.savedTimeline : [],
+
+      eventConfiguration: {
+        minParticipants: formValue.minParticipants,
+        dateOpenInscription: this.eventCreatorService.toLocalISO(formValue.dateOpenInscription),
+        dateCloseInscription: this.eventCreatorService.toLocalISO(formValue.dateCloseInscription),
+        cost: formValue.cost,
+        transferBankNumber: formValue.transferBankNumber,
+        transferCode: formValue.transferCode,
+        notificationTarget: formValue.notificationTarget
+      }
     };
   }
 
-  handleBack(events: any[]) {
+  isStepValid(currentStep: number): boolean {
+    const fieldsByStep: { [key: number]: string[] } = {
+      1: ['title', 'shortname', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector', 'selectedBlocks', 'status'],
+      2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
+    };
+
+    const fields = fieldsByStep[currentStep];
+    if (!fields) return true;
+
+    return fields.every(field => this.eventForm.get(field)?.valid);
+  }
+
+  nextStep() {
+    if (this.isStepValid(this.step)) {
+      if (this.step === 2) {
+        this.prepareBlocksForScheduler();
+      }
+      this.step++;
+    }
+  }
+
+  prevStep() {
+    if (this.step > 1) {
+      this.step--;
+    }
+  }
+
+  private prepareBlocksForScheduler() {
+    const selectedBlocks = this.eventForm.value.selectedBlocks.map((block: any) => ({
+      id: block.id,
+      title: block.name,
+      code: block.code,
+      totalHours: block.contactHours,
+      remainingHours: block.contactHours,
+      assignedHours: 0,
+      color: this.getRandomColor(),
+      itemType: 'FORMATIVE'
+    }));
+
+    const logisticBlock = {
+      id: 9999,
+      title: 'Gestión y Logística',
+      code: 'LOG',
+      assignedHours: 0,
+      color: '#64748b',
+      itemType: 'LOGISTIC'
+    };
+
+    this.pendingBlocks = [logisticBlock, ...selectedBlocks];
+  }
+
+  handleBackFromScheduler(events: any[]) {
     this.savedTimeline = events;
-    this.step = 1;
+    this.step = 2;
   }
 
   private getRandomColor(): string {
