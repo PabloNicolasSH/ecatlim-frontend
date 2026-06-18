@@ -10,3 +10,9 @@ export interface LessonBlock {
   code?: string;
   educationStageId?: number;
 }
+
+export interface LessonBlockCalendarSummary {
+  name: string;
+  code: string;
+  hours: number;
+}
