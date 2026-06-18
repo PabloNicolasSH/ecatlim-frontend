@@ -1,27 +1,29 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {EventSchedulerComponent} from '../event-scheduler/event-scheduler.component';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {FloatLabel} from 'primeng/floatlabel';
-import {Select} from 'primeng/select';
-import {InputText} from 'primeng/inputtext';
-import {MessageService, PrimeTemplate, SelectItemGroup} from 'primeng/api';
-import {Button} from 'primeng/button';
-import {DatePicker} from 'primeng/datepicker';
-import {MultiSelect} from 'primeng/multiselect';
-import {EventService} from '../../../shared/services/event.service';
-import {Textarea} from 'primeng/textarea';
-import {UserService} from '../../../shared/services/user.service';
-import {LessonBlockService} from '../../../shared/services/lesson-block.service';
-import {Role} from '../../../shared/models/role.model';
-import {User} from '../../../shared/models/user.model';
-import {LessonBlock} from '../../../shared/models/lesson-block.model';
-import {EventCreatorService} from '../event-creator.service';
-import {Router} from '@angular/router';
-import {TimelineItem} from '../../../shared/models/timeline-item.model';
-import {InputNumber} from 'primeng/inputnumber';
-import {NgClass} from '@angular/common';
-import {EducationStageService} from '../../../shared/services/education-stage.service';
-import {EducationStage} from '../../../shared/models/education-stage.model';
+import { Component, inject, OnInit } from '@angular/core';
+import { EventSchedulerComponent } from '../event-scheduler/event-scheduler.component';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FloatLabel } from 'primeng/floatlabel';
+import { Select } from 'primeng/select';
+import { InputText } from 'primeng/inputtext';
+import { MessageService, PrimeTemplate, SelectItemGroup } from 'primeng/api';
+import { Button } from 'primeng/button';
+import { DatePicker } from 'primeng/datepicker';
+import { MultiSelect } from 'primeng/multiselect';
+import { EventService } from '../../../shared/services/event.service';
+import { Textarea } from 'primeng/textarea';
+import { UserService } from '../../../shared/services/user.service';
+import { LessonBlockService } from '../../../shared/services/lesson-block.service';
+import { Role } from '../../../shared/models/role.model';
+import { User } from '../../../shared/models/user.model';
+import { LessonBlock } from '../../../shared/models/lesson-block.model';
+import { EventCreatorService } from '../event-creator.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TimelineItem } from '../../../shared/models/timeline-item.model';
+import { InputNumber } from 'primeng/inputnumber';
+import { NgClass } from '@angular/common';
+import { EducationStageService } from '../../../shared/services/education-stage.service';
+import { EducationStage } from '../../../shared/models/education-stage.model';
+import { forkJoin } from 'rxjs';
+import {EventForm} from '../../../shared/models/event.model';
 
 @Component({
   selector: 'app-admin-create-event',
@@ -39,10 +41,10 @@ import {EducationStage} from '../../../shared/models/education-stage.model';
     InputNumber,
     NgClass
   ],
-  templateUrl: './admin-create-event.component.html',
-  styleUrl: './admin-create-event.component.scss'
+  templateUrl: './admin-edit-create-event.component.html',
+  styleUrl: './admin-edit-create-event.component.scss'
 })
-export class AdminCreateEventComponent implements OnInit{
+export class AdminEditCreateEventComponent implements OnInit {
 
   protected readonly formBuilder = inject(FormBuilder);
   protected readonly messageService = inject(MessageService);
@@ -52,6 +54,7 @@ export class AdminCreateEventComponent implements OnInit{
   protected readonly eventCreatorService = inject(EventCreatorService);
   protected readonly educationStageService = inject(EducationStageService);
   protected readonly router = inject(Router);
+  protected readonly route = inject(ActivatedRoute);
 
   eventForm!: FormGroup;
   step: number = 1;
@@ -68,6 +71,8 @@ export class AdminCreateEventComponent implements OnInit{
   loading: boolean = false;
   eventId: number | undefined;
 
+  isEdit: boolean = false;
+
   protected defaultStartDate!: Date;
   protected defaultEndDate!: Date;
 
@@ -79,7 +84,11 @@ export class AdminCreateEventComponent implements OnInit{
 
   constructor() {
     this.initializeForm();
-    this.loadData();
+    const idParam = this.route.snapshot.params['id'];
+    if (idParam) {
+      this.isEdit = true;
+      this.eventId = Number(idParam);
+    }
   }
 
   ngOnInit(): void {
@@ -94,8 +103,12 @@ export class AdminCreateEventComponent implements OnInit{
 
     this.eventForm.get('selectedEducationStage')?.valueChanges.subscribe((stage: EducationStage | null) => {
       this.filterAndGroupBlocks(stage);
-      this.eventForm.get('selectedBlocks')?.setValue([]);
+      if (this.eventForm.get('selectedEducationStage')?.dirty) {
+        this.eventForm.get('selectedBlocks')?.setValue([]);
+      }
     });
+
+    this.loadDataAndEvent();
   }
 
   private initializeForm() {
@@ -113,7 +126,6 @@ export class AdminCreateEventComponent implements OnInit{
       selectedEducationStage: [null, Validators.required],
       selectedBlocks: [[], [Validators.required, Validators.minLength(1)]],
       status: ['PENDING', Validators.required],
-
       minParticipants: [1, [Validators.required, Validators.min(1)]],
       dateOpenInscription: [null, Validators.required],
       dateCloseInscription: [null, Validators.required],
@@ -124,34 +136,86 @@ export class AdminCreateEventComponent implements OnInit{
     });
   }
 
-  private loadData() {
-    this.userService.getUsersByRole(Role.EVENT_DIRECTOR)
-      .subscribe({
-        next: (users) => {
-          this.directors = users;
-        }
-      });
+  private loadDataAndEvent() {
+    this.loading = true;
+    forkJoin({
+      directors: this.userService.getUsersByRole(Role.EVENT_DIRECTOR),
+      facilitators: this.userService.getUsersByRole(Role.TRAINER),
+      stages: this.educationStageService.getEducationStages(),
+      blocks: this.lessonBlockService.getAll()
+    }).subscribe({
+      next: (res) => {
+        this.directors = res.directors;
+        this.facilitators = res.facilitators;
+        this.availableEducationStages = res.stages;
+        this.allBlocks = res.blocks;
 
-    this.userService.getUsersByRole(Role.TRAINER)
-      .subscribe({
-        next: (users) => {
-          this.facilitators = users;
+        if (this.isEdit && this.eventId) {
+          this.loadEventForEditing(this.eventId);
+        } else {
+          this.loading = false;
         }
-      });
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos maestros.' });
+      }
+    });
+  }
 
-    this.educationStageService.getEducationStages()
-      .subscribe({
-        next: (stages) => {
-          this.availableEducationStages = stages;
-        }
-      })
+  private loadEventForEditing(id: number) {
+    this.eventService.getEventFormById(id).subscribe({
+      next: (event: EventForm) => {
+        const director = this.directors.find(d => d.id === event.directorId) || null;
+        const stage = this.availableEducationStages.find(s => s.id === event.educationStageId) || null;
+        const selectedFacilitators = this.facilitators.filter(f =>
+          f.id && event.facilitatorIds?.includes(f.id)
+        );
 
-    this.lessonBlockService.getAll()
-      .subscribe({
-        next: (blocks) => {
-          this.allBlocks = blocks;
+        if (stage) {
+          this.filterAndGroupBlocks(stage);
         }
-      });
+        const selectedBlocks = this.allBlocks.filter(b =>
+           b.id && event.lessonBlockIds?.includes(b.id)
+        );
+
+        const rawTargets = event.eventConfiguration?.notificationTarget || [];
+
+        const cleanTargets = rawTargets.map(target =>
+          target.replace('[', '').replace(']', '')
+        );
+
+        this.eventForm.patchValue({
+          title: event.title,
+          shortname: event.shortname,
+          description: event.description,
+          contents: event.contents,
+          startDate: event.startDate ? new Date(event.startDate) : null,
+          endDate: event.endDate ? new Date(event.endDate) : null,
+          location: event.location,
+          organizer: event.organizer || 'ECATLIM',
+          selectedDirector: director,
+          selectedFacilitators: selectedFacilitators,
+          selectedEducationStage: stage,
+          selectedBlocks: selectedBlocks,
+          status: event.status || 'PENDING',
+          minParticipants: event.eventConfiguration?.minParticipants || 1,
+          dateOpenInscription: event.eventConfiguration?.dateOpenInscription ? new Date(event.eventConfiguration.dateOpenInscription) : null,
+          dateCloseInscription: event.eventConfiguration?.dateCloseInscription ? new Date(event.eventConfiguration.dateCloseInscription) : null,
+          cost: event.eventConfiguration?.cost || 0,
+          transferBankNumber: event.eventConfiguration?.transferBankNumber || '',
+          transferCode: event.eventConfiguration?.transferCode || '',
+          notificationTarget: cleanTargets
+        });
+
+        this.savedTimeline = event.timelineItems || [];
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el evento.' });
+      }
+    });
   }
 
   private filterAndGroupBlocks(stage: EducationStage | null) {
@@ -159,7 +223,6 @@ export class AdminCreateEventComponent implements OnInit{
       this.availableBlocks = [];
       return;
     }
-
     const filtered = this.allBlocks.filter(block => block.educationStageId === stage.id);
     this.availableBlocks = this.groupedBlocksByCode(filtered);
   }
@@ -218,12 +281,11 @@ export class AdminCreateEventComponent implements OnInit{
     }
   }
 
-
   saveDraftEvent() {
     if (this.eventForm.invalid) return;
 
     this.loading = true;
-    this.eventForm.patchValue({status: 'DRAFT'});
+    this.eventForm.patchValue({ status: 'DRAFT' });
     const eventDto = this.prepareDto(false);
 
     const request = this.eventId
@@ -235,6 +297,7 @@ export class AdminCreateEventComponent implements OnInit{
         this.eventId = res.id;
         this.messageService.add({ severity: 'success', summary: 'Borrador Guardado', detail: 'El evento se ha guardado correctamente como Borrador.' });
         this.loading = false;
+        this.router.navigate(['/app/admin/eventos-formativos'], { queryParams: { openEventId: this.eventId } });
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
@@ -259,6 +322,7 @@ export class AdminCreateEventComponent implements OnInit{
         this.eventId = res.id;
         this.messageService.add({ severity: 'success', summary: 'Evento Guardado', detail: 'El evento se ha guardado, para que sea visible, el director debe darle a publicar.' });
         this.loading = false;
+        this.router.navigate(['/app/admin/eventos-formativos'], { queryParams: { openEventId: this.eventId } });
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
@@ -279,9 +343,10 @@ export class AdminCreateEventComponent implements OnInit{
       : this.eventService.saveEvent(eventDto);
 
     request.subscribe({
-      next: () => {
+      next: (res: any) => {
+        const finalId = this.eventId || res?.id;
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Evento y cronograma guardados' });
-        this.router.navigate(['/app/admin/eventos']);
+        this.router.navigate(['/app/admin/eventos-formativos'], { queryParams: { openEventId: finalId } });
       },
       error: () => {
         this.loading = false;
@@ -303,11 +368,10 @@ export class AdminCreateEventComponent implements OnInit{
       organizer: formValue.organizer,
       status: formValue.status,
       directorId: formValue.selectedDirector?.id,
-      facilitatorIds: formValue.selectedFacilitators.map((f:any) => f.id),
+      facilitatorIds: formValue.selectedFacilitators.map((f: any) => f.id),
       educationStageId: formValue.selectedEducationStage?.id,
       lessonBlockIds: formValue.selectedBlocks.map((b: any) => b.id),
       timelineItems: includeTimeline ? this.savedTimeline : [],
-
       eventConfiguration: {
         minParticipants: formValue.minParticipants,
         dateOpenInscription: this.eventCreatorService.toLocalISO(formValue.dateOpenInscription),
@@ -389,4 +453,6 @@ export class AdminCreateEventComponent implements OnInit{
     ];
     return presetColors[Math.floor(Math.random() * presetColors.length)];
   }
+
+  protected readonly history = history;
 }

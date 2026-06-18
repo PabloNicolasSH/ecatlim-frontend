@@ -1,22 +1,41 @@
-<div class="max-w-7xl mx-auto p-2 md:p-4">
+<div class="w-full flex flex-col gap-4 px-2">
+  <div class="w-full flex justify-start">
+    <p-button
+      (onClick)="history.back()"
+      icon="pi pi-arrow-left"
+      label="Volver a la agenda de eventos"
+      [rounded]="true"
+      [outlined]="true"
+      styleClass="text-xs font-semibold text-amber-800 border-amber-200 bg-white hover:bg-amber-50/50 px-4 py-2"
+    ></p-button>
+  </div>
+</div>
 
-  <div class="flex items-center justify-center gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
-    <div class="flex items-center gap-2">
-      <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold" [ngClass]="step === 1 ? 'bg-cyan-900 text-white' : 'bg-cyan-100 text-cyan-900'">1</span>
-      <span class="text-sm font-semibold hidden sm:inline" [ngClass]="step === 1 ? 'text-cyan-900' : 'text-gray-400'">Información general</span>
-    </div>
-    <div class="h-px bg-gray-200 flex-1"></div>
-    <div class="flex items-center gap-2">
-      <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold" [ngClass]="step === 2 ? 'bg-cyan-900 text-white' : 'bg-cyan-100 text-cyan-900'">2</span>
-      <span class="text-sm font-semibold hidden sm:inline" [ngClass]="step === 2 ? 'text-cyan-900' : 'text-gray-400'">Inscripción y pago</span>
-    </div>
-    <div class="h-px bg-gray-200 flex-1"></div>
-    <div class="flex items-center gap-2">
-      <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold" [ngClass]="step === 3 ? 'bg-cyan-900 text-white' : 'bg-cyan-100 text-cyan-900'">3</span>
-      <span class="text-sm font-semibold hidden sm:inline" [ngClass]="step === 3 ? 'text-cyan-900' : 'text-gray-400'">Cronograma</span>
+<div class="max-w-7xl mx-auto">
+  <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-4">
+    <h1 class="text-3xl md:text-4xl font-black text-amber-800 tracking-tight min-w-max">
+      {{ isEdit ? 'Editar' : 'Crear' }} Evento
+    </h1>
+    <div class="flex items-center justify-between gap-2 md:gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100 w-full lg:max-w-3xl">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+              [ngClass]="step === 1 ? 'bg-cyan-950 text-white' : 'bg-cyan-100 text-cyan-900'">1</span>
+        <span class="text-xs md:text-sm font-bold tracking-tight hidden sm:inline" [ngClass]="step === 1 ? 'text-cyan-950' : 'text-gray-400'">Información general</span>
+      </div>
+      <div class="h-px bg-gray-200 flex-1 mx-1"></div>
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+              [ngClass]="step === 2 ? 'bg-cyan-950 text-white' : 'bg-cyan-100 text-cyan-900'">2</span>
+        <span class="text-xs md:text-sm font-bold tracking-tight hidden sm:inline" [ngClass]="step === 2 ? 'text-cyan-950' : 'text-gray-400'">Inscripción y pago</span>
+      </div>
+      <div class="h-px bg-gray-200 flex-1 mx-1"></div>
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+              [ngClass]="step === 3 ? 'bg-cyan-950 text-white' : 'bg-cyan-100 text-cyan-900'">3</span>
+        <span class="text-xs md:text-sm font-bold tracking-tight hidden sm:inline" [ngClass]="step === 3 ? 'text-cyan-950' : 'text-gray-400'">Cronograma</span>
+      </div>
     </div>
   </div>
-
   @if (step === 1) {
     <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-4 md:p-8 border border-gray-100">
       <h3 class="text-xl md:text-2xl font-extrabold text-cyan-900 mb-6 flex items-center gap-2">
@@ -37,7 +56,17 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <p-floatlabel variant="on">
-            <p-date-picker id="startDate" formControlName="startDate" appendTo="body" styleClass="w-full" required [showIcon]="true" [showTime]="true" [defaultDate]="defaultStartDate" [stepMinute]="5" [hideOnDateTimeSelect]="false"/>
+            <p-date-picker
+              id="startDate"
+              formControlName="startDate"
+              appendTo="body"
+              styleClass="w-full"
+              required
+              [showIcon]="true"
+              [showTime]="true"
+              [defaultDate]="defaultStartDate"
+              [stepMinute]="5"
+              [hideOnDateTimeSelect]="false"/>
             <label for="startDate">Fecha Inicio del Evento</label>
           </p-floatlabel>
           <p-floatlabel variant="on">
@@ -126,7 +155,7 @@
   @if (step === 2) {
     <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-4 md:p-8 border border-gray-100">
       <h3 class="text-xl md:text-2xl font-extrabold text-cyan-900 mb-6 flex items-center gap-2">
-        <i class="pi pi-sliders-h text-cyan-700"></i> Paso 2: Parámetros de Inscripción y Pago
+        Paso 2: Parámetros de Inscripción y Pago
       </h3>
 
       <form [formGroup]="eventForm" class="flex flex-col gap-6">

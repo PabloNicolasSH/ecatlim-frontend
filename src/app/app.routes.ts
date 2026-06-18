@@ -22,7 +22,7 @@ import {EducationOfferComponent} from './features/education-offer/education-offe
 import {
   UserEducationStagesProgressComponent
 } from './features/user-education-stages-progress/user-education-stages-progress.component';
-import {AdminCreateEventComponent} from './features/event-creator/admin-create-event/admin-create-event.component';
+import {AdminEditCreateEventComponent} from './features/event-creator/admin-create-event/admin-edit-create-event.component';
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
 import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
 
@@ -108,7 +108,11 @@ export const routes: Routes = [
       },
       {
         path: "admin/eventos-formativos/crear-evento",
-        component: AdminCreateEventComponent
+        component: AdminEditCreateEventComponent
+      },
+      {
+        path: "admin/eventos-formativos/editar/:id",
+        component: AdminEditCreateEventComponent
       },
       {
         path: "admin/oferta-educativa",
