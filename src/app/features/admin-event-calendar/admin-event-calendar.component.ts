@@ -1,15 +1,17 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
-import {Dialog} from 'primeng/dialog';
-import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
-import {EventService} from '../../shared/services/event.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CalendarOptions} from '@fullcalendar/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Dialog } from 'primeng/dialog';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
+import { EventService } from '../../shared/services/event.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import {map, tap} from 'rxjs';
-import {Button} from 'primeng/button';
-import {TableModule} from 'primeng/table';
-import {CurrencyPipe, DatePipe, NgClass, UpperCasePipe} from '@angular/common';
-import {Tag} from 'primeng/tag';
+import { map, tap } from 'rxjs';
+import { Button } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { CurrencyPipe, DatePipe, NgClass, UpperCasePipe } from '@angular/common';
+import { Menu } from 'primeng/menu';
+import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
+import {ConfirmDialog} from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-admin-event-calendar',
@@ -20,9 +22,10 @@ import {Tag} from 'primeng/tag';
     TableModule,
     DatePipe,
     CurrencyPipe,
-    Tag,
     UpperCasePipe,
-    NgClass
+    NgClass,
+    Menu,
+    ConfirmDialog
   ],
   templateUrl: './admin-event-calendar.component.html',
   styleUrl: './admin-event-calendar.component.scss'
@@ -30,18 +33,35 @@ import {Tag} from 'primeng/tag';
 export class AdminEventCalendarComponent implements OnInit {
 
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+  @ViewChild('menu') menuComponent!: Menu;
 
   protected readonly eventService = inject(EventService);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
+  protected readonly confirmationService = inject(ConfirmationService);
+  protected readonly messageService = inject(MessageService);
 
   allEvents = signal<any[]>([]);
   showModal = signal(false);
   selectedEvent = signal<any>(null);
 
+  menuContextEvent: any = null;
+  menuItems: MenuItem[] = [
+    {
+      label: 'Ver Detalle',
+      icon: 'pi pi-eye',
+      command: () => this.openEventDetails(this.menuContextEvent)
+    },
+    {
+      label: 'Editar',
+      icon: 'pi pi-pencil',
+      command: () => this.goToEditEvent(this.menuContextEvent.id)
+    }
+  ];
+
   upcomingEvents = computed(() => {
     return [...this.allEvents()]
-      .filter(e => new Date(e.startDate) >= new Date())
+      .filter(e => e.startDate && new Date(e.startDate) >= new Date())
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   });
 
@@ -59,8 +79,8 @@ export class AdminEventCalendarComponent implements OnInit {
     const uniqueEmails = new Set<string>();
 
     this.upcomingEvents().forEach(event => {
-      if (event.attendees && Array.isArray(event.attendees)) {
-        event.attendees.forEach((student: any) => {
+      if (event.students && Array.isArray(event.students)) {
+        event.students.forEach((student: any) => {
           if (student.email) uniqueEmails.add(student.email.trim().toLowerCase());
         });
       }
@@ -96,7 +116,7 @@ export class AdminEventCalendarComponent implements OnInit {
   }
 
   loadEvents() {
-    this.eventService.getEventsForCalendar()
+    this.eventService.getAdminEventsForCalendar()
       .pipe(
         map(events => events.map(event => {
           const statusColor = this.getStatusColor(event.status!);
@@ -115,8 +135,34 @@ export class AdminEventCalendarComponent implements OnInit {
         tap(mappedEvents => {
           this.allEvents.set(mappedEvents);
           this.calendarOptions = { ...this.calendarOptions, events: this.allEvents() };
+          this.checkQueryParams();
         })
       ).subscribe();
+  }
+
+  private checkQueryParams() {
+    const openEventId = this.route.snapshot.queryParamMap.get('openEventId');
+    if (openEventId) {
+      const eventToOpen = this.allEvents().find(e => e.id === openEventId);
+      if (eventToOpen) {
+        this.clearModalData();
+        this.openEventDetails(eventToOpen);
+        this.clearQueryParam();
+      }
+    }
+  }
+
+  private clearQueryParam() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { openEventId: null },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  clearModalData() {
+    this.showModal.set(false);
+    this.selectedEvent.set(null);
   }
 
   openEventDetails(event: any) {
@@ -129,6 +175,7 @@ export class AdminEventCalendarComponent implements OnInit {
 
   handleEventClick(info: any) {
     const rawEvent = this.allEvents().find(e => e.id === info.event.id);
+    this.clearModalData();
     this.selectedEvent.set({
       id: info.event.id,
       title: info.event.title,
@@ -139,13 +186,50 @@ export class AdminEventCalendarComponent implements OnInit {
     this.showModal.set(true);
   }
 
-  goToEditScheduler(eventId: number) {
-    this.showModal.set(false);
-    this.router.navigate(['/app/admin/eventos-formativos/crear-evento', eventId]);
+  goToEditEvent(eventId: number) {
+    this.clearModalData();
+    this.router.navigate(['editar', eventId], { relativeTo: this.route });
   }
 
   goToCreateEvent() {
-    this.router.navigate(['/app/admin/eventos-formativos/crear-evento']);
+    this.clearModalData();
+    this.router.navigate(['crear-evento'], { relativeTo: this.route });
+  }
+
+  publishEvent(event: any) {
+    this.confirmationService.confirm({
+      message: `¿Estás seguro de que deseas publicar el evento "${event.title}"?`,
+      header: 'Confirmar Publicación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, publicar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-warning text-sm',
+      rejectButtonStyleClass: 'p-button-text text-sm',
+      accept: () => {
+        this.eventService.updateStatus(event.id, "PUBLISHED").subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Evento publicado',
+              detail: `El evento "${event.title}" ahora está visible para todos.`
+            });
+            this.loadEvents();
+          },
+          error: (err) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo publicar el evento.'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  openMenu(eventClick: Event, eventItem: any) {
+    this.menuContextEvent = eventItem;
+    this.menuComponent.toggle(eventClick);
   }
 
   getStatusColor(status: string) {

@@ -3,7 +3,7 @@ import {CalendarOptions} from '@fullcalendar/core';
 import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import {EventService} from '../../shared/services/event.service';
-import {EventCalendar} from '../../shared/models/event.model';
+import {UserEventCalendar} from '../../shared/models/event.model';
 import {DatePipe} from '@angular/common';
 import {Button} from 'primeng/button';
 import {Tag} from 'primeng/tag';
@@ -12,6 +12,7 @@ import {MessageService, PrimeTemplate} from 'primeng/api';
 import {Chip} from 'primeng/chip';
 import {ActivatedRoute, Router} from '@angular/router';
 import {map, switchMap, tap} from 'rxjs';
+import {TabPanel, TabView} from 'primeng/tabview';
 
 @Component({
   selector: 'app-user-event-calendar',
@@ -22,7 +23,9 @@ import {map, switchMap, tap} from 'rxjs';
     Tag,
     Dialog,
     PrimeTemplate,
-    Chip
+    Chip,
+    TabView,
+    TabPanel
   ],
   templateUrl: './user-event-calendar.component.html',
   styleUrl: './user-event-calendar.component.scss'
@@ -36,8 +39,8 @@ export class UserEventCalendarComponent implements OnInit{
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
 
-  userEvents = signal<EventCalendar[]>([]);
-  allEvents = signal<EventCalendar[]>([]);
+  userEvents = signal<UserEventCalendar[]>([]);
+  allEvents = signal<UserEventCalendar[]>([]);
   showingAllEvents = signal(false);
   showModal = signal(false);
   selectedEvent = signal<any>(null);
@@ -87,7 +90,7 @@ export class UserEventCalendarComponent implements OnInit{
   }
 
   loadEvents() {
-    this.eventService.getEventsForCalendar()
+    this.eventService.getUserEventsForCalendar()
       .pipe(
         map(events => events.map(event => ({
           ...event,
@@ -156,10 +159,11 @@ export class UserEventCalendarComponent implements OnInit{
       start: event.startDate,
       end: event.endDate,
       description: event.description,
+      contents: event.contents,
       location: event.location,
       organizer: event.organizer,
       educationStageCode: event.educationStageCode,
-      lessonBlockCodes: event.lessonBlockCodes,
+      lessonBlocks: event.lessonBlocks,
       attendeesCount: event.attendeesCount,
       canParticipate: event.canParticipate,
       isCurrentUserAttending: event.isCurrentUserAttending
@@ -194,7 +198,7 @@ export class UserEventCalendarComponent implements OnInit{
             severity: 'success',
           });
         }),
-        switchMap(() => this.eventService.getEventsForCalendar()),
+        switchMap(() => this.eventService.getUserEventsForCalendar()),
         tap(events => {
           const mappedEvents = events.map(event => ({
             ...event,
@@ -229,6 +233,56 @@ export class UserEventCalendarComponent implements OnInit{
           this.messageService.add({
             summary: "Error al inscribirse",
             detail: "No se pudo completar la inscripción.",
+            severity: 'error',
+          });
+        }
+      });
+  }
+
+  unregisterFromEvent(eventId: number) {
+    this.eventService.unenroll(eventId)
+      .pipe(
+        tap(() => {
+          this.messageService.add({
+            summary: "Te has desinscrito correctamente del evento",
+            severity: 'success',
+          });
+        }),
+        switchMap(() => this.eventService.getUserEventsForCalendar()),
+        tap(events => {
+          const mappedEvents = events.map(event => ({
+            ...event,
+            id: event.id?.toString(),
+            start: event.startDate,
+            end: event.endDate,
+            classNames: event.isCurrentUserAttending ? ['event-enrolled'] : [],
+            title: event.isCurrentUserAttending ? `✓ ${event.title}` : event.title,
+            backgroundColor: this.getColor(event.educationStageCode),
+            borderColor: this.getColor(event.educationStageCode)
+          }));
+
+          this.allEvents.set(mappedEvents);
+          this.userEvents.set(mappedEvents.filter(e => e.isCurrentUserAttending || e.canParticipate));
+
+          this.calendarOptions = {
+            ...this.calendarOptions,
+            events: this.userEvents()
+          };
+
+          const updatedEvent = mappedEvents.find(e => e.id == eventId.toString());
+          if (updatedEvent) {
+            this.selectedEvent.set({
+              ...updatedEvent,
+              id: Number(updatedEvent.id)
+            });
+          }
+        })
+      )
+      .subscribe({
+        error: (err) => {
+          this.messageService.add({
+            summary: "Error al desinscribirse",
+            detail: "No se pudo completar la acción.",
             severity: 'error',
           });
         }
