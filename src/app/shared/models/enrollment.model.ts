@@ -19,3 +19,9 @@ export interface Enrollment {
   percentage: number;
   blocks: Block[];
 }
+
+export interface EnrolledUser {
+  name: string;
+  email: string;
+  paymentState: string;
+}

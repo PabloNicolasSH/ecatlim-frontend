@@ -21,7 +21,7 @@
         </div>
         <div class="flex items-center gap-2">
           <span class="w-3 h-3 rounded-full bg-green-600"></span>
-          <span class="text-xs font-medium text-gray-700">Cursos</span>
+          <span class="text-xs font-medium text-gray-700">Especializados</span>
         </div>
       </div>
     </div>
@@ -144,21 +144,23 @@
     @if (selectedEvent()) {
       <div class="w-full">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-          <div class="space-y-6">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 border border-blue-100">
-                <i class="pi pi-calendar text-xl"></i>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-xs text-gray-400 uppercase font-bold letter">Fecha y Hora</span>
-                @if (!isMultiDay()) {
-                  <span class="text-lg font-bold text-gray-800 capitalize italic">
+
+          <div class="space-y-6 flex flex-col justify-between">
+            <div class="space-y-6">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 border border-blue-100">
+                  <i class="pi pi-calendar text-xl"></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs text-gray-400 uppercase font-bold tracking-wider">Fecha y Hora</span>
+                  @if (!isMultiDay()) {
+                    <span class="text-lg font-bold text-gray-800 capitalize italic">
                     {{ selectedEvent().start | date:'EEEE, d MMMM y' }}
                   </span>
-                  <span class="text-gray-500 font-medium">
+                    <span class="text-gray-500 font-medium">
                     {{ selectedEvent().start | date:'HH:mm' }} - {{ selectedEvent().end | date:'HH:mm' }}
                   </span>
-                } @else {
+                  } @if (isMultiDay()) {
                   <div class="mt-1 space-y-1">
                     <div class="flex items-center gap-3">
                       <p-tag value="Inicio" severity="secondary" [rounded]="true" styleClass="text-[11px] px-2"></p-tag>
@@ -170,68 +172,98 @@
                     </div>
                   </div>
                 }
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 shrink-0 border border-red-100">
+                  <i class="pi pi-map-marker text-xl"></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs text-gray-400 uppercase font-bold tracking-wider">Ubicación</span>
+                  <span class="text-lg font-bold text-gray-800 italic">{{ selectedEvent().location }}</span>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-center">
+                <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 shrink-0 border border-green-100">
+                  <i class="pi pi-users text-xl"></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs text-gray-400 uppercase font-bold tracking-wider">Asistencia</span>
+                  <span class="text-lg font-bold text-gray-800">{{ selectedEvent().attendeesCount }} participantes</span>
+                  <p class="text-sm text-gray-400">Inscritos actualmente</p>
+                </div>
               </div>
             </div>
 
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 shrink-0 border border-red-100">
-                <i class="pi pi-map-marker text-xl"></i>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-xs text-gray-400 uppercase font-bold">Ubicación</span>
-                <span class="text-lg font-bold text-gray-800 italic">{{ selectedEvent().location }}</span>
-              </div>
-            </div>
-
-            <div class="flex gap-4 items-center">
-              <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 shrink-0 border border-green-100">
-                <i class="pi pi-users text-xl"></i>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-xs text-gray-400 uppercase font-bold">Asistencia</span>
-                <span class="text-lg font-bold text-gray-800">{{ selectedEvent().attendeesCount }} participantes</span>
-                <p class="text-sm text-gray-400">Inscritos actualmente</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col">
-            <span class="text-xs text-gray-400 uppercase font-bold mb-1">Descripción</span>
-            <div class="text-gray-600 leading-relaxed text-sm overflow-y-auto max-h-50 mb-4">
-              {{ selectedEvent().description || 'No hay una descripción detallada para este evento todavía.' }}
-            </div>
-
-            <div class="mb-4">
-              <span class="text-xs text-gray-400 uppercase font-bold. mb-3 block">Bloques a impartir</span>
-              <div class="flex flex-wrap gap-2">
-                @for (lb of selectedEvent().lessonBlockCodes; track -$index) {
-                  <p-chip
-                    [label]="lb"
-                    styleClass="bg-white border border-gray-200 text-ecatlim font-bold text-xs px-3 shadow-sm"
-                  />
-                } @empty {
-                  <span class="text-xs text-gray-400 italic">No hay bloques específicos asignados.</span>
-                }
-              </div>
-            </div>
-
-            <div class="mt-auto pt-6 flex items-center justify-between border-t border-gray-200">
+            <div class="pt-4 border-t border-gray-100 mt-2 flex items-center justify-between">
               <div>
                 <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-widest">Organiza</p>
-                <p class="text-gray-900 font-bold">{{ selectedEvent().organizer }}</p>
+                <p class="text-gray-900 font-bold text-base">{{ selectedEvent().organizer }}</p>
               </div>
               <p-tag [value]="selectedEvent().type || 'Formación'" severity="info" styleClass="px-4 py-1 rounded-lg"></p-tag>
             </div>
           </div>
+
+          <div class="flex flex-col min-h-87.5">
+            <p-tabView styleClass="custom-tabs-container bg-transparent">
+              <p-tabPanel header="Bloques">
+                <div class="flex flex-col gap-3 max-h-65 overflow-y-auto pr-1 scrollbar-thin pt-4">
+                  @for (lb of selectedEvent().lessonBlocks; track $index) {
+                    <p-chip styleClass="bg-white border border-gray-200 text-gray-700 font-medium text-xs py-2 pl-2 pr-3 rounded-xxl w-full max-w-xl">
+                      <div class="flex items-center w-full gap-3">
+                      <span class="bg-orange-50 text-amber-800 font-bold px-3 py-2 rounded-xl border border-orange-100 min-w-18.75 text-center shrink-0">
+                        {{ lb.code }}
+                      </span>
+                        <div class="h-8 w-px bg-gray-200 shrink-0"></div>
+                        <div class="flex-1 text-gray-600 leading-tight pr-2 py-0.5 text-left font-semibold">
+                          {{ lb.name }}
+                        </div>
+                        <span class="bg-gray-100 text-slate-700 font-bold px-2 py-1 text-[10px] shrink-0 ml-auto rounded-full">
+                        {{ lb.hours }}h
+                      </span>
+                      </div>
+                    </p-chip>
+                  } @empty {
+                    <span class="text-xs text-gray-400 italic pt-2 block">No hay bloques específicos asignados.</span>
+                  }
+                </div>
+              </p-tabPanel>
+
+              <p-tabPanel header="Contenidos">
+                <div class="text-gray-600 leading-relaxed text-sm overflow-y-auto max-h-65 pt-4 whitespace-pre-line">
+                  {{ selectedEvent().contents || 'No hay contenidos detallados para este evento todavía.' }}
+                </div>
+              </p-tabPanel>
+
+              <p-tabPanel header="Logística">
+                <div class="text-gray-600 leading-relaxed text-sm overflow-y-auto max-h-65 pt-4 whitespace-pre-line">
+                  {{ selectedEvent().description || 'No se han especificado detalles logísticos adicionales.' }}
+                </div>
+              </p-tabPanel>
+
+            </p-tabView>
+          </div>
+
         </div>
 
-        <div class="mt-8 flex items-center gap-4 border-t border-gray-100 pt-6 justify-end">
+        <div class="flex items-center gap-4 border-t border-gray-100 pt-2 justify-end">
           @if (selectedEvent().canParticipate && !selectedEvent().isCurrentUserAttending) {
             <p-button
               label="Inscribirme ahora"
               icon="pi pi-check"
               styleClass="p-button-raised p-button-primary py-4 px-8 font-bold flex-1"
               (onClick)="registerToEvent(selectedEvent().id)"
+            />
+          }
+
+          @if (selectedEvent().isCurrentUserAttending && !selectedEvent().isEventClosed) {
+            <p-button
+              label="Desinscribirme"
+              icon="pi pi-times"
+              styleClass="p-button-raised p-button-danger py-4 px-8 font-bold flex-1"
+              (onClick)="unregisterFromEvent(selectedEvent().id)"
             />
           }
 
