@@ -5,7 +5,7 @@ import {MainComponent} from './core/main/main.component';
 import {authGuard} from './core/auth/auth.guard';
 import {HomeComponent} from './features/home/home.component';
 import {redirect} from './core/auth/redirect.guard';
-import {UserProfileComponent} from './features/user-profile/user-profile.component';
+import {UserProfileComponent} from './features/profile/user-profile/user-profile.component';
 import {UserListComponent} from './features/user-list/user-list.component';
 import {ResetPasswordComponent} from './features/reset-password/reset-password.component';
 import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';

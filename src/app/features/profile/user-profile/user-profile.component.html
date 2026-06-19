@@ -1,0 +1,136 @@
+<div class="p-4 md:p-6 max-w-7xl mx-auto">
+  <h1 class="text-2xl md:text-3xl font-bold mb-6">Mi Perfil</h1>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch w-full">
+    <div class="lg:col-span-4 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center h-full justify-between min-h-112.5">
+      <div class="flex flex-col items-center w-full">
+        <div class="relative w-32 h-32 sm:w-36 sm:h-36 mb-4">
+          <div class="w-full h-full rounded-full overflow-hidden border-2 border-orange-200 bg-gray-50 flex items-center justify-center">
+            @if (user.avatarUrl) {
+              <img [src]="secureAvatarUrl" alt="Foto de Perfil" class="w-full h-full object-cover"/>
+            } @else {
+              <span class="text-3xl font-bold text-gray-600">{{ userFirstLetter() }}</span>
+            }
+          </div>
+          <button (click)="visibleEditAvatar = true" class="absolute bottom-1 right-1 bg-ecatlim text-white p-2 rounded-full shadow-md hover:bg-amber-700 transition-colors border border-white flex items-center justify-center cursor-pointer">
+            <i class="pi pi-pencil text-xs"></i>
+          </button>
+        </div>
+
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+          {{ user.name || 'Administrador' }}<br>
+          {{ user.surname || 'Global' }}
+        </h2>
+
+        <span class="mt-2 px-3 py-1 bg-orange-50 text-ecatlim  text-xs font-semibold rounded-full tracking-wide">
+          @if (user.role === 'ADMIN') { Administrador }
+          @else if (user.role === 'STUDENT') { Alumno / Cursante }
+          @else { Formador }
+        </span>
+      </div>
+
+      <div class="mt-6 flex flex-col gap-3 w-full">
+        <p-button styleClass="w-full py-2.5 font-semibold" (onClick)="visibleEditProfile = true" severity="secondary" rounded>
+          Editar mis Datos
+        </p-button>
+        <p-button styleClass="w-full py-2.5 font-semibold text-sm" routerLink="/cambiar-contraseña" rounded outlined severity="secondary">
+          Cambiar mi Contraseña
+        </p-button>
+      </div>
+    </div>
+
+    <div class="lg:col-span-8 flex flex-col justify-between gap-6 h-full">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex flex-col h-full">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-orange-50/70 flex items-center justify-center text-ecatlim ">
+              <i class="pi pi-at text-lg"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800">Información de Contacto</h3>
+          </div>
+
+          <div class="space-y-4 flex-1 flex flex-col justify-center">
+            <div class="flex flex-col">
+              <span class="text-xs text-gray-400 font-medium">Correo Electrónico</span>
+              <span class="text-sm font-semibold text-gray-800 break-all">{{ user.email }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs text-gray-400 font-medium">Teléfono de Contacto</span>
+              <span class="text-sm font-semibold text-gray-700">{{ user.phone || 'No aportado' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex flex-col h-full">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-orange-50/70 flex items-center justify-center text-ecatlim">
+              <i class="pi pi-sitemap text-lg"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800">Datos de Grupo/Entidad</h3>
+          </div>
+
+          <div class="space-y-4 flex-1 flex flex-col justify-center">
+            <div class="flex flex-col">
+              <span class="text-xs text-gray-400 font-medium">Nombre de la Entidad</span>
+              <span class="text-sm font-bold text-ecatlim">{{ user.scoutGroup.name || 'Escuela Global / Federativa' }}</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-400 font-medium">ID de Provincia</span>
+                <span class="text-sm font-semibold text-gray-700">{{ user.scoutGroup.provinceId || '---' }}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-400 font-medium">Mi Censo</span>
+                <span class="text-sm font-semibold text-gray-700">{{ user.census || '---' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm w-full">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-10 h-10 rounded-xl bg-orange-50/70 flex items-center justify-center text-ecatlim">
+            <i class="pi pi-user text-lg"></i>
+          </div>
+          <h3 class="text-base font-bold text-gray-800">Información Personal</h3>
+        </div>
+
+        <div class="bg-[#fcf8f5] border border-orange-100/50 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-center gap-3">
+            <i class="pi pi-id-card text-gray-400 text-lg"></i>
+            <div class="flex flex-col">
+              <span class="text-[11px] text-gray-400 uppercase font-bold tracking-wider">DNI/NIE</span>
+              <span class="text-sm font-semibold text-gray-700 tracking-wide">{{ user.nif || 'No aportado' }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <i class="pi pi-map-marker text-gray-400 text-lg"></i>
+            <div class="flex flex-col">
+              <span class="text-[11px] text-gray-400 uppercase font-bold tracking-wider">Dirección Registrada</span>
+              <span class="text-sm font-medium text-gray-700 italic">
+                {{ getFormattedAddress() }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<app-user-modal-me-edit
+  (userUpdated)="updateUser()"
+  [(visible)]="visibleEditProfile"
+  [userToEdit]="user"
+></app-user-modal-me-edit>
+
+<app-user-avatar-modal
+  (avatarUpdated)="updateUser()"
+  [(visible)]="visibleEditAvatar"
+></app-user-avatar-modal>

@@ -18,9 +18,13 @@ export class AuthService {
     return this.http.post(`${environment.apiUrl}/auth/login`, userToLog).pipe(
       tap((res:any) => {
         localStorage.setItem('token', res.token);
+
+        const name = res.profile?.name || 'Administrador';
+        const surname = res.profile?.surname || 'Global';
+
         localStorage.setItem('me', JSON.stringify({
-          name: res.name,
-          surname: res.surname,
+          name: name,
+          surname: surname,
           email: res.email,
           role: res.role
         }));

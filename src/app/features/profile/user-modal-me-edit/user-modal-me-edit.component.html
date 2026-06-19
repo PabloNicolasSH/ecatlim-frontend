@@ -4,63 +4,70 @@
   [draggable]="false"
   [style]="{width: '50vw'}"
   appendTo="body"
+  styleClass="max-w-4xl"
 >
   <ng-template #header>
     <div class="inline-flex items-start gap-2">
-      <span class="font-bold whitespace-nowrap">Mi Información Personal</span>
+      <span class="font-bold whitespace-nowrap text-lg text-gray-800">Mi Información Personal</span>
     </div>
   </ng-template>
-  <form #userForm (ngSubmit)="onSubmit()" [formGroup]="form" class="mt-2">
-    <div class="flex flex-col justify-between">
-      <div class="flex flex-row gap-2 w-full">
-        <div class="flex flex-col">
-          <p class="text-cyan-900 font-bold">Nombre y Apellidos</p>
-          <div class="flex flex-row gap-2 mt-2">
-            <p-floatlabel variant="on">
-              <input
-                id="name"
-                pInputText
-                formControlName="name"
-                type="text"
-              />
-              <label for="name">Nombre</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on">
-              <input
-                id="surname"
-                pInputText
-                formControlName="surname"
-                type="text"
-              />
-              <label for="surname">Apellidos</label>
-            </p-floatlabel>
-          </div>
-        </div>
+
+  <form (ngSubmit)="onSubmit()" [formGroup]="form" class="mt-2 w-full box-border">
+    <div class="flex flex-col w-full">
+
+      <p class="text-ecatlim font-bold mb-3">Nombre y Apellidos</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <p-floatlabel variant="on" class="w-full">
+          <input
+            id="name"
+            pInputText
+            formControlName="name"
+            type="text"
+            class="w-full"
+          />
+          <label for="name">Nombre</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="w-full">
+          <input
+            id="surname"
+            pInputText
+            formControlName="surname"
+            type="text"
+            class="w-full"
+          />
+          <label for="surname">Apellidos</label>
+        </p-floatlabel>
       </div>
-      <p class="text-cyan-900 font-bold mt-4">Datos de Contacto</p>
-      <div class="flex flex-row mt-2 gap-2">
-        <p-floatlabel variant="on">
+
+      <p class="text-ecatlim font-bold mt-5 mb-3">Datos de Contacto</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <p-floatlabel variant="on" class="w-full">
           <input
             id="email"
             pInputText
             formControlName="email"
             type="text"
+            class="w-full"
           />
           <label for="email">Correo Electrónico</label>
         </p-floatlabel>
-        <p-floatlabel variant="on">
+
+        <p-floatlabel variant="on" class="w-full">
           <input
             id="phone"
             pInputText
             formControlName="phone"
             type="text"
+            class="w-full"
           />
           <label for="phone">Teléfono/móvil</label>
         </p-floatlabel>
       </div>
-      <p class="text-cyan-900 font-bold mt-4">Información Personal</p>
-      <div class="flex flex-row mt-2 gap-2 w-full">
-        <p-floatlabel variant="on" class="basis-1/4">
+
+      <p class="text-ecatlim font-bold mt-5 mb-3">Información Personal</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <p-floatlabel variant="on" class="w-full">
           <input
             id="census"
             pInputText
@@ -70,7 +77,8 @@
           />
           <label for="census">Censo en su grupo scout</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
+
+        <p-floatlabel variant="on" class="w-full">
           <input
             id="nif"
             pInputText
@@ -81,8 +89,9 @@
           <label for="nif">DNI/NIE</label>
         </p-floatlabel>
       </div>
-      <div class="flex flex-row mt-4 gap-2">
-        <p-floatlabel variant="on" class="basis-2/4">
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full mt-5">
+        <p-floatlabel variant="on" class="w-full md:col-span-2">
           <input
             id="address"
             pInputText
@@ -92,31 +101,35 @@
           />
           <label for="address">Dirección Postal</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
+
+        <p-floatlabel variant="on" class="w-full">
           <input
             id="city"
             pInputText
             formControlName="city"
             type="text"
+            class="w-full"
           />
-          <label for="city">Municipio de residencia</label>
+          <label for="city">Municipio</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="basis-1/4">
+
+        <p-floatlabel variant="on" class="w-full">
           <input
             id="country"
             pInputText
             formControlName="country"
             type="text"
+            class="w-full"
           />
           <label for="country">País</label>
         </p-floatlabel>
       </div>
     </div>
-    <div class="mt-6 text-end w-full">
-      <p-button label="Cancelar" severity="danger" (onClick)="visible.set(false)" class="mr-3"/>
+
+    <div class="mt-6 flex justify-end gap-3 w-full">
       <p-button
         label="Actualizar Mis Datos"
-        [disabled]="!this.form.valid"
+        [disabled]="!form.valid"
         [loading]="loading"
         type="submit"
       />

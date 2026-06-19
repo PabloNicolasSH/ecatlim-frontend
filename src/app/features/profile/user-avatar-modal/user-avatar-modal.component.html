@@ -1,0 +1,84 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '400px' }"
+  appendTo="body"
+>
+  <ng-template #header>
+    <span class="font-bold text-lg text-gray-800">Actualizar Foto de Perfil</span>
+  </ng-template>
+
+  <div class="flex flex-col items-center justify-center p-2 w-full box-border">
+
+    <p-fileupload
+      #fileUpload
+      mode="advanced"
+      accept="image/*"
+      maxFileSize="2000000"
+      (onSelect)="onFileSelect($event)"
+      [customUpload]="true"
+      styleClass="w-full CustomUploadAdvanced"
+    >
+      <ng-template #header let-files let-chooseCallback="chooseCallback" let-clearCallback="clearCallback">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-xs font-semibold text-gray-500">Estado del archivo</span>
+          @if (files && files.length > 0) {
+            <p-button
+              (onClick)="clearCallback(); imagePreview = null; selectedFile = null"
+              icon="pi pi-trash"
+              label="Quitar"
+              [rounded]="true"
+              [outlined]="true"
+              severity="danger"
+              styleClass="p-button-sm text-xs py-1 px-3"
+            />
+          }
+        </div>
+      </ng-template>
+
+      <ng-template #content let-files>
+        @if (files && files.length > 0) {
+          <div class="flex flex-col items-center justify-center py-4 w-full animate-fade-in">
+            <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-orange-200 shadow-sm">
+              <img [src]="files[0].objectURL" alt="Preview" class="w-full h-full object-cover" />
+            </div>
+            <span class="text-sm font-semibold text-gray-700 mt-3 max-w-xs text-ellipsis overflow-hidden whitespace-nowrap">
+            {{ files[0].name }}
+          </span>
+            <span class="text-xs font-medium text-[#aa642a] mt-1 flex items-center gap-1">
+            <i class="pi pi-check-circle"></i> Lista para guardar
+          </span>
+          </div>
+        }
+      </ng-template>
+
+      <ng-template #empty>
+        <div class="flex items-center justify-center flex-col py-6 w-full text-center text-gray-400 min-h-[130px]">
+          <i class="pi pi-cloud-upload text-4xl mb-3 text-gray-300"></i>
+          <p class="text-sm font-semibold text-gray-700 m-0">
+            Arrastra una imagen aquí
+          </p>
+          <p class="text-xs text-gray-400 mt-1 mb-0">Sube archivos JPG o PNG (Máx. 2MB)</p>
+        </div>
+      </ng-template>
+    </p-fileupload>
+
+  </div>
+  <ng-template #footer>
+    <div class="flex justify-end gap-2 w-full mt-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeModal()"
+      />
+      <p-button
+        label="Guardar Foto"
+        [disabled]="!selectedFile"
+        [loading]="loading"
+        (onClick)="uploadAvatar()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
