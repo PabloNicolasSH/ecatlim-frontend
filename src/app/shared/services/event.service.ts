@@ -27,14 +27,6 @@ export class EventService {
     return this.http.get<EventDashboard[]>(`${environment.apiUrl}/events/user-home`);
   }
 
-  enroll(eventId: number): Observable<Event> {
-    return this.http.put<Event>(`${environment.apiUrl}/events/${eventId}/enroll`, {});
-  }
-
-  unenroll(eventId: number): Observable<Event> {
-    return this.http.put<Event>(`${environment.apiUrl}/events/${eventId}/unenroll`, {});
-  }
-
   saveEvent(event: EventForm): Observable<Event> {
     return this.http.post<Event>(`${environment.apiUrl}/events/admin/add`, event);
   }
