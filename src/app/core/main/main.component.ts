@@ -8,7 +8,8 @@ import {Toast} from 'primeng/toast';
   selector: 'app-main',
   imports: [
     HeaderComponent,
-    RouterOutlet
+    RouterOutlet,
+    FooterComponent
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss'

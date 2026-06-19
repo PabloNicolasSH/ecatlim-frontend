@@ -1,5 +1,4 @@
 <header class="flex items-center justify-between border-b border-gray-300 px-4 py-4 md:px-6">
-
   <div class="flex items-center space-x-2 md:space-x-4">
     <p-button
       (onClick)="onMenuClick()"
@@ -23,41 +22,23 @@
     </h1>
   </div>
 
-  <div class="flex items-center space-x-2 md:space-x-3">
-
-    <div class="hidden md:flex items-center space-x-3">
-      @if (messages().length > 0) {
-        <p-overlay-badge [value]="messages().length" severity="info">
-          <p-button (onClick)="openMessages()" icon="pi pi-comments" severity="secondary" rounded></p-button>
-        </p-overlay-badge>
-      } @else {
-        <p-button (onClick)="openMessages()" icon="pi pi-comments" severity="secondary" rounded></p-button>
-      }
-
-      @if (notifies().length > 0) {
-        <p-overlay-badge [value]="notifies().length" severity="danger">
-          <p-button (onClick)="toggleNotifications($event)" icon="pi pi-bell" severity="secondary" rounded></p-button>
-        </p-overlay-badge>
-      } @else {
+  <div class="flex items-center space-x-3">
+    @if (notifies().length > 0) {
+      <p-overlay-badge [value]="notifies().length" severity="danger">
         <p-button (onClick)="toggleNotifications($event)" icon="pi pi-bell" severity="secondary" rounded></p-button>
-      }
-    </div>
+      </p-overlay-badge>
+    } @else {
+      <p-button (onClick)="toggleNotifications($event)" icon="pi pi-bell" severity="secondary" rounded></p-button>
+    }
 
-    <p-splitbutton
-      (onClick)="router.navigateByUrl('/app/perfil')"
-      [model]="userOptions()"
-      severity="secondary"
-      text
-    >
-      <ng-template #content>
-        <span class="flex items-center font-bold">
-          <p-avatar [label]="userFirstLetter()" size="normal" shape="circle"/>
-          <span class="ml-3 hidden lg:inline">
-            {{ user.name }} {{ user.surname }}
-          </span>
-        </span>
-      </ng-template>
-    </p-splitbutton>
+    @if (messages().length > 0) {
+      <p-overlay-badge [value]="messages().length" severity="info">
+        <p-button (onClick)="openMessages()" icon="pi pi-comments" severity="secondary" rounded></p-button>
+      </p-overlay-badge>
+    } @else {
+      <p-button (onClick)="openMessages()" icon="pi pi-comments" severity="secondary" rounded></p-button>
+    }
+
   </div>
 </header>
 
@@ -69,8 +50,7 @@
   <ng-template #header>
     <div class="flex flex-row items-center justify-between shrink-0 w-full">
       <span class="inline-flex items-center gap-2">
-          <svg width="31" height="33" viewBox="0 0 31 33" fill="none" xmlns="http://www.w3.org/2000/svg"
-               class="block mx-auto">
+          <svg width="31" height="33" viewBox="0 0 31 33" fill="none" xmlns="http://www.w3.org/2000/svg" class="block mx-auto">
               <path d="..."/>
           </svg>
           <span class="font-semibold text-2xl text-primary">ECATLIM</span>
@@ -89,13 +69,40 @@
   </ng-template>
   <p-panelMenu [model]="sidebarMenu"></p-panelMenu>
   <ng-template #footer>
-    <div class="text-center">
-      <p-divider></p-divider>
-      <div class="flex flex-col">
-        <p-button routerLink="/politica-privacidad" label="Política de Privacidad" severity="secondary" text></p-button>
-        <a class="font-bold" href="mailto:ecatlim@scoutsdecanarias.org">ecatlim&#64;scoutsdecanarias.org</a>
-        <a class="flex font-bold items-center justify-center gap-1" href="https://www.instagram.com/ecatlim/" target="_blank"><i class="pi pi-instagram"></i> &#64;ecatlim</a>
+    <div class="w-full flex flex-col gap-4 box-border">
+      <p-divider class="m-0 w-full"></p-divider>
+
+      <div class="flex items-center space-x-3 px-2 cursor-pointer w-full" (click)="router.navigateByUrl('/app/perfil'); sidebarVisible = false">
+
+        <p-avatar
+          [image]="avatarUrl ?? undefined"
+          [label]="!avatarUrl ? userFirstLetter() : undefined"
+          size="large"
+          shape="circle"
+          class="border border-orange-200 bg-gray-100 text-gray-700 font-semibold shrink-0 overflow-hidden">
+        </p-avatar>
+
+        <div class="flex flex-col min-w-0 flex-1">
+          <span class="font-semibold text-gray-800 truncate text-sm sm:text-base w-full">
+            {{ user.name || 'Administrador' }} {{ user.surname || 'Global' }}
+          </span>
+          <span class="text-xs sm:text-sm text-gray-600 font-medium truncate w-full">
+            @if (user.role === 'ADMIN') { Administrador }
+            @else if (user.role === 'STUDENT') { Alumno }
+            @else { Formador }
+          </span>
+          <span class="text-xs text-gray-400 truncate w-full">
+            {{ user.email }}
+          </span>
+        </div>
       </div>
+      <button
+        (click)="logout()"
+        class="text-center space-x-3 w-full px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 font-medium"
+      >
+        <i class="pi pi-sign-out text-lg"></i>
+        <span class="text-sm sm:text-base">Cerrar sesión</span>
+      </button>
     </div>
   </ng-template>
 </p-drawer>
@@ -110,7 +117,6 @@
         </span>
       }
     </div>
-
     <div class="overflow-y-auto custom-scrollbar">
       @if (notifies().length > 0) {
         @for (notify of notifies(); track notify.id) {
