@@ -68,6 +68,22 @@ export class UserEventCalendarComponent implements OnInit {
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   });
 
+  orderedLessonBlocks = computed(() => {
+    const event = this.selectedEvent();
+    if (!event || !event.lessonBlocks) return [];
+
+    return [...event.lessonBlocks].sort((a, b) => a.code.localeCompare(b.code));
+  });
+
+  enrolledLessonBlocks = computed(() => {
+    const event = this.selectedEvent();
+    if (!event || !event.lessonBlocks || !event.enrolledBlockCodes) return [];
+
+    return [...event.lessonBlocks]
+      .filter(lb => event.enrolledBlockCodes.includes(lb.code))
+      .sort((a, b) => a.code.localeCompare(b.code));
+  });
+
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin],
     initialView: 'dayGridMonth',

@@ -49,6 +49,7 @@ export interface UserEventCalendar extends BasicEventCalendar {
   isCurrentUserAttending?: boolean;
   canParticipate?: boolean;
   isEventClosed?: boolean;
+  enrolledBlockCodes?: string[];
 }
 
 export interface AdminEventCalendar extends BasicEventCalendar {

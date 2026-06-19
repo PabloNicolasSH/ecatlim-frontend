@@ -22,10 +22,10 @@ export class EnrollmentService {
   }
 
   enrollInEvent(eventId: number, lessonBlockIds: number[]): Observable<Event> {
-    return this.http.put<Event>(`${environment.apiUrl}/enrollments/events/${eventId}/enroll`, lessonBlockIds);
+    return this.http.post<Event>(`${environment.apiUrl}/enrollments/events/${eventId}/enroll`, lessonBlockIds);
   }
 
   unenrollInEvent(eventId: number, lessonBlockIds: number[]): Observable<Event> {
-    return this.http.put<Event>(`${environment.apiUrl}/enrollments/events/${eventId}/unenroll`, lessonBlockIds);
+    return this.http.post<Event>(`${environment.apiUrl}/enrollments/events/${eventId}/unenroll`, lessonBlockIds);
   }
 }

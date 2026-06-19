@@ -12,6 +12,7 @@ export interface LessonBlock {
 }
 
 export interface LessonBlockCalendarSummary {
+  id?: number;
   name: string;
   code: string;
   hours: number;
