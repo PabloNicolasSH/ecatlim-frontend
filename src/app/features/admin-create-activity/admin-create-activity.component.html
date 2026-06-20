@@ -1,0 +1,150 @@
+<div class="card m-4 p-4 ui-fluid">
+  <h2 class="mb-4">Crear Nueva Actividad</h2>
+
+  <form [formGroup]="activityForm" (ngSubmit)="onSubmit()">
+
+    <div class="grid p-fluid mb-3">
+      <div class="col-12 md:col-6">
+        <label class="block font-bold mb-2">Tipo de Actividad</label>
+        <p-dropdown
+          formControlName="activityType"
+          [options]="activityTypes"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona un tipo">
+        </p-dropdown>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="block font-bold mb-2">Método de Evaluación</label>
+        <p-dropdown
+          formControlName="evaluationMethod"
+          [options]="evaluationMethods"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona el método">
+        </p-dropdown>
+      </div>
+    </div>
+
+    <div class="grid p-fluid mb-4">
+      <div class="col-12 md:col-6">
+        <label class="block font-bold mb-2">Fecha de Publicación</label>
+        <p-calendar
+          formControlName="availableAt"
+          [showTime]="true"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          placeholder="Selecciona fecha y hora">
+        </p-calendar>
+      </div>
+      <div class="col-12 md:col-6">
+        <label class="block font-bold mb-2">Fecha Límite (Due Date)</label>
+        <p-calendar
+          formControlName="dueDate"
+          [showTime]="true"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          placeholder="Selecciona fecha y hora">
+        </p-calendar>
+      </div>
+    </div>
+
+    @if (activityForm.get('activityType')?.value === 'SURVEY') {
+      <div class="p-field card bg-gray-50 p-3 mb-4">
+        <h3 class="text-xl font-semibold mb-3">Configuración del Cuestionario</h3>
+
+        <div class="flex align-items-center gap-3 mb-3">
+          <p-inputSwitch formControlName="isGradable" id="isGradable"></p-inputSwitch>
+          <label for="isGradable" class="font-medium">¿Es un Examen Evaluable? (Requiere nota mínima)</label>
+        </div>
+
+        @if (activityForm.get('isGradable')?.value) {
+          <div class="grid p-fluid">
+            <div class="col-12 md:col-6 mb-3">
+              <label class="block mb-2 font-medium">Número Máximo de Intentos</label>
+              <input type="number" pInputText formControlName="maxAttempts" min="1" placeholder="Ej: 3">
+            </div>
+            <div class="col-12 md:col-6 mb-3">
+              <label class="block mb-2 font-medium">Nota de Corte para Aprobar</label>
+              <input type="number" pInputText formControlName="passingScore" step="0.1" min="0" max="10" placeholder="Ej: 5.0">
+            </div>
+          </div>
+        }
+
+        <p-divider></p-divider>
+
+        <div class="flex justify-content-between align-items-center mb-3">
+          <h4 class="text-lg font-medium m-0">Preguntas del Cuestionario</h4>
+          <p-button
+            label="Añadir Pregunta"
+            icon="pi pi-plus"
+            styleClass="p-button-outlined p-button-sm"
+            (onClick)="addQuestion()">
+          </p-button>
+        </div>
+
+        <div formArrayName="questions">
+          @for (question of questions.controls; track qIndex; let qIndex = $index) {
+            <div [formGroupName]="qIndex" class="card p-3 mb-3 shadow-1 surface-card border-round">
+
+              <div class="flex justify-content-between align-items-center mb-3">
+                <span class="font-bold text-primary">Pregunta #{{ qIndex + 1 }}</span>
+                <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-text p-button-sm" (onClick)="removeQuestion(qIndex)"></p-button>
+              </div>
+
+              <div class="p-field mb-3">
+                <input type="text" pInputText formControlName="questionText" class="w-full" placeholder="Escribe el enunciado de la pregunta aquí...">
+              </div>
+
+              <div class="p-field mb-3 w-full md:w-3">
+                <label class="block text-sm mb-1 text-600">Tipo de Respuesta</label>
+                <p-dropdown
+                  formControlName="responseType"
+                  [options]="responseTypes"
+                  optionLabel="label"
+                  optionValue="value">
+                </p-dropdown>
+              </div>
+
+              @if (question.get('responseType')?.value === 'SELECTION') {
+                <div class="mt-2 surface-50 p-3 border-round border-1 border-200">
+                  <div class="flex justify-content-between align-items-center mb-2">
+                    <span class="text-sm font-bold text-600">Opciones de respuesta:</span>
+                    <p-button label="Añadir Opción" icon="pi pi-plus-circle" styleClass="p-button-link p-button-sm p-0" (onClick)="addOption(qIndex)"></p-button>
+                  </div>
+
+                  <div formArrayName="options">
+                    @for (option of getOptions(qIndex).controls; track oIndex; let oIndex = $index) {
+                      <div [formGroupName]="oIndex" class="flex align-items-center gap-2 mb-2">
+
+                        @if (activityForm.get('isGradable')?.value) {
+                          <p-checkbox
+                            formControlName="isCorrect"
+                            [binary]="true"
+                            pTooltip="¿Es la correcta?">
+                          </p-checkbox>
+                        }
+
+                        <input type="text" pInputText formControlName="optionText" class="p-inputtext-sm flex-grow-1" placeholder="Texto de la opción...">
+
+                        <p-button icon="pi pi-times" styleClass="p-button-danger p-button-text p-button-sm" (onClick)="removeOption(qIndex, oIndex)"></p-button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="flex justify-content-end gap-2 mt-4">
+      <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-secondary p-button-text" [routerLink]="['/events', eventId]"></p-button>
+      <p-button label="Guardar Actividad" icon="pi pi-check" styleClass="p-button-success" type="submit" [disabled]="activityForm.invalid"></p-button>
+    </div>
+
+  </form>
+</div>
