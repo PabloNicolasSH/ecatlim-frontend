@@ -157,16 +157,16 @@ export class UserModalAddEditComponent implements OnInit{
 
   private initializeEditForm() {
     this.form = this.formBuilder.group({
-      name: [this.userToEdit.name, Validators.required],
-      surname: [this.userToEdit.surname, Validators.required],
+      name: [this.userToEdit.profile?.name, Validators.required],
+      surname: [this.userToEdit.profile?.surname, Validators.required],
       email: [this.userToEdit.email, [Validators.required, Validators.email]],
-      phone: [this.userToEdit.phone],
-      census: [this.userToEdit.census],
-      nif: [this.userToEdit.nif],
-      address: [this.userToEdit.address],
-      city: [this.userToEdit.city],
-      country: [this.userToEdit.country],
-      selectedScoutGroup: [this.userToEdit.scoutGroup],
+      phone: [this.userToEdit.profile?.phone],
+      census: [this.userToEdit.profile?.census],
+      nif: [this.userToEdit.profile?.nif],
+      address: [this.userToEdit.profile?.address],
+      city: [this.userToEdit.profile?.city],
+      country: [this.userToEdit.profile?.country],
+      selectedScoutGroup: [this.userToEdit.profile?.scoutGroup],
       selectedRole: [this.userToEdit.role, Validators.required]
     });
   }

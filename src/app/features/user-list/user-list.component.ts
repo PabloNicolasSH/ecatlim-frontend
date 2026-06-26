@@ -38,7 +38,6 @@ export class UserListComponent implements OnInit {
   protected readonly scoutGroupService = inject(EntityService);
   protected readonly confirmationService = inject(ConfirmationService);
   protected readonly messageService = inject(MessageService);
-  protected readonly filterService = inject(FilterService);
 
   visible: boolean = false;
   dialogMode: string = '';
@@ -80,7 +79,7 @@ export class UserListComponent implements OnInit {
 
     this.users = this.users.map(user => ({
       ...user,
-      fullName: `${user.surname}, ${user.name}`
+      fullName: `${user.profile?.surname}, ${user.profile?.name}`
     }));
 
     this.userService.getInactiveUsers().subscribe({
@@ -107,7 +106,7 @@ export class UserListComponent implements OnInit {
   confirmDialog(event: Event, mode: string, user?: User, pendingUser?: PendingUser) {
     if (mode == 'Deactivate' && user) {
       const confirmationMessage = {
-        message: '¿Está seguro de que desea desactivar a ' + user.name + "?",
+        message: '¿Está seguro de que desea desactivar a ' + user.profile?.name + "?",
         header: 'Confirmación de desactivación de usuario',
         icon: 'pi pi-exclamation-triangle',
         rejectLabel: 'Cancelar la desactivación',
@@ -144,7 +143,7 @@ export class UserListComponent implements OnInit {
       this.generateConfirmation(confirmationMessage);
     } else if (user){
       const confirmationMessage = {
-        message: '¿Está seguro de que desea reactivar a ' + user.name + "?",
+        message: '¿Está seguro de que desea reactivar a ' + user.profile?.name + "?",
         header: 'Confirmación de reactivación de usuario',
         icon: 'pi pi-history',
         rejectLabel: 'Cancelar la activación',
@@ -209,7 +208,7 @@ export class UserListComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Confirmado',
-        detail: 'Se ha desactivado a ' + user.name
+        detail: 'Se ha desactivado a ' + user.profile?.name
       });
       this.deactivateUser(user);
     } else if (mode == 'Create User' && pendingUser) {
@@ -220,7 +219,7 @@ export class UserListComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Confirmado',
-        detail: 'Se ha activado a ' + user.name
+        detail: 'Se ha activado a ' + user.profile?.name
       });
       this.activateUser(user);
     }

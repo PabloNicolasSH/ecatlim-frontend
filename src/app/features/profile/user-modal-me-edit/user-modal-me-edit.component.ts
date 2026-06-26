@@ -88,15 +88,15 @@ export class UserModalMeEditComponent {
 
   private initializeEditForm() {
     this.form = this.formBuilder.group({
-      name: [this.userToEdit.name || '', Validators.required],
-      surname: [this.userToEdit.surname || '', Validators.required],
+      name: [this.userToEdit.profile?.name || '', Validators.required],
+      surname: [this.userToEdit.profile?.surname || '', Validators.required],
       email: [this.userToEdit.email, [Validators.required, Validators.email]],
-      phone: [this.userToEdit.phone || ''],
-      census: [this.userToEdit.census || null],
-      nif: [this.userToEdit.nif || ''],
-      address: [this.userToEdit.address || ''],
-      city: [this.userToEdit.city || ''],
-      country: [this.userToEdit.country || '']
+      phone: [this.userToEdit.profile?.phone || ''],
+      census: [this.userToEdit.profile?.census || null],
+      nif: [this.userToEdit.profile?.nif || ''],
+      address: [this.userToEdit.profile?.address || ''],
+      city: [this.userToEdit.profile?.city || ''],
+      country: [this.userToEdit.profile?.country || '']
     });
   }
 }
