@@ -45,16 +45,16 @@ export class UserProfileComponent implements OnInit {
     this.userService.getMyInfo().subscribe({
       next: user => {
         this.user = user;
-        if (this.user?.avatarUrl) {
-          this.fileService.loadAvatar(this.user.avatarUrl);
+        if (this.user?.profile?.avatarUrl) {
+          this.fileService.loadAvatar(this.user.profile?.avatarUrl);
         }
       }
     });
   }
 
   userFirstLetter(): string {
-    if (this.user?.name) {
-      return this.user.name.at(0)!.toUpperCase();
+    if (this.user?.profile?.name) {
+      return this.user.profile?.name.at(0)!.toUpperCase();
     }
     if (this.user?.email) {
       return this.user.email.at(0)!.toUpperCase();
@@ -63,7 +63,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   getFormattedAddress(): string {
-    const profile = this.user;
+    const profile = this.user.profile;
     if (!profile) {
       return 'No tiene dirección registrada';
     }
