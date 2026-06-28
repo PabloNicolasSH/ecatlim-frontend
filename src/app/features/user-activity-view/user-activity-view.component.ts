@@ -1,6 +1,6 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {Button} from 'primeng/button';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ActivityService} from '../../shared/services/activity.service';
 
@@ -72,10 +72,10 @@ export class UserActivityViewComponent implements OnInit {
   }
 
   buildSurveyForm(questions: any[]): void {
-    const answersArray = this.fb.array([]);
+    this.answers.clear();
     if (questions) {
       questions.forEach(q => {
-        answersArray.push(this.fb.group({
+        this.answers.push(this.fb.group({
           questionId: [q.id],
           responseType: [q.responseType],
           textValue: [''],
@@ -83,12 +83,25 @@ export class UserActivityViewComponent implements OnInit {
         }));
       });
     }
-    this.surveyForm.setControl('answers', answersArray);
+  }
+
+  get answers(): FormArray {
+    return this.surveyForm.get('answers') as FormArray;
+  }
+
+  asFormGroup(control: AbstractControl): FormGroup {
+    return control as FormGroup;
   }
 
   onForumSubmit(): void {
     if (this.forumForm.invalid) return;
-    this.activityService.publishInForum(this.selectedActivity().id, this.currentStudentId(), this.forumForm.value).subscribe({
+
+    const requestBody = {
+      ...this.forumForm.value,
+      studentId: this.currentStudentId()
+    };
+
+    this.activityService.publishInForum(this.selectedActivity().id, requestBody).subscribe({
       next: () => {
         this.loadForumPublications(this.selectedActivity().id);
         this.forumForm.reset();

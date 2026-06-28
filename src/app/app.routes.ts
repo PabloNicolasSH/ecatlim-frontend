@@ -26,6 +26,7 @@ import {AdminEditCreateEventComponent} from './features/event-creator/admin-crea
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
 import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
 import {AdminCreateActivityComponent} from './features/admin-create-activity/admin-create-activity.component';
+import {UserActivityViewComponent} from './features/user-activity-view/user-activity-view.component';
 
 export const routes: Routes = [
   {
@@ -86,6 +87,10 @@ export const routes: Routes = [
       {
         path: "oferta-educativa",
         component: EducationOfferComponent
+      },
+      {
+        path: ":eventId/actividades",
+        component: UserActivityViewComponent
       },
       {
         path: "mi-progreso",

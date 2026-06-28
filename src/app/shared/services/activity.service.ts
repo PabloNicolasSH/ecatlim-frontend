@@ -22,15 +22,19 @@ export class ActivityService {
     return this.http.get<any[]>(`${environment.apiUrl}/activity/${activityId}/publications`);
   }
 
-  publishInForum(activityId: number, studentId: number, body: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/activity/${activityId}/publish?studentId=${studentId}`, body);
+  publishInForum(activityId: number, body: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/activity/${activityId}/forum-publications`, body);
   }
 
   submitSurvey(activityId: number, studentId: number, responses: any[]): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/${activityId}/survey-submit?studentId=${studentId}`, responses);
+    return this.http.post(`${environment.apiUrl}/activity/${activityId}/survey-responses?studentId=${studentId}`, responses);
   }
 
-  uploadSubmissionFile(activityId: number, studentId: number, formData: FormData): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/${activityId}/upload-file?studentId=${studentId}`, formData);
+  uploadSubmissionFile(activityId: number, studentId: number, formData: FormData, comment?: string): Observable<any> {
+    let url = `${environment.apiUrl}/activity/${activityId}/file-submissions?studentId=${studentId}`;
+    if (comment) {
+      url += `&comment=${encodeURIComponent(comment)}`;
+    }
+    return this.http.post(url, formData);
   }
 }

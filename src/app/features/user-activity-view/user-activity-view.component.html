@@ -2,7 +2,7 @@
 
   <div class="w-full md:w-4/12 flex flex-col gap-4">
     <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
-      <h2 class="text-xl font-bold text-amber-900 mb-1">Actividades del Curso</h2>
+      <h2 class="text-xl font-bold text-amber-900 mb-1">Actividades del Evento</h2>
       <p class="text-xs text-stone-500 mb-4">Completa las tareas para avanzar en tu progresión scout.</p>
 
       <div class="flex flex-col gap-2">
@@ -55,17 +55,17 @@
           @case ('FORUM') {
             <div class="flex flex-col gap-6">
               <div class="flex flex-col gap-3 max-h-96 overflow-y-auto pr-2">
-                <h3 class="text-sm font-semibold text-stone-700">Aportaciones de la Comunidad</h3>
+                <h3 class="text-sm font-semibold text-stone-700">Aportaciones del alumnado</h3>
                 @for (pub of forumPublications(); track pub.id) {
                   <div class="bg-stone-50 p-4 rounded-xl border border-stone-200/60">
                     <div class="flex items-center justify-between mb-2">
                       <span class="font-semibold text-sm text-stone-800">{{ pub.title }}</span>
-                      <span class="text-[11px] text-stone-400">{{ pub.publishedAt }}</span>
+                      <span class="text-[11px] text-stone-400">{{ pub.availableAt }}</span>
                     </div>
                     <p class="text-xs text-stone-600 leading-relaxed">{{ pub.body }}</p>
                   </div>
                 } @empty {
-                  <p class="text-xs text-stone-400 italic py-2">Nadie ha publicado todavía. ¡Sé el primero en romper el hielo!</p>
+                  <p class="text-xs text-stone-400 italic py-2">Nadie ha publicado todavía. ¡Estás a tiempo de romper el hielo!</p>
                 }
               </div>
 
@@ -122,7 +122,7 @@
                   <div class="flex flex-col gap-2 p-4 rounded-xl border border-stone-100 bg-stone-50/40">
                     <span class="text-sm font-semibold text-stone-800">{{ idx + 1 }}. {{ question.questionText }}</span>
 
-                    <div [formGroup]="surveyForm.get('answers')['at'](idx)">
+                    <div [formGroup]="asFormGroup(answers.at(idx))">
                       @if (question.responseType === 'SELECTION') {
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                           @for (opt of question.options; track opt.id) {
@@ -147,7 +147,7 @@
                           @for (num of [1,2,3,4,5]; track num) {
                             <label class="flex-1 text-center border border-stone-200 rounded-lg p-2 bg-white hover:bg-stone-50 cursor-pointer transition-all text-xs">
                               <input type="radio" [value]="num" formControlName="numValue" class="hidden" />
-                              <span class="block font-semibold" [class.text-amber-700]="surveyForm.get('answers')['at'](idx).get('numValue').value === num">
+                              <span class="block font-semibold" [class.text-amber-700]="answers.at(idx).get('numValue')?.value === num">
                                 {{ num }}
                               </span>
                             </label>
