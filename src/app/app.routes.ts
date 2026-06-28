@@ -25,6 +25,7 @@ import {
 import {AdminEditCreateEventComponent} from './features/event-creator/admin-create-event/admin-edit-create-event.component';
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
 import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
+import {AdminCreateActivityComponent} from './features/admin-create-activity/admin-create-activity.component';
 
 export const routes: Routes = [
   {
@@ -113,6 +114,10 @@ export const routes: Routes = [
       {
         path: "admin/eventos-formativos/editar/:id",
         component: AdminEditCreateEventComponent
+      },
+      {
+        path: "admin/eventos-formativos/:eventId/actividades/crear-nueva",
+        component: AdminCreateActivityComponent
       },
       {
         path: "admin/oferta-educativa",
