@@ -49,10 +49,10 @@
         </ng-template>
         <ng-template #body let-user>
           <tr>
-            <td>{{user.surname}}, {{user.name}}</td>
+            <td>{{user.profile?.surname}}, {{user.profile?.name}}</td>
             <td>{{user.email}}</td>
-            <td>@if (user.scoutGroup != null) {
-              {{user.scoutGroup.name}}
+            <td>@if (user.profile?.scoutGroup != null) {
+              {{user.profile?.scoutGroup.name}}
             }</td>
             <td class="flex gap-2 justify-end">
               <p-button
@@ -100,10 +100,10 @@
         </ng-template>
         <ng-template #body let-user>
           <tr>
-            <td>{{user.surname}}, {{user.name}}</td>
+            <td>{{user.profile?.surname}}, {{user.profile?.name}}</td>
             <td>{{user.email}}</td>
-            <td>@if (user.scoutGroup != null) {
-              {{user.scoutGroup.name}}
+            <td>@if (user.profile?.scoutGroup != null) {
+              {{user.profile?.scoutGroup.name}}
             }</td>
             <td class="flex gap-2 justify-end">
               <p-button
