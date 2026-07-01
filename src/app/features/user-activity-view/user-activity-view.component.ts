@@ -3,12 +3,18 @@ import {Button} from 'primeng/button';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ActivityService} from '../../shared/services/activity.service';
+import {FloatLabel} from 'primeng/floatlabel';
+import {Textarea} from 'primeng/textarea';
+import {InputText} from 'primeng/inputtext';
 
 @Component({
   selector: 'app-user-activity-view',
   imports: [
     Button,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FloatLabel,
+    Textarea,
+    InputText
   ],
   templateUrl: './user-activity-view.component.html',
   styleUrl: './user-activity-view.component.scss'

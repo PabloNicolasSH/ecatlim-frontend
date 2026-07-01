@@ -13,6 +13,7 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { Tooltip } from 'primeng/tooltip';
 import {ToggleButton} from 'primeng/togglebutton';
 import {MessageService} from 'primeng/api';
+import {EventService} from '../../shared/services/event.service';
 
 @Component({
   selector: 'app-admin-create-activity',
@@ -36,13 +37,15 @@ export class AdminCreateActivityComponent implements OnInit {
 
   protected readonly fb = inject(FormBuilder);
   protected readonly activityService = inject(ActivityService);
+  protected readonly messageService = inject(MessageService);
+  protected readonly eventService = inject(EventService);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
-  protected readonly messageService = inject(MessageService);
   protected readonly history = history
 
   activityForm!: FormGroup;
-  eventId!: number;
+  eventId!: number | null;
+  availableBlocks: any[] = [];
 
   activityTypes = [
     { label: 'Foro de Discusión', value: 'FORUM' },
@@ -63,7 +66,15 @@ export class AdminCreateActivityComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.eventId = Number(this.route.snapshot.paramMap.get('eventId'));
+
+    this.route.paramMap.subscribe(params => {
+      const rawId = params.get('eventId');
+      this.eventId = rawId ? Number(rawId) : null;
+      if (this.eventId !== null) {
+        this.loadEventBlocks(this.eventId);
+      }
+    })
+
     this.initForm();
 
     this.activityForm.get('activityType')?.valueChanges.subscribe(type => {
@@ -82,6 +93,7 @@ export class AdminCreateActivityComponent implements OnInit {
       evaluationMethod: ['AUTOMATIC', Validators.required],
       availableAt: ['', Validators.required],
       dueDate: ['', Validators.required],
+      lessonBlockId: [null, Validators.required],
       isOptional: [false],
       isGradable: [false],
       maxAttempts: [null],
@@ -134,6 +146,7 @@ export class AdminCreateActivityComponent implements OnInit {
     }
 
     const payload = this.activityForm.value;
+    if (this.eventId === null) {return;}
     this.activityService.createActivity(this.eventId, payload).subscribe({
       next: () => {
         this.messageService.add({
@@ -149,5 +162,11 @@ export class AdminCreateActivityComponent implements OnInit {
         detail: err.message,
       })
     });
+  }
+
+  loadEventBlocks(id: number): void {
+    this.eventService.getEventBlocks(id).subscribe(blocks => {
+      this.availableBlocks = blocks
+    })
   }
 }

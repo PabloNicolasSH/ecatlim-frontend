@@ -25,10 +25,34 @@
 
     <form [formGroup]="activityForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <p-floatlabel variant="on" class="md:col-span-2">
           <input id="title" pInputText formControlName="title" type="text" class="w-full" required/>
           <label for="title">Título de la Actividad</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on">
+          <p-select
+            id="lessonBlock"
+            [options]="availableBlocks"
+            optionLabel="name"
+            optionValue="id"
+            formControlName="lessonBlockId"
+            appendTo="body"
+            styleClass="w-full"
+            [filter]="true"
+            filterBy="code,name"
+          >
+            <ng-template #item let-block>
+              <div class="flex items-center">
+                <span class="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                  {{ block.code }}
+                </span>
+                <span class="font-medium text-gray-700">{{ block.name }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+          <label for="lessonBlock">Bloque Formativo de la actividad</label>
         </p-floatlabel>
 
         <p-floatlabel variant="on">
