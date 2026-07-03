@@ -1,0 +1,193 @@
+<div class="max-w-7xl mx-auto p-4 md:p-6">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-orange-900 mb-2">Biblioteca de Recursos</h1>
+      <p class="text-gray-600">Descubre, descarga y comparte materiales educativos diseñados para inspirar la curiosidad y el aprendizaje en el aula.</p>
+    </div>
+    <p-button
+      label="Nuevo Recurso"
+      icon="pi pi-plus"
+      severity="warn"
+      (onClick)="openAddModal()"
+      styleClass="shadow-sm font-semibold">
+    </p-button>
+  </div>
+
+  <div class="flex flex-wrap gap-2 mb-8">
+    @for (cat of categories; track cat) {
+      <p-button
+        [label]="cat"
+        [rounded]="true"
+        [severity]="activeCategory() === cat ? 'warn' : 'secondary'"
+        [outlined]="activeCategory() !== cat"
+        (onClick)="activeCategory.set(cat)"
+        styleClass="text-sm font-semibold px-4 py-2" />
+    }
+  </div>
+
+  <p-data-view
+    [value]="filteredResources()"
+    [paginator]="true"
+    [rows]="8"
+    styleClass="!border-none"
+  >
+    <ng-template #list let-items>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+        @for (res of items; track res.id) {
+          <p-card styleClass="h-full flex flex-col shadow-sm border border-gray-100 hover:shadow-md transition-shadow rounded-2xl overflow-hidden bg-white !p-0">
+
+            <div class="flex justify-between items-start p-6 pb-2">
+              <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-800 text-xl">
+                <i [class]="getIconForType(res.type)"></i>
+              </div>
+              <p-tag [value]="res.type" [severity]="getSeverityForType(res.type)" />
+            </div>
+
+            <div class="grow flex flex-col p-6 pt-0">
+              <h2 class="text-xl font-bold text-gray-700 mb-2">{{ res.name }}</h2>
+
+              @if (res.description && res.description.trim() !== '') {
+                <p class="text-sm text-gray-600 mb-4 line-clamp-3">{{ res.description }}</p>
+              } @else {
+                <div class="mb-3"></div>
+              }
+
+              <div class="flex flex-wrap gap-2 mt-auto">
+                @for (tag of res.tags; track tag.id) {
+                  <p-tag [value]="tag.name" [rounded]="true" styleClass="bg-orange-50 text-orange-900 border-none" />
+                }
+              </div>
+            </div>
+
+            <div class="w-full">
+              <div class="grid w-full gap-2 p-6 pt-0"
+                   [class.grid-cols-1]="res.type === 'LINK' || res.type === 'VIDEO_LINK'"
+                   [class.grid-cols-2]="res.type !== 'LINK' && res.type !== 'VIDEO_LINK'">
+
+                @if (res.type === 'LINK') {
+                  <p-button label="Visitar" icon="pi pi-external-link" styleClass="w-full" (onClick)="viewResource(res)"/>
+                } @else if (res.type === 'VIDEO_LINK') {
+                  <p-button label="Ver Vídeo" icon="pi pi-play-circle" styleClass="w-full" (onClick)="viewResource(res)"/>
+                } @else {
+                  <p-button label="Ver" [outlined]="true" styleClass="w-full" (onClick)="viewResource(res)"/>
+                  <p-button label="Descargar" icon="pi pi-download" severity="warn" styleClass="w-full" (onClick)="download(res)"/>
+                }
+              </div>
+            </div>
+          </p-card>
+        }
+      </div>
+    </ng-template>
+  </p-data-view>
+</div>
+
+<p-dialog
+  header="Añadir Nuevo Recurso"
+  [modal]="true"
+  [(visible)]="displayAddModal"
+  [style]="{ width: '35rem' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="resourceForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 mt-2">
+
+    <div class="flex flex-col gap-1">
+      <label for="name" class="font-semibold text-gray-700">Nombre del recurso <span class="text-red-500">*</span></label>
+      <input pInputText id="name" formControlName="name" placeholder="Ej: Guía de nudos nivel 1" class="w-full" />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="description" class="font-semibold text-gray-700">Descripción</label>
+      <textarea pTextarea id="description" formControlName="description" rows="3" placeholder="Breve resumen del contenido..." class="w-full"></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1">
+        <label for="type" class="font-semibold text-gray-700">Tipo de Archivo <span class="text-red-500">*</span></label>
+        <p-select id="type" formControlName="type" [options]="resourceTypes" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="tags" class="font-semibold text-gray-700">Etiquetas</label>
+        <p-multiSelect
+          #tagSelect
+          id="tags"
+          formControlName="tagNames"
+          [options]="availableTags()"
+          optionLabel="name"
+          optionValue="name"
+          display="chip"
+          placeholder="Selecciona o busca etiquetas..."
+          [filter]="true"
+          filterPlaceHolder="Escribe para buscar..."
+          (onFilter)="onTagFilter($event)"
+          styleClass="w-full"
+          appendTo="body">
+
+          <ng-template pTemplate="emptyfilter">
+            <div class="flex flex-col items-center justify-center p-4 text-center">
+              <i class="pi pi-tags text-2xl text-gray-300 mb-2"></i>
+              <span class="text-gray-600 mb-3">No se encontró "<b>{{ currentSearch() }}</b>"</span>
+
+              <p-button
+                label="Crear etiqueta"
+                icon="pi pi-plus"
+                size="small"
+                severity="warn"
+                [outlined]="true"
+                [loading]="isCreatingTag()"
+                (onClick)="createInlineTag(currentSearch())"
+                styleClass="w-full">
+              </p-button>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="empty">
+            <div class="p-3 text-gray-500 text-center">No hay etiquetas creadas en el sistema.</div>
+          </ng-template>
+
+          <ng-template pTemplate="footer">
+            <div class="p-2 border-t border-gray-100 bg-gray-50 rounded-b-md">
+              <p-button
+                label="Añadir nueva etiqueta..."
+                icon="pi pi-plus"
+                [text]="true"
+                severity="warn"
+                styleClass="w-full text-left justify-start font-semibold text-sm"
+                (onClick)="openNewTagModal()">
+              </p-button>
+            </div>
+          </ng-template>
+
+        </p-multiSelect>
+      </div>
+    </div>
+
+    @if (resourceForm.get('type')?.value !== 'LINK' && resourceForm.get('type')?.value !== 'VIDEO_LINK') {
+      <div class="flex flex-col gap-1 mt-2">
+        <label class="font-semibold text-gray-700">Archivo <span class="text-red-500">*</span></label>
+        <p-fileupload
+          mode="basic"
+          chooseLabel="Seleccionar Archivo"
+          chooseIcon="pi pi-upload"
+          [auto]="false"
+          (onSelect)="onFileSelect($event)"
+          [maxFileSize]="10000000"
+          styleClass="w-full">
+        </p-fileupload>
+        @if (selectedFile) {
+          <small class="text-green-600 mt-1"><i class="pi pi-check-circle"></i> Archivo listo: {{ selectedFile.name }}</small>
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col gap-1 mt-2">
+        <label class="font-semibold text-gray-700">URL del Enlace <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="blobPath" placeholder="https://..." class="w-full" />
+      </div>
+    }
+
+    <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
+      <p-button label="Guardar Recurso" icon="pi pi-save" type="submit" [loading]="isSubmitting()" [disabled]="resourceForm.invalid"></p-button>
+    </div>
+  </form>
+</p-dialog>
