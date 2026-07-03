@@ -63,4 +63,12 @@ export class UserService {
   getUsersByRole(role: Role) {
     return this.http.get<User[]>(`${environment.apiUrl}/user/admin/all/${role}`);
   }
+
+  uploadAvatar(formData: FormData): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/users/me/files/avatar`, formData);
+  }
+
+  downloadSecureFile(fileUrl: string): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}${fileUrl}`, { responseType: 'blob' });
+  }
 }

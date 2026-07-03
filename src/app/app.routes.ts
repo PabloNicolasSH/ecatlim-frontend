@@ -5,7 +5,7 @@ import {MainComponent} from './core/main/main.component';
 import {authGuard} from './core/auth/auth.guard';
 import {HomeComponent} from './features/home/home.component';
 import {redirect} from './core/auth/redirect.guard';
-import {UserProfileComponent} from './features/user-profile/user-profile.component';
+import {UserProfileComponent} from './features/profile/user-profile/user-profile.component';
 import {UserListComponent} from './features/user-list/user-list.component';
 import {ResetPasswordComponent} from './features/reset-password/reset-password.component';
 import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';
@@ -22,8 +22,12 @@ import {EducationOfferComponent} from './features/education-offer/education-offe
 import {
   UserEducationStagesProgressComponent
 } from './features/user-education-stages-progress/user-education-stages-progress.component';
-import {AdminCreateEventComponent} from './features/event-creator/admin-create-event/admin-create-event.component';
-import {EventCalendarComponent} from './features/event-calendar/event-calendar.component';
+import {AdminEditCreateEventComponent} from './features/event-creator/admin-create-event/admin-edit-create-event.component';
+import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
+import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
+import {AdminCreateActivityComponent} from './features/admin-create-activity/admin-create-activity.component';
+import {UserActivityViewComponent} from './features/user-activity-view/user-activity-view.component';
+import {ResourceLibraryComponent} from './features/resource-library/resource-library.component';
 
 export const routes: Routes = [
   {
@@ -79,11 +83,19 @@ export const routes: Routes = [
       },
       {
         path: "calendario",
-        component: EventCalendarComponent
+        component: UserEventCalendarComponent
       },
       {
         path: "oferta-educativa",
         component: EducationOfferComponent
+      },
+      {
+        path: "biblioteca",
+        component: ResourceLibraryComponent
+      },
+      {
+        path: ":eventId/actividades",
+        component: UserActivityViewComponent
       },
       {
         path: "mi-progreso",
@@ -103,7 +115,19 @@ export const routes: Routes = [
       },
       {
         path: "admin/eventos-formativos",
-        component: AdminCreateEventComponent
+        component: AdminEventCalendarComponent
+      },
+      {
+        path: "admin/eventos-formativos/crear-evento",
+        component: AdminEditCreateEventComponent
+      },
+      {
+        path: "admin/eventos-formativos/editar/:id",
+        component: AdminEditCreateEventComponent
+      },
+      {
+        path: "admin/eventos-formativos/:eventId/actividades/crear-nueva",
+        component: AdminCreateActivityComponent
       },
       {
         path: "admin/oferta-educativa",

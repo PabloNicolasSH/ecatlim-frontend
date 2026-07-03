@@ -11,7 +11,9 @@
       <span class="font-bold text-xl">Añadir un Nuevo Usuario</span>
     } @else {
       <div class="flex flex-col">
-        <span class="font-bold text-xl">{{userToEdit.name}} {{userToEdit.surname}}</span>
+        <span class="font-bold text-xl">
+          {{ form.get('selectedRole')?.value === 'ADMIN' ? 'Administrador' : (userToEdit.profile?.name + ' ' + userToEdit.profile?.surname) }}
+        </span>
         <small class="text-surface-500">Actualice la información del usuario.</small>
       </div>
     }
@@ -19,9 +21,24 @@
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-3">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div class="flex flex-col gap-3">
-          <p class="text-cyan-900 font-bold border-b border-gray-200">Nombre y Apellidos</p>
+
+      <div class="flex flex-col gap-3">
+        <p class="text-cyan-900 font-bold border-b border-gray-200">Credenciales del Sistema</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <p-floatlabel variant="on">
+            <input id="email" pInputText formControlName="email" class="w-full" required/>
+            <label for="email">Correo Electrónico</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-select id="role" [options]="roles" formControlName="selectedRole" appendTo="body" class="w-full" required/>
+            <label for="role">Rol asignado</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      @if (form.get('selectedRole')?.value !== 'ADMIN') {
+        <div class="flex flex-col gap-3 animate-fade-in mt-2">
+          <p class="text-cyan-900 font-bold border-b border-gray-200">Datos Personales (Perfil)</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             <p-floatlabel variant="on">
               <input id="name" pInputText formControlName="name" class="w-full" required/>
@@ -34,62 +51,49 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-3">
-          <p class="text-cyan-900 font-bold border-b border-gray-200">Datos de Contacto</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+        <div class="flex flex-col gap-3 animate-fade-in">
+          <p class="text-cyan-900 font-bold border-b border-gray-200">Detalles de la Ficha Scout</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
             <p-floatlabel variant="on">
-              <input id="email" pInputText formControlName="email" class="w-full" required/>
-              <label for="email">Correo</label>
+              <input id="census" pInputText formControlName="census" type="number" class="w-full" />
+              <label for="census">Censo</label>
             </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <p-select id="scoutGroup" [options]="scoutGroups" optionLabel="name" formControlName="selectedScoutGroup" appendTo="body" class="w-full" />
+              <label for="scoutGroup">Grupo Scout</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <input id="nif" pInputText formControlName="nif" class="w-full" />
+              <label for="nif">DNI/NIE</label>
+            </p-floatlabel>
+
             <p-floatlabel variant="on">
               <input id="phone" pInputText formControlName="phone" class="w-full" />
               <label for="phone">Teléfono</label>
             </p-floatlabel>
           </div>
         </div>
-      </div>
 
-      <div class="flex flex-col gap-3">
-        <p class="text-cyan-900 font-bold border-b border-gray-200">Información Personal</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
-          <p-floatlabel variant="on">
-            <input id="census" pInputText formControlName="census" type="number" class="w-full" />
-            <label for="census">Censo</label>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-1.5 animate-fade-in">
+          <p-floatlabel variant="on" class="md:col-span-2">
+            <input id="address" pInputText formControlName="address" class="w-full" />
+            <label for="address">Dirección Postal</label>
           </p-floatlabel>
 
-          <p-floatlabel variant="on">
-            <p-select id="role" [options]="roles" formControlName="selectedRole" appendTo="body" class="w-full" required/>
-            <label for="role">Rol</label>
+          <p-floatlabel variant="on" class="md:col-span-1">
+            <input id="city" pInputText formControlName="city" class="w-full" />
+            <label for="city">Municipio</label>
           </p-floatlabel>
 
-          <p-floatlabel variant="on">
-            <p-select id="scoutGroup" [options]="scoutGroups" optionLabel="name" formControlName="selectedScoutGroup" appendTo="body" class="w-full" />
-            <label for="scoutGroup">Entidad</label>
-          </p-floatlabel>
-
-          <p-floatlabel variant="on">
-            <input id="nif" pInputText formControlName="nif" class="w-full" />
-            <label for="nif">DNI/NIE</label>
+          <p-floatlabel variant="on" class="md:col-span-1">
+            <input id="country" pInputText formControlName="country" class="w-full" />
+            <label for="country">País</label>
           </p-floatlabel>
         </div>
-      </div>
+      }
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-1.5">
-        <p-floatlabel variant="on" class="md:col-span-2">
-          <input id="address" pInputText formControlName="address" class="w-full" />
-          <label for="address">Dirección Postal</label>
-        </p-floatlabel>
-
-        <p-floatlabel variant="on" class="md:col-span-1">
-          <input id="city" pInputText formControlName="city" class="w-full" />
-          <label for="city">Municipio</label>
-        </p-floatlabel>
-
-        <p-floatlabel variant="on" class="md:col-span-1">
-          <input id="country" pInputText formControlName="country" class="w-full" />
-          <label for="country">País</label>
-        </p-floatlabel>
-      </div>
     </div>
 
     <div class="mt-8 flex flex-row justify-end gap-2">

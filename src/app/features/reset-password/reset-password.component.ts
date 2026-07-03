@@ -36,7 +36,7 @@ export class ResetPasswordComponent implements OnInit{
   changePassword: boolean = false;
   actualPassword: string = '';
 
-  protected passwordRegex: RegExp = /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)_\+\[\]{};':"\\|,.<>\/?`~\-])(?!.*\s).{8,}$/;
+  protected passwordRegex: RegExp = /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?`~\-])(?!.*\s).{8,}$/;
 
 
   protected passwordValidationRules = [
@@ -45,7 +45,7 @@ export class ResetPasswordComponent implements OnInit{
     { key: 'may', regex: /.*[A-ZÑ].*/, text: 'Al menos 1 mayúscula. ' },
     { key: 'min', regex: /.*[a-zñ].*/, text: 'Al menos 1 minúscula. ' },
     { key: 'dig', regex: /.*\d.*/, text: 'Al menos 1 número. <br>' },
-    { key: 'special', regex: /[!@#\$%\^&\*\(\)_\+\[\]{};':"\\|,.<>\/?`~\-]/, text: 'Al menos 1 carácter especial (!@#?%_.:)'}
+    { key: 'special', regex: /[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?`~\-]/, text: 'Al menos 1 carácter especial (!@#?%_.:)'}
   ];
 
   constructor() {

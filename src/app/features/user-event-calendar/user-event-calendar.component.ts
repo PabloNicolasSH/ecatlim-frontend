@@ -1,20 +1,23 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
-import {CalendarOptions} from '@fullcalendar/core';
-import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { CalendarOptions } from '@fullcalendar/core';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import {EventService} from '../../shared/services/event.service';
-import {EventCalendar} from '../../shared/models/event.model';
-import {DatePipe} from '@angular/common';
-import {Button} from 'primeng/button';
-import {Tag} from 'primeng/tag';
-import {Dialog} from 'primeng/dialog';
-import {MessageService, PrimeTemplate} from 'primeng/api';
-import {Chip} from 'primeng/chip';
-import {ActivatedRoute, Router} from '@angular/router';
-import {map, switchMap, tap} from 'rxjs';
+import { EventService } from '../../shared/services/event.service';
+import { UserEventCalendar } from '../../shared/models/event.model';
+import { DatePipe } from '@angular/common';
+import { Button } from 'primeng/button';
+import { Tag } from 'primeng/tag';
+import { Dialog } from 'primeng/dialog';
+import { MessageService, PrimeTemplate } from 'primeng/api';
+import { Chip } from 'primeng/chip';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map, switchMap, tap } from 'rxjs';
+import { TabPanel, TabView } from 'primeng/tabview';
+import { EnrollmentService } from '../../shared/services/enrollment.service';
+import { Popover } from 'primeng/popover';
 
 @Component({
-  selector: 'app-event-calendar',
+  selector: 'app-user-event-calendar',
   imports: [
     FullCalendarModule,
     DatePipe,
@@ -22,25 +25,31 @@ import {map, switchMap, tap} from 'rxjs';
     Tag,
     Dialog,
     PrimeTemplate,
-    Chip
+    Chip,
+    TabView,
+    TabPanel,
+    Popover
   ],
-  templateUrl: './event-calendar.component.html',
-  styleUrl: './event-calendar.component.scss'
+  templateUrl: './user-event-calendar.component.html',
+  styleUrl: './user-event-calendar.component.scss'
 })
-export class EventCalendarComponent implements OnInit{
+export class UserEventCalendarComponent implements OnInit {
 
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
   protected readonly eventService = inject(EventService);
+  protected readonly enrollmentService = inject(EnrollmentService);
   protected readonly messageService = inject(MessageService);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
 
-  userEvents = signal<EventCalendar[]>([]);
-  allEvents = signal<EventCalendar[]>([]);
+  userEvents = signal<UserEventCalendar[]>([]);
+  allEvents = signal<UserEventCalendar[]>([]);
   showingAllEvents = signal(false);
   showModal = signal(false);
   selectedEvent = signal<any>(null);
+
+  selectedBlockIds = signal<number[]>([]);
 
   isMultiDay = computed(() => {
     const event = this.selectedEvent();
@@ -57,6 +66,22 @@ export class EventCalendarComponent implements OnInit{
     return [...events]
       .filter(e => new Date(e.startDate) >= new Date())
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  });
+
+  orderedLessonBlocks = computed(() => {
+    const event = this.selectedEvent();
+    if (!event || !event.lessonBlocks) return [];
+
+    return [...event.lessonBlocks].sort((a, b) => a.code.localeCompare(b.code));
+  });
+
+  enrolledLessonBlocks = computed(() => {
+    const event = this.selectedEvent();
+    if (!event || !event.lessonBlocks || !event.enrolledBlockCodes) return [];
+
+    return [...event.lessonBlocks]
+      .filter(lb => event.enrolledBlockCodes.includes(lb.code))
+      .sort((a, b) => a.code.localeCompare(b.code));
   });
 
   calendarOptions: CalendarOptions = {
@@ -87,7 +112,7 @@ export class EventCalendarComponent implements OnInit{
   }
 
   loadEvents() {
-    this.eventService.getEventsForCalendar()
+    this.eventService.getUserEventsForCalendar()
       .pipe(
         map(events => events.map(event => ({
           ...event,
@@ -156,10 +181,11 @@ export class EventCalendarComponent implements OnInit{
       start: event.startDate,
       end: event.endDate,
       description: event.description,
+      contents: event.contents,
       location: event.location,
       organizer: event.organizer,
       educationStageCode: event.educationStageCode,
-      lessonBlockCodes: event.lessonBlockCodes,
+      lessonBlocks: event.lessonBlocks,
       attendeesCount: event.attendeesCount,
       canParticipate: event.canParticipate,
       isCurrentUserAttending: event.isCurrentUserAttending
@@ -184,55 +210,100 @@ export class EventCalendarComponent implements OnInit{
     this.showModal.set(true);
   }
 
-  registerToEvent(eventId: number) {
-    this.eventService.enroll(eventId)
+  registerToEvent(eventId: number, blockIds: number[]) {
+    if (!blockIds || blockIds.length === 0) return;
+
+    this.enrollmentService.enrollInEvent(eventId, blockIds)
       .pipe(
         tap(() => {
           this.messageService.add({
-            summary: "¡Te has inscrito correctamente al evento!",
+            summary: "¡Inscripción procesada con éxito!",
             detail: "Acuérdate de revisar los detalles en tu calendario.",
             severity: 'success',
           });
+          this.selectedBlockIds.set([]); // Reseteamos la selección
         }),
-        switchMap(() => this.eventService.getEventsForCalendar()),
-        tap(events => {
-          const mappedEvents = events.map(event => ({
-            ...event,
-            id: event.id?.toString(),
-            start: event.startDate,
-            end: event.endDate,
-            classNames: event.isCurrentUserAttending ? ['event-enrolled'] : [],
-            title: event.isCurrentUserAttending ? `✓ ${event.title}` : event.title,
-            backgroundColor: this.getColor(event.educationStageCode),
-            borderColor: this.getColor(event.educationStageCode)
-          }));
-
-          this.allEvents.set(mappedEvents);
-          this.userEvents.set(mappedEvents.filter(e => e.isCurrentUserAttending || e.canParticipate));
-
-          this.calendarOptions = {
-            ...this.calendarOptions,
-            events: this.userEvents()
-          };
-
-          const updatedEvent = mappedEvents.find(e => e.id == eventId.toString());
-          if (updatedEvent) {
-            this.selectedEvent.set({
-              ...updatedEvent,
-              id: Number(updatedEvent.id)
-            });
-          }
-        })
+        switchMap(() => this.eventService.getUserEventsForCalendar()),
+        tap(events => this.refreshCalendarAndSelected(events, eventId))
       )
       .subscribe({
-        error: (err) => {
-          this.messageService.add({
-            summary: "Error al inscribirse",
-            detail: "No se pudo completar la inscripción.",
-            severity: 'error',
-          });
-        }
+        error: () => this.showErrorToast("Error al inscribirse")
       });
+  }
+
+  unregisterFromEvent(eventId: number, blockIds: number[]) {
+    if (!blockIds || blockIds.length === 0) return;
+
+    this.enrollmentService.unenrollInEvent(eventId, blockIds)
+      .pipe(
+        tap(() => {
+          this.messageService.add({
+            summary: "Te has desinscrito correctamente",
+            severity: 'success',
+          });
+          this.selectedBlockIds.set([]); // Reseteamos la selección
+        }),
+        switchMap(() => this.eventService.getUserEventsForCalendar()),
+        tap(events => this.refreshCalendarAndSelected(events, eventId))
+      )
+      .subscribe({
+        error: () => this.showErrorToast("Error al desinscribirse")
+      });
+  }
+
+  registerToAllBlocks(event: any) {
+    const allIds = event.lessonBlocks.map((lb: any) => lb.id);
+    this.registerToEvent(event.id, allIds);
+  }
+
+  unregisterFromAllBlocks(event: any) {
+    const allIds = event.lessonBlocks.map((lb: any) => lb.id);
+    this.unregisterFromEvent(event.id, allIds);
+  }
+
+  toggleBlockSelection(blockId: number, checked: boolean) {
+    if (checked) {
+      this.selectedBlockIds.update(ids => [...ids, blockId]);
+    } else {
+      this.selectedBlockIds.update(ids => ids.filter(id => id !== blockId));
+    }
+  }
+
+  private refreshCalendarAndSelected(events: any[], eventId: number) {
+    const mappedEvents = events.map(event => ({
+      ...event,
+      id: event.id?.toString(),
+      start: event.startDate,
+      end: event.endDate,
+      classNames: event.isCurrentUserAttending ? ['event-enrolled'] : [],
+      title: event.isCurrentUserAttending ? `✓ ${event.title}` : event.title,
+      backgroundColor: this.getColor(event.educationStageCode),
+      borderColor: this.getColor(event.educationStageCode)
+    }));
+
+    this.allEvents.set(mappedEvents);
+    this.userEvents.set(mappedEvents.filter(e => e.isCurrentUserAttending || e.canParticipate));
+
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      events: this.userEvents()
+    };
+
+    const updatedEvent = mappedEvents.find(e => e.id == eventId.toString());
+    if (updatedEvent) {
+      this.selectedEvent.set({
+        ...updatedEvent,
+        id: Number(updatedEvent.id)
+      });
+    }
+  }
+
+  private showErrorToast(summary: string) {
+    this.messageService.add({
+      summary: summary,
+      detail: "No se pudo completar la acción.",
+      severity: 'error',
+    });
   }
 
   getColor(educationStageCode: string | undefined) {

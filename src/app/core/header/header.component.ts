@@ -1,4 +1,4 @@
-import {Component, computed, HostListener, inject, signal, ViewChild, WritableSignal} from '@angular/core';
+import {Component, HostListener, inject, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
 import {MenuItem, MenuItemCommandEvent} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
@@ -12,11 +12,11 @@ import {Profile} from '../../shared/models/profile.model';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
 import {Notification} from '../../shared/models/notification.model';
+import {FileService} from '../../shared/services/file.service';
 
 @Component({
   selector: 'app-header',
   imports: [
-    SplitButton,
     Button,
     OverlayBadge,
     RouterLink,
@@ -29,16 +29,16 @@ import {Notification} from '../../shared/models/notification.model';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
 
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
+  protected readonly fileService = inject(FileService);
 
   @ViewChild('op') op!: Popover;
-  @ViewChild('drawerRef') drawerRef!: Drawer;
 
-  baseUserOptions!: MenuItem[];
   user!: Profile;
+  avatarUrl: any = null;
   sidebarVisible: boolean = false;
 
   windowWidth = signal(window.innerWidth);
@@ -47,28 +47,12 @@ export class HeaderComponent {
   notifies: WritableSignal<Notification[]> = signal([]);
   sidebarMenu!: MenuItem[];
 
-  userOptions = computed(() => {
-    if (this.windowWidth() < 768) {
-      return [
-        {
-          label: `Mensajes (${this.messages().length})`,
-          icon: 'pi pi-comments',
-          command: () => this.openMessages()
-        },
-        {
-          label: `Notificaciones (${this.notifies().length})`,
-          icon: 'pi pi-bell',
-          command: (event: any) => this.toggleNotifications(event)
-        },
-        { separator: true },
-        ...this.baseUserOptions
-      ];
+  ngOnInit() {
+    const savedMe = localStorage.getItem('me');
+    if (savedMe) {
+      this.user = JSON.parse(savedMe);
     }
-    return this.baseUserOptions;
-  });
-
-  constructor() {
-    this.createUserOptions();
+    this.fileService.avatarUrl$.subscribe(url => this.avatarUrl = url);
     this.createSidebarMenu();
   }
 
@@ -95,22 +79,6 @@ export class HeaderComponent {
 
   onMenuClick() {
     this.sidebarVisible = !this.sidebarVisible;
-  }
-
-  private createUserOptions() {
-    this.user = this.authService.getProfile();
-    this.baseUserOptions = [
-      {
-        label: 'Mi Perfil',
-        command: () => {this.router.navigateByUrl('/app/perfil')}
-      },
-      {separator: true},
-      {
-        label: 'Cerrar Sesión',
-        icon: 'pi pi-fw pi-power-off',
-        command: () => {this.authService.logout()}
-      }
-    ];
   }
 
   userFirstLetter() {
@@ -145,7 +113,11 @@ export class HeaderComponent {
       },
       {
         label: 'La Biblioteca',
-        icon: "pi pi-bookmark"
+        icon: "pi pi-bookmark",
+        command: () => {
+          this.router.navigateByUrl('/app/biblioteca');
+          this.sidebarVisible = false;
+        }
       },
       {
         label: 'Mi formación',
@@ -165,7 +137,7 @@ export class HeaderComponent {
         ]
       }
     ];
-    if (this.user.role == "ADMIN"){
+    if (this.user?.role == "ADMIN"){
       this.addAdminOptions();
     }
   }
@@ -192,5 +164,9 @@ export class HeaderComponent {
         }}
       ]
     });
+  }
+
+  protected logout() {
+    this.authService.logout()
   }
 }

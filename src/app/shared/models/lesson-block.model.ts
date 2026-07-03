@@ -8,4 +8,12 @@ export interface LessonBlock {
   recognizable: boolean;
   moduleId: number;
   code?: string;
+  educationStageId?: number;
+}
+
+export interface LessonBlockCalendarSummary {
+  id?: number;
+  name: string;
+  code: string;
+  hours: number;
 }

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EventCalendarComponent } from './event-calendar.component';
+import { UserAvatarModalComponent } from './user-avatar-modal.component';
 
-describe('EventCalendarComponent', () => {
-  let component: EventCalendarComponent;
-  let fixture: ComponentFixture<EventCalendarComponent>;
+describe('UserAvatarModelComponent', () => {
+  let component: UserAvatarModalComponent;
+  let fixture: ComponentFixture<UserAvatarModalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EventCalendarComponent]
+      imports: [UserAvatarModalComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EventCalendarComponent);
+    fixture = TestBed.createComponent(UserAvatarModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

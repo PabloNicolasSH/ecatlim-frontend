@@ -309,19 +309,19 @@ export const MyPreset = definePreset(Lara, {
         disabledOpacity: "0.6",
         iconSize: "1rem",
         anchorGutter: "2px",
-        primary: {
-            50: "#fbf7f4",
-            100: "#ebdacc",
-            200: "#dabca3",
-            300: "#ca9f7b",
-            400: "#ba8152",
-            500: "#aa642a",
-            600: "#915524",
-            700: "#77461d",
-            800: "#5e3717",
-            900: "#442811",
-            950: "#2b190b"
-        },
+      primary: {
+        50: "{amber.50}",
+        100: "{amber.100}",
+        200: "{amber.200}",
+        300: "{amber.300}",
+        400: "{amber.400}",
+        500: "{amber.500}",
+        600: "{amber.600}",
+        700: "{amber.700}",
+        800: "{amber.800}",
+        900: "{amber.900}",
+        950: "{amber.950}"
+      },
         formField: {
             paddingX: "0.75rem",
             paddingY: "0.625rem",

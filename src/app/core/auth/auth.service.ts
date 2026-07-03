@@ -5,6 +5,7 @@ import {Observable, tap} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
 import {User} from '../../shared/models/user.model';
+import {Profile} from '../../shared/models/profile.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +19,13 @@ export class AuthService {
     return this.http.post(`${environment.apiUrl}/auth/login`, userToLog).pipe(
       tap((res:any) => {
         localStorage.setItem('token', res.token);
+
+        const name = res.profile?.name || 'Administrador';
+        const surname = res.profile?.surname || 'Global';
+
         localStorage.setItem('me', JSON.stringify({
-          name: res.name,
-          surname: res.surname,
+          name: name,
+          surname: surname,
           email: res.email,
           role: res.role
         }));
@@ -42,7 +47,7 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  getProfile(): User {
+  getProfile(): Profile {
     const profile = localStorage.getItem('me');
     return profile ? JSON.parse(profile) : null;
   }
