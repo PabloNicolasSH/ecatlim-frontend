@@ -12,7 +12,7 @@ export class TagService {
   protected readonly http = inject(HttpClient)
 
   getTags(): Observable<LRTag[]> {
-    return this.http.get<LRTag[]>('/tags');
+    return this.http.get<LRTag[]>(`${environment.apiUrl}/tags`);
   }
 
   createTag(newName: string): Observable<LRTag> {

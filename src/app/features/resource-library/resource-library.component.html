@@ -25,50 +25,60 @@
     }
   </div>
 
-  <p-dataView #dv [value]="filteredResources()" layout="grid" [paginator]="true" [rows]="8">
-    <ng-template pTemplate="grid" let-resources>
+  <p-data-view
+    [value]="filteredResources()"
+    [paginator]="true"
+    [rows]="8"
+    styleClass="!border-none"
+  >
+    <ng-template #list let-items>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-        @for (res of resources; track res.id) {
-          <p-card styleClass="h-full flex flex-col shadow-sm border border-gray-100 hover:shadow-md transition-shadow rounded-2xl overflow-hidden">
+        @for (res of items; track res.id) {
+          <p-card styleClass="h-full flex flex-col shadow-sm border border-gray-100 hover:shadow-md transition-shadow rounded-2xl overflow-hidden bg-white !p-0">
 
-            <ng-template pTemplate="header">
-              <div class="flex justify-between items-start p-6 pb-0">
-                <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-800 text-xl">
-                  <i [class]="getIconForType(res.type)"></i>
-                </div>
-                <p-tag [value]="res.type" [severity]="getSeverityForType(res.type)" />
+            <div class="flex justify-between items-start p-6 pb-2">
+              <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-800 text-xl">
+                <i [class]="getIconForType(res.type)"></i>
               </div>
-            </ng-template>
-
-            <h2 class="text-xl font-bold text-gray-900 mb-2">{{ res.title }}</h2>
-            <p class="text-sm text-gray-600 mb-4">{{ res.description }}</p>
-
-            <div class="flex flex-wrap gap-2 mb-2">
-              @for (tag of res.tags; track tag.id) {
-                <p-tag [value]="tag.name" severity="warn" [rounded]="true" styleClass="bg-orange-50 text-orange-900 border-none" />
-              }
+              <p-tag [value]="res.type" [severity]="getSeverityForType(res.type)" />
             </div>
 
-            <ng-template pTemplate="footer">
-              <div class="mt-auto pt-4">
-                @if (res.type === 'ENLACE') {
-                  <p-button label="Visitar" icon="pi pi-external-link" styleClass="w-full" severity="warn" />
-                } @else if (res.type === 'VIDEO') {
-                  <p-button label="Ver Vídeo" icon="pi pi-play-circle" styleClass="w-full" severity="warn" />
-                } @else {
-                  <div class="flex gap-3 w-full">
-                    <p-button label="Ver" [outlined]="true" severity="warn" styleClass="flex-1" />
-                    <p-button label="Descargar" icon="pi pi-download" severity="warn" styleClass="flex-1" (onClick)="download(res)" />
-                  </div>
+            <div class="grow flex flex-col p-6 pt-0">
+              <h2 class="text-xl font-bold text-gray-700 mb-2">{{ res.name }}</h2>
+
+              @if (res.description && res.description.trim() !== '') {
+                <p class="text-sm text-gray-600 mb-4 line-clamp-3">{{ res.description }}</p>
+              } @else {
+                <div class="mb-3"></div>
+              }
+
+              <div class="flex flex-wrap gap-2 mt-auto">
+                @for (tag of res.tags; track tag.id) {
+                  <p-tag [value]="tag.name" [rounded]="true" styleClass="bg-orange-50 text-orange-900 border-none" />
                 }
               </div>
-            </ng-template>
+            </div>
 
+            <div class="w-full">
+              <div class="grid w-full gap-2 p-6 pt-0"
+                   [class.grid-cols-1]="res.type === 'LINK' || res.type === 'VIDEO_LINK'"
+                   [class.grid-cols-2]="res.type !== 'LINK' && res.type !== 'VIDEO_LINK'">
+
+                @if (res.type === 'LINK') {
+                  <p-button label="Visitar" icon="pi pi-external-link" styleClass="w-full" (onClick)="viewResource(res)"/>
+                } @else if (res.type === 'VIDEO_LINK') {
+                  <p-button label="Ver Vídeo" icon="pi pi-play-circle" styleClass="w-full" (onClick)="viewResource(res)"/>
+                } @else {
+                  <p-button label="Ver" [outlined]="true" styleClass="w-full" (onClick)="viewResource(res)"/>
+                  <p-button label="Descargar" icon="pi pi-download" severity="warn" styleClass="w-full" (onClick)="download(res)"/>
+                }
+              </div>
+            </div>
           </p-card>
         }
       </div>
     </ng-template>
-  </p-dataView>
+  </p-data-view>
 </div>
 
 <p-dialog
@@ -82,8 +92,8 @@
   <form [formGroup]="resourceForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 mt-2">
 
     <div class="flex flex-col gap-1">
-      <label for="title" class="font-semibold text-gray-700">Título <span class="text-red-500">*</span></label>
-      <input pInputText id="title" formControlName="title" placeholder="Ej: Guía de nudos nivel 1" class="w-full" />
+      <label for="name" class="font-semibold text-gray-700">Nombre del recurso <span class="text-red-500">*</span></label>
+      <input pInputText id="name" formControlName="name" placeholder="Ej: Guía de nudos nivel 1" class="w-full" />
     </div>
 
     <div class="flex flex-col gap-1">
@@ -153,7 +163,7 @@
       </div>
     </div>
 
-    @if (resourceForm.get('type')?.value !== 'LINK') {
+    @if (resourceForm.get('type')?.value !== 'LINK' && resourceForm.get('type')?.value !== 'VIDEO_LINK') {
       <div class="flex flex-col gap-1 mt-2">
         <label class="font-semibold text-gray-700">Archivo <span class="text-red-500">*</span></label>
         <p-fileupload
@@ -172,8 +182,7 @@
     } @else {
       <div class="flex flex-col gap-1 mt-2">
         <label class="font-semibold text-gray-700">URL del Enlace <span class="text-red-500">*</span></label>
-        <input pInputText placeholder="https://..." class="w-full" />
-        <small class="text-gray-500">Nota: Al ser un enlace, no es necesario subir archivo físico.</small>
+        <input pInputText formControlName="blobPath" placeholder="https://..." class="w-full" />
       </div>
     }
 

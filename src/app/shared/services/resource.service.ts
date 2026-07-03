@@ -12,16 +12,16 @@ export class ResourceService {
   protected readonly http = inject(HttpClient);
 
   getAll(): Observable<LearningResource[]> {
-    return this.http.get<LearningResource[]>(`${environment.apiUrl}`);
+    return this.http.get<LearningResource[]>(`${environment.apiUrl}/learning-resources`);
   }
 
   download(id: number): Observable<Blob> {
-    return this.http.get(`${environment.apiUrl}/${id}/download`, {
+    return this.http.get(`${environment.apiUrl}/learning-resources/${id}/download`, {
       responseType: 'blob'
     });
   }
 
   upload(formData: FormData): Observable<LearningResource> {
-    return this.http.post<LearningResource>(`${environment.apiUrl}/add`, formData);
+    return this.http.post<LearningResource>(`${environment.apiUrl}/learning-resources/add`, formData);
   }
 }
