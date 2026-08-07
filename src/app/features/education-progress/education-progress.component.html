@@ -1,0 +1,347 @@
+<div class="min-h-screen p-4 md:p-8 font-sans text-[#4A3B32]">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <div>
+      <h1 class="text-3xl font-extrabold text-ecatlim tracking-tight">Mi Progreso</h1>
+      <p class="text-xs text-[#8C7A6B] mt-1">Consulta el avance de tus etapas formativas y gestiona tus acreditaciones.</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-[#EBE5DC]">
+      <div class="flex items-center gap-2 mb-4 text-ecatlim">
+        <i class="pi pi-sitemap text-sm"></i>
+        <h2 class="text-base font-bold text-ecatlim">Ruta de Formación</h2>
+      </div>
+
+      <p-carousel
+        [value]="stages()"
+        [numVisible]="3"
+        [numScroll]="1"
+        [responsiveOptions]="responsiveOptions"
+        [circular]="false"
+        [showNavigators]="false"
+        [showIndicators]="false"
+        styleClass="custom-stage-carousel"
+      >
+        <ng-template pTemplate="item" let-stage>
+          <div class="p-2 h-full">
+            <div
+              (click)="selectStage(stage)"
+              class="relative rounded-xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between h-32 border"
+              [ngClass]="{
+                'bg-ecatlim text-white border-ecatlim shadow-md': selectedStage()?.id === stage.id,
+                'bg-[#EFEAE2] text-[#3D2E24] border-[#E5DDD2] hover:border-[#795221]': selectedStage()?.id !== stage.id && stage.isEnabled,
+                'bg-[#ECEAE6] text-[#A69B91] border-[#E2DFD9] opacity-60 cursor-not-allowed': !stage.isEnabled
+              }"
+            >
+              <div class="flex justify-between items-start">
+                <div
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                  [ngClass]="selectedStage()?.id === stage.id ? 'bg-white/10 text-white' : 'bg-white/60 text-[#795221]'"
+                >
+                  <i [class]="stage.status === 'COMPLETED' ? 'pi pi-check-circle' : 'pi pi-graduation-cap'"></i>
+                </div>
+
+                <span
+                  class="text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest"
+                  [ngClass]="{
+                    'bg-white/20 text-white': selectedStage()?.id === stage.id,
+                    'bg-white/80 text-[#795221]': selectedStage()?.id !== stage.id && stage.status === 'COMPLETED',
+                    'bg-[#DED6CB] text-[#5C4D42]': selectedStage()?.id !== stage.id && stage.status !== 'COMPLETED'
+                  }"
+                >
+                  {{ stage.status | educationStageStatus }}
+                </span>
+              </div>
+
+              <div>
+                <h3 class="font-extrabold text-xl leading-snug">{{ stage.name }}</h3>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </p-carousel>
+    </div>
+
+    <div class="flex justify-between items-center px-1">
+      <h2 class="text-xl font-black text-[#3D2E24] flex items-center gap-2">
+        <i [class]="selectedStage()?.status === 'COMPLETED' ? 'pi pi-check-circle text-emerald-600' : 'pi pi-graduation-cap text-[#795221]'"></i>
+        Mi paso por {{ selectedStage()?.name || 'Formación Scout' }}
+      </h2>
+      <span class="text-[11px] font-bold text-[#795221] bg-[#EFEAE2] px-3 py-1 rounded-full border border-[#E5DDD2]">
+        {{ activeEnrollment()?.modules?.length || 0 }} Módulos totales
+      </span>
+    </div>
+
+    <div class="grid grid-cols-12 gap-6">
+
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+
+        <div class="space-y-3">
+          @for (module of activeEnrollment()?.modules; track module.code) {
+            <div
+              class="rounded-2xl border transition-all overflow-hidden"
+              [ngClass]="{
+            'bg-[#FFFDF9] border-[#EADFCF] shadow-sm': expandedModuleCode() === module.code,
+            'bg-white border-[#EBE5DC]': expandedModuleCode() !== module.code
+          }"
+            >
+              <button
+                (click)="toggleModule(module.code)"
+                class="w-full p-4 flex justify-between items-center bg-transparent border-0 cursor-pointer text-left"
+              >
+                <div class="flex items-center gap-3 me-3">
+                  <div
+                    class="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 font-bold"
+                    [ngClass]="{
+                  'bg-emerald-500 text-white': getModuleStatus(module) === 'Superada',
+                  'bg-[#D89052] text-white': getModuleStatus(module) === 'En Curso',
+                  'bg-[#EBE5DC] text-[#A69B91]': getModuleStatus(module) === 'Pendiente'
+                }"
+                  >
+                    @if (getModuleStatus(module) === 'Superada') {
+                      <i class="pi pi-check text-xs text-white"></i>
+                    } @else if (getModuleStatus(module) === 'En Curso') {
+                      <i class="pi pi-ellipsis-h text-xs"></i>
+                    } @else {
+                      <i class="pi pi-lock text-xs"></i>
+                    }
+                  </div>
+
+                  <div>
+                    <h3 class="font-bold text-[#3D2E24]">
+                      {{ module.code }} {{ module.name }}
+                    </h3>
+                  </div>
+                </div>
+
+                <i
+                  class="pi pi-chevron-down text-xs text-[#8C7A6B] transition-transform duration-300"
+                  [class.rotate-180]="expandedModuleCode() === module.code"
+                ></i>
+              </button>
+
+              @if (expandedModuleCode() === module.code) {
+                <div class="px-5 pb-5 pt-2 border-t border-[#F2ECE4]">
+                  <div class="space-y-3">
+                    @if (module.blocks && module.blocks.length > 0) {
+                      @for (block of module.blocks; track $index) {
+                        <div class="space-y-1.5">
+                          <div class="flex items-center justify-between text-xs text-[#4A3B32] p-2 bg-[#FAF8F5] rounded-lg border border-[#EBE5DC]">
+                            <div class="flex items-center gap-2.5">
+                              <i
+                                class="pi text-[14px]"
+                                [ngClass]="{
+                              'pi-check-circle text-emerald-600 font-bold': block.status === 'Superada',
+                              'pi-graduation-cap text-[#D89052]': block.status === 'En Curso',
+                              'pi-circle text-[#C2B7AC]': block.status === 'Pendiente'
+                            }"
+                              ></i>
+                              <span class="font-bold text-[12px]">{{ block.code }} {{ block.name }}</span>
+                            </div>
+
+                            <span
+                              class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+                              [ngClass]="{
+                            'bg-emerald-100 text-emerald-800': block.status === 'Superada',
+                            'bg-amber-100 text-amber-800': block.status === 'En Curso',
+                            'bg-gray-100 text-gray-500': block.status === 'Pendiente'
+                          }"
+                            >
+                          {{ block.status }}
+                        </span>
+                          </div>
+
+                          @if (block.activities && block.activities.length > 0) {
+                            <div class="pl-6 space-y-1">
+                              @for (act of block.activities; track act.name) {
+                                <div class="flex items-center justify-between text-[11px] text-[#6E5D50]">
+                              <span class="flex items-center gap-1.5">
+                                <i class="pi pi-minus text-[8px] text-[#C2B7AC]"></i>
+                                <span>{{ act.name }}</span>
+                              </span>
+                                  <span class="text-[9px] font-bold text-[#8C7A6B]">{{ act.result || (act.completed ? 'Apto' : 'Pendiente') }}</span>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    } @else {
+                      <p class="text-xs italic text-[#8C7A6B] py-2">Sin bloques asignados en este módulo.</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-[#EBE5DC] space-y-4">
+          <div class="flex items-center gap-2 text-[#3D2E24]">
+            <i class="pi pi-folder text-[#795221]"></i>
+            <h3 class="text-sm font-bold">Documentación y Archivos</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="p-4 rounded-xl border border-[#EBE5DC] bg-[#FAF8F5] flex flex-col justify-between h-28">
+              <div class="flex justify-between items-start">
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-file-edit text-[#795221] text-sm"></i>
+                  <span class="text-xs font-bold text-[#3D2E24]">Plan Personal de Formación</span>
+                </div>
+
+                <span
+                  class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+                  [ngClass]="planUploaded() ? 'bg-emerald-100 text-emerald-800' : 'bg-[#F3E3C3] text-[#795221]'"
+                >
+                  {{ planUploaded() ? 'Entregado' : 'Pendiente' }}
+                </span>
+              </div>
+
+              <input
+                #fileInput
+                type="file"
+                class="hidden"
+                (change)="onFileSelected($event)"
+                accept=".pdf,.doc,.docx"
+              />
+
+              <div class="flex gap-2">
+                <a
+                  href="assets/templates/plan_personal_formacion.docx"
+                  download="Plan_Personal_Formacion_ECATLIM.docx"
+                  class="flex-1 py-1 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer flex items-center justify-center gap-1 no-underline"
+                  title="Descargar plantilla base"
+                >
+                  <i class="pi pi-download text-[10px]"></i> Plantilla
+                </a>
+
+                @if (!planUploaded()) {
+                  <button
+                    (click)="fileInput.click()"
+                    class="flex-1 py-1 text-xs font-bold bg-[#633F17] text-white rounded-lg hover:bg-[#4D3112] border-0 cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <i class="pi pi-upload text-[10px]"></i> Subir
+                  </button>
+                } @else {
+                  <a
+                    [href]="fileUrl()"
+                    target="_blank"
+                    class="flex-1 py-1 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer flex items-center justify-center gap-1 no-underline"
+                    title="Ver archivo actual en línea"
+                  >
+                    <i class="pi pi-eye text-[10px]"></i> Ver
+                  </a>
+
+                  <button
+                    (click)="fileInput.click()"
+                    class="py-1 px-2.5 text-xs font-bold bg-[#633F17] text-white rounded-lg hover:bg-[#4D3112] border-0 cursor-pointer flex items-center justify-center gap-1"
+                    title="Reemplazar archivo existente"
+                  >
+                    <i class="pi pi-refresh text-[10px]"></i> Sustituir
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl border border-[#EBE5DC] bg-[#FAF8F5] flex flex-col justify-between h-28">
+              <div class="flex justify-between items-start">
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-check-circle text-emerald-600 text-sm"></i>
+                  <span class="text-xs font-bold text-[#3D2E24]">Visto Bueno de la Entidad</span>
+                </div>
+                <span class="text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Aprobado</span>
+              </div>
+              <button class="w-full py-1 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer">
+                <i class="pi pi-eye text-[10px] mr-1"></i> Ver Archivo
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-[#EBE5DC]">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold text-[#3D2E24]">Eventos Asistidos</h3>
+            <i class="pi pi-history text-xs text-[#8C7A6B]"></i>
+          </div>
+
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3 text-xs">
+              <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">E</span>
+              <div>
+                <h4 class="font-bold text-[#3D2E24]">Escuela de Primavera 2026</h4>
+                <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5">
+                  <span><i class="pi pi-calendar text-[9px]"></i> 12-14 Abr</span>
+                  <span><i class="pi pi-map-marker text-[9px]"></i> Guadarrama</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 text-xs">
+              <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">T</span>
+              <div>
+                <h4 class="font-bold text-[#3D2E24]">Taller de Resolución de Conflictos</h4>
+                <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5">
+                  <span><i class="pi pi-calendar text-[9px]"></i> 05 Mar</span>
+                  <span><i class="pi pi-globe text-[9px]"></i> Online</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 text-xs">
+              <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">P</span>
+              <div>
+                <h4 class="font-bold text-[#3D2E24]">Encuentro de Formación Inicial</h4>
+                <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5">
+                  <span><i class="pi pi-calendar text-[9px]"></i> 20 Ene</span>
+                  <span><i class="pi pi-building text-[9px]"></i> Sede Central</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button class="w-full mt-4 py-2 text-xs font-bold text-[#633F17] bg-[#EFEAE2] rounded-xl hover:bg-[#E5DDD2] border-0 cursor-pointer flex items-center justify-center gap-1">
+            Ver todo el historial <i class="pi pi-arrow-right text-[10px]"></i>
+          </button>
+        </div>
+
+        <div class="relative rounded-2xl overflow-hidden shadow-sm text-white h-52 group">
+          <img
+            src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80"
+            alt="Fototeca Scout"
+            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-5 flex flex-col justify-end">
+            <i class="pi pi-images text-xl text-amber-200 mb-1"></i>
+            <h4 class="font-black text-base">Fototeca de Formación</h4>
+            <p class="text-[10px] text-gray-200 opacity-90 mt-0.5 leading-snug">Revive tus momentos y descarga tus certificados grupales.</p>
+          </div>
+        </div>
+
+        <div class="bg-[#633F17] text-white p-5 rounded-2xl shadow-sm text-left space-y-2">
+          <span class="text-[9px] font-black uppercase tracking-widest opacity-75">Asistencia</span>
+          <p class="text-xs leading-relaxed font-medium">
+            ¿Tienes dudas sobre los requisitos de tu etapa actual? Contacta con tu tutor de formación.
+          </p>
+          <div class="pt-2">
+            <a
+              href="mailto:ecatlim@scoutsdecanarias.org?subject=Consulta%20sobre%20Etapa%20Formativa%20ECATLIM"
+              class="w-full py-2 bg-white text-[#633F17] text-xs font-black rounded-full hover:bg-amber-50 transition-colors border-0 cursor-pointer shadow-sm flex items-center justify-center gap-2 no-underline"
+            >
+              <i class="pi pi-envelope text-xs"></i>
+              Solicitar Ayuda
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

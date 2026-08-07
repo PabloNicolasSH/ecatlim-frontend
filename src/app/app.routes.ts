@@ -28,6 +28,7 @@ import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin
 import {AdminCreateActivityComponent} from './features/admin-create-activity/admin-create-activity.component';
 import {UserActivityViewComponent} from './features/user-activity-view/user-activity-view.component';
 import {ResourceLibraryComponent} from './features/resource-library/resource-library.component';
+import {EducationProgressComponent} from './features/education-progress/education-progress.component';
 
 export const routes: Routes = [
   {
@@ -87,7 +88,7 @@ export const routes: Routes = [
       },
       {
         path: "oferta-educativa",
-        component: EducationOfferComponent
+        component: EducationProgressComponent
       },
       {
         path: "biblioteca",
