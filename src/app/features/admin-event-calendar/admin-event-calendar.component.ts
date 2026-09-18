@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular
 import { Dialog } from 'primeng/dialog';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { EventService } from '../../shared/services/event.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import { map, tap } from 'rxjs';
@@ -25,7 +25,8 @@ import {ConfirmDialog} from 'primeng/confirmdialog';
     UpperCasePipe,
     NgClass,
     Menu,
-    ConfirmDialog
+    ConfirmDialog,
+    RouterLink
   ],
   templateUrl: './admin-event-calendar.component.html',
   styleUrl: './admin-event-calendar.component.scss'

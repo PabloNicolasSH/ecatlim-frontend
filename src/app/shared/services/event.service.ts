@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Event, UserEventCalendar, EventDashboard, EventForm, AdminEventCalendar} from '../models/event.model';
+import {LessonBlock} from '../models/lesson-block.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,10 @@ export class EventService {
 
   getEventFormById(id: number): Observable<EventForm> {
     return this.http.get<EventForm>(`${environment.apiUrl}/events/edit/${id}`);
+  }
+
+  getEventBlocks(id: number): Observable<LessonBlock[]> {
+    return this.http.get<LessonBlock[]>(`${environment.apiUrl}/events/${id}/lesson-blocks`);
   }
 
   getUserEventsForCalendar(): Observable<UserEventCalendar[]> {

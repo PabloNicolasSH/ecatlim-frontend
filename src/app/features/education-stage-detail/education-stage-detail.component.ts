@@ -14,7 +14,6 @@ import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'prim
   imports: [
     DecimalPipe,
     ModuleTypePipe,
-    Button,
     Fieldset,
     ScrollPanel,
     Accordion,

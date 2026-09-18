@@ -137,8 +137,17 @@
           </div>
         </div>
         <div class="flex items-center gap-4">
-          <p-button (click)="goToEditEvent(selectedEvent().id)" text styleClass="text-sm">
-            <i class="pi pi-pencil text-xs mr-1"></i> Editar Evento
+          <p-button
+            label="Nueva Actividad"
+            icon="pi pi-plus"
+            [routerLink]="'/app/admin/eventos-formativos/' + selectedEvent()?.id + '/actividades/crear-nueva'"
+          ></p-button>
+          <p-button
+            (click)="goToEditEvent(selectedEvent().id)"
+            icon="pi pi-pencil"
+            label="Editar Evento"
+            text
+            styleClass="text-sm">
           </p-button>
         </div>
       </div>

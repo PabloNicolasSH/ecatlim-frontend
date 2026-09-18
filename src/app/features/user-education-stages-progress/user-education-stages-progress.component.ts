@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {EnrollmentService} from '../../shared/services/enrollment.service';
 import {Enrollment} from '../../shared/models/enrollment.model';
 import {Button} from 'primeng/button';
@@ -13,7 +13,7 @@ import {RouterLink} from '@angular/router';
   templateUrl: './user-education-stages-progress.component.html',
   styleUrl: './user-education-stages-progress.component.scss'
 })
-export class UserEducationStagesProgressComponent {
+export class UserEducationStagesProgressComponent implements OnInit {
 
   protected readonly enrollmentsService = inject(EnrollmentService);
 

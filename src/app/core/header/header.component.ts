@@ -1,6 +1,6 @@
 import {Component, HostListener, inject, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {SplitButton} from 'primeng/splitbutton';
-import {MenuItem} from 'primeng/api';
+import {MenuItem, MenuItemCommandEvent} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
 import {OverlayBadge} from 'primeng/overlaybadge';
@@ -113,7 +113,11 @@ export class HeaderComponent implements OnInit {
       },
       {
         label: 'La Biblioteca',
-        icon: "pi pi-bookmark"
+        icon: "pi pi-bookmark",
+        command: () => {
+          this.router.navigateByUrl('/app/biblioteca');
+          this.sidebarVisible = false;
+        }
       },
       {
         label: 'Mi formación',

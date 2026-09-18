@@ -11,7 +11,7 @@ import {ResetPasswordComponent} from './features/reset-password/reset-password.c
 import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';
 import {InformationFormPagesComponent} from './core/information-form-pages/information-form-pages.component';
 import {GeneralInfoComponent} from './info-pages/general-info/general-info.component';
-import {AdminEducationalHomeComponent} from './features/admin-educational-home/admin-educational-home.component';
+import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 import {EntityListComponent} from './features/entity-list/entity-list.component';
 import {AdminEducationOfferComponent} from './features/admin-education-offer/admin-education-offer.component';
 import {
@@ -25,6 +25,10 @@ import {
 import {AdminEditCreateEventComponent} from './features/event-creator/admin-create-event/admin-edit-create-event.component';
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
 import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
+import {AdminCreateActivityComponent} from './features/admin-create-activity/admin-create-activity.component';
+import {UserActivityViewComponent} from './features/user-activity-view/user-activity-view.component';
+import {ResourceLibraryComponent} from './features/resource-library/resource-library.component';
+import {EducationProgressComponent} from './features/education-progress/education-progress.component';
 
 export const routes: Routes = [
   {
@@ -84,7 +88,15 @@ export const routes: Routes = [
       },
       {
         path: "oferta-educativa",
-        component: EducationOfferComponent
+        component: EducationProgressComponent
+      },
+      {
+        path: "biblioteca",
+        component: ResourceLibraryComponent
+      },
+      {
+        path: ":eventId/actividades",
+        component: UserActivityViewComponent
       },
       {
         path: "mi-progreso",
@@ -100,7 +112,7 @@ export const routes: Routes = [
       },
       {
         path: "admin/formacion",
-        component: AdminEducationalHomeComponent
+        component: DashboardComponent
       },
       {
         path: "admin/eventos-formativos",
@@ -113,6 +125,10 @@ export const routes: Routes = [
       {
         path: "admin/eventos-formativos/editar/:id",
         component: AdminEditCreateEventComponent
+      },
+      {
+        path: "admin/eventos-formativos/:eventId/actividades/crear-nueva",
+        component: AdminCreateActivityComponent
       },
       {
         path: "admin/oferta-educativa",
