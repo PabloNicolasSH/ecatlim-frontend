@@ -25,7 +25,7 @@
           >
             {{ item.stageName }}
             @if (activeTabIndex() === i) {
-              <div class="absolute bottom-0 left-0 w-full h-1 bg-[#4A90E2] translate-y-[2px]"></div>
+              <div class="absolute bottom-0 left-0 w-full h-1 bg-[#4A90E2] translate-y-0.5"></div>
             }
           </button>
         }
@@ -64,73 +64,82 @@
 
               <div class="mt-8 md:mt-0 w-28 h-28 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/20 shadow-inner relative z-10 shrink-0">
                 @if (item.completed) {
-                  <i
-                    class="pi pi-verified text-amber-300"
-                    style="font-size: 3rem;"
-                  ></i>
+                  <i class="pi pi-verified text-amber-300" style="font-size: 3rem;"></i>
                 } @else {
-                  <i class="pi pi-book text-white/40"
-                     style="font-size: 3rem;"
-                  ></i>
+                  <i class="pi pi-book text-white/40" style="font-size: 3rem;"></i>
                 }
               </div>
             </div>
 
             <div class="col-span-12 lg:col-span-8 bg-[#4A90E2] text-white p-8 rounded-[2.5rem] shadow-lg">
               <div class="flex justify-between items-center mb-10">
-                <h3 class="text-2xl italic font-bold tracking-tight">Bloques del Curso</h3>
+                <h3 class="text-2xl italic font-bold tracking-tight">Módulos del Curso</h3>
                 <div class="px-4 py-1 bg-black/10 rounded-full text-[10px] uppercase tracking-widest border border-white/10">
-                  {{ item.blocks.length }} Bloques
+                  {{ item.modules.length }} Módulos
                 </div>
               </div>
 
-              <div class="space-y-4">
-                @for (block of item.blocks; track block.id) {
-                  <div class="bg-white/10 rounded-2xl overflow-hidden border border-white/5 transition-all"
-                       [class.expanded-bg]="expandedBlockId() === block.id">
-                    <button
-                      (click)="toggleBlock(block.id)"
-                      class="w-full p-6 flex justify-between items-center group bg-transparent border-0 cursor-pointer text-white">
-                      <span class="flex items-center gap-5">
-                        <span class="w-20 p-2 h-10 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0"
-                              [class]="block.status === 'Superada' ? 'bg-green-500 text-white shadow-md' : 'bg-black/20 text-white/70'">
-                           @if (block.status === 'Superada') {
-                             <i class="pi pi-check text-xl"></i>
-                           } @else {
-                             {{ block.id }}
-                           }
-                        </span>
-                        <span class="font-bold tracking-tight text-left">{{ block.name }}</span>
-                      </span>
-
-                      <span class="flex items-center gap-4 shrink-0">
-                        <span class="hidden sm:inline text-[10px] font-bold uppercase bg-black/20 px-3 py-1 rounded-lg">
-                          {{ block.status }}
-                        </span>
-                        <i class="pi pi-chevron-down transition-transform duration-300"
-                           [class.rotate-180]="expandedBlockId() === block.id"></i>
-                      </span>
-                    </button>
-
-                    @if (expandedBlockId() === block.id) {
-                      <div class="px-6 pb-6 pt-2 bg-black/10 border-t border-white/5 animate-slide-down">
-                        @if (block.activities && block.activities.length > 0) {
-                          <div class="space-y-2 mt-4">
-                            @for (act of block.activities; track act.name) {
-                              <div class="flex justify-between items-center text-sm p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span class="flex items-center gap-3">
-                                  <span class="w-2 h-2 rounded-full" [class]="act.completed ? 'bg-green-400' : 'bg-white/20'"></span>
-                                  <span>{{ act.name }}</span>
-                                </span>
-                                <span class="font-black text-[10px] uppercase bg-blue-600/30 px-2 py-0.5 rounded">{{ act.result || 'Apto' }}</span>
-                              </div>
-                            }
-                          </div>
-                        } @else {
-                          <p class="text-xs italic text-white/40 text-center py-6">Sin actividades registradas.</p>
-                        }
+              <div class="space-y-6">
+                @for (module of item.modules; track module.code) {
+                  <div class="bg-white/10 p-6 rounded-3xl border border-white/10 space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                      <div>
+                        <span class="text-[10px] font-black uppercase bg-black/20 px-2.5 py-1 rounded-md">{{ module.code }}</span>
+                        <h4 class="text-lg font-extrabold tracking-tight mt-1">{{ module.name }}</h4>
                       </div>
-                    }
+                      <span class="text-xs font-bold opacity-80">{{ module.blocks.length }} Bloques</span>
+                    </div>
+
+                    <div class="space-y-3">
+                      @for (block of module.blocks; track block.id) {
+                        <div class="bg-white/10 rounded-2xl overflow-hidden border border-white/5 transition-all"
+                             [class.expanded-bg]="expandedBlockId() === block.id">
+                          <button
+                            (click)="toggleBlock(block.id)"
+                            class="w-full p-5 flex justify-between items-center group bg-transparent border-0 cursor-pointer text-white">
+                            <span class="flex items-center gap-4">
+                              <span class="w-16 p-2 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0"
+                                    [class]="block.status === 'Superada' ? 'bg-green-500 text-white shadow-md' : 'bg-black/20 text-white/70'">
+                                 @if (block.status === 'Superada') {
+                                   <i class="pi pi-check text-lg"></i>
+                                 } @else {
+                                   {{ block.code || block.id }}
+                                 }
+                              </span>
+                              <span class="font-bold tracking-tight text-left text-sm">{{ block.name }}</span>
+                            </span>
+
+                            <span class="flex items-center gap-3 shrink-0">
+                              <span class="hidden sm:inline text-[9px] font-bold uppercase bg-black/20 px-2.5 py-1 rounded-lg">
+                                {{ block.status }}
+                              </span>
+                              <i class="pi pi-chevron-down transition-transform duration-300 text-xs"
+                                 [class.rotate-180]="expandedBlockId() === block.id"></i>
+                            </span>
+                          </button>
+
+                          @if (expandedBlockId() === block.id) {
+                            <div class="px-6 pb-5 pt-2 bg-black/10 border-t border-white/5 animate-slide-down">
+                              @if (block.activities && block.activities.length > 0) {
+                                <div class="space-y-2 mt-3">
+                                  @for (act of block.activities; track act.name) {
+                                    <div class="flex justify-between items-center text-xs p-2.5 bg-white/5 rounded-xl border border-white/5">
+                                      <span class="flex items-center gap-2.5">
+                                        <span class="w-2 h-2 rounded-full" [class]="act.completed ? 'bg-green-400' : 'bg-white/20'"></span>
+                                        <span>{{ act.name }}</span>
+                                      </span>
+                                      <span class="font-black text-[9px] uppercase bg-blue-600/30 px-2 py-0.5 rounded">{{ act.result || 'Apto' }}</span>
+                                    </div>
+                                  }
+                                </div>
+                              } @else {
+                                <p class="text-xs italic text-white/40 text-center py-4">Sin actividades registradas.</p>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
                   </div>
                 }
               </div>
@@ -141,7 +150,7 @@
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
                   <i class="pi pi-images"></i> Fototeca
                 </h3>
-                <div class="w-full aspect-[4/5] bg-slate-500/40 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-white/20 p-6 text-center">
+                <div class="w-full aspect-4/5 bg-slate-500/40 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-white/20 p-6 text-center">
                   <i class="pi pi-image text-6xl text-white/20 mb-4"></i>
                   <p class="text-xs font-bold opacity-60">Tus fotos aparecerán aquí automáticamente.</p>
                 </div>
@@ -150,7 +159,7 @@
               <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
                 <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Ayuda</h4>
                 <p class="text-xs text-slate-500 leading-relaxed">
-                  Haz clic en cada bloque para ver el desglose de actividades. Si has completado la etapa, el botón de descarga se activará arriba.
+                  Haz clic en cada módulo y despliega sus bloques para ver el desglose de actividades. Si has completado la etapa, el botón de descarga se activará arriba.
                 </p>
               </div>
             </div>
