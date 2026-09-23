@@ -9,6 +9,7 @@ import {UserAvatarModalComponent} from '../user-avatar-modal/user-avatar-modal.c
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {HttpClient} from '@angular/common/http';
 import {FileService} from '../../../shared/services/file.service';
+import {Role} from '../../../shared/models/role.model';
 
 @Component({
   selector: 'app-user-profile',
@@ -75,5 +76,26 @@ export class UserProfileComponent implements OnInit {
     ].filter(value => value && value.trim() !== '');
 
     return parts.length > 0 ? parts.join(', ') : 'No tiene dirección registrada';
+  }
+
+  protected getRoleNames(roles: Role[]) {
+    if (!roles || roles.length === 0) {
+      return ['Sin Rol'];
+    }
+
+    return roles.map(role => {
+      switch (role.toUpperCase()) {
+        case 'ADMIN':
+          return 'Administración';
+        case 'EVENT_DIRECTOR':
+          return 'Dirección de Eventos';
+        case 'HEAD_OF_EDUCATION':
+          return 'Coord. Formación';
+        case 'STUDENT':
+          return 'Persona en Formación';
+        default:
+          return role;
+      }
+    });
   }
 }

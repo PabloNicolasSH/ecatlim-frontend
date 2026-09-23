@@ -8,6 +8,7 @@ import { Select } from 'primeng/select';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PrimeTemplate } from 'primeng/api';
 import {EntityService} from '../../shared/services/entity.service';
+import {UserService} from '../../shared/services/user.service';
 
 @Component({
   selector: 'app-entity-modal-add-edit',
@@ -27,6 +28,7 @@ import {EntityService} from '../../shared/services/entity.service';
 export class EntityModalAddEditComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private entityService = inject(EntityService);
+  private userService = inject(UserService);
 
   visible = model<boolean>(false);
   @Input() dialogMode: string | undefined;

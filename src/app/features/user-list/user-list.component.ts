@@ -6,11 +6,10 @@ import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {ConfirmDialog} from 'primeng/confirmdialog';
-import {ConfirmationService, FilterService, MessageService} from 'primeng/api';
+import {ConfirmationService, MessageService} from 'primeng/api';
 import {PendingUserService} from '../../shared/services/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {FormsModule} from '@angular/forms';
-import {MultiSelect} from 'primeng/multiselect';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {EntityService} from '../../shared/services/entity.service';
 
