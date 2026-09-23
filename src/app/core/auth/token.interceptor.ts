@@ -1,4 +1,4 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import {HttpInterceptorFn} from '@angular/common/http';
 import {inject} from '@angular/core';
 import {AuthService} from './auth.service';
 import {catchError} from 'rxjs';
@@ -26,13 +26,13 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
           severity: 'warn',
           summary: 'Aviso',
           detail: "Vuelva a iniciar sesión"
-        })
+        });
       } else {
         messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err.error.ecatlimMessage?? "Ha ocurrido un error inesperado"
-        })
+          detail: err?.error?.ecatlimMessage ?? "Ha ocurrido un error inesperado"
+        });
       }
       throw err;
     })
