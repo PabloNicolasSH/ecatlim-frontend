@@ -86,8 +86,7 @@ export const routes: Routes = [
       },
       {
         path: "informacion-general",
-        component: GeneralInfoComponent,
-        data: {roles: []}
+        component: GeneralInfoComponent
       },
       {
         path: "perfil",
@@ -95,8 +94,7 @@ export const routes: Routes = [
       },
       {
         path: "calendario",
-        component: UserEventCalendarComponent,
-        data: {roles: [Role.STUDENT]} //todo example, do this with every route
+        component: UserEventCalendarComponent
       },
       {
         path: "oferta-educativa",
@@ -108,15 +106,18 @@ export const routes: Routes = [
       },
       {
         path: ":eventId/actividades",
-        component: UserActivityViewComponent
+        component: UserActivityViewComponent,
+        data: {roles: [Role.STUDENT]}
       },
       {
         path: "mi-progreso",
-        component: UserEducationStagesProgressComponent
+        component: UserEducationStagesProgressComponent,
+        data: {roles: [Role.STUDENT]}
       },
       {
         path: "responsable-formacion/solicitudes-alta",
-        component: HeadEducationPendingUsersListComponent
+        component: HeadEducationPendingUsersListComponent,
+        data: {roles: [Role.HEAD_OF_EDUCATION]}
       },
       {
         path: "admin", //todo for subroutes with common roles do this, everything here is protected under the admin role
@@ -170,7 +171,7 @@ export const routes: Routes = [
       },
       {
         path: "**",
-        redirectTo: baseRedirect  //todo always add this to parent routes with children to avoid dead pages (antes podías entrar a localhost:4200/app y salía una página en blanco
+        redirectTo: baseRedirect
       }
     ]
   },
