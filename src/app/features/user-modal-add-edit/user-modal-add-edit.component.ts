@@ -12,6 +12,7 @@ import {UserService} from '../../shared/services/user.service';
 import {UserForm} from '../../shared/models/user-form.model';
 import {Role} from '../../shared/models/role.model';
 import {MessageService, PrimeTemplate} from 'primeng/api';
+import {MultiSelect} from 'primeng/multiselect';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -23,7 +24,8 @@ import {MessageService, PrimeTemplate} from 'primeng/api';
     Select,
     FormsModule,
     InputText,
-    PrimeTemplate
+    PrimeTemplate,
+    MultiSelect
   ],
   templateUrl: './user-modal-add-edit.component.html',
   styleUrl: './user-modal-add-edit.component.scss'
@@ -65,13 +67,14 @@ export class UserModalAddEditComponent implements OnInit{
 
     const RoleLabels: Record<string, string> = {
       [Role.STUDENT]: "Persona en Formación",
-      [Role.TRAINER]: "Formador",
+      [Role.TRAINER]: "Persona Formadora",
       [Role.MANAGEMENT]: "Gestión",
-      [Role.EVENT_DIRECTOR]: "Director de Eventos",
-      [Role.ADMIN]: "Administrador",
+      [Role.EVENT_DIRECTOR]: "Dirección de Eventos",
+      [Role.HEAD_OF_EDUCATION]: "Coord. Formación",
+      [Role.ADMIN]: "Administración",
     };
 
-    this.roles = [Role.STUDENT, Role.TRAINER, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.ADMIN]
+    this.roles = [Role.STUDENT, Role.TRAINER, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.HEAD_OF_EDUCATION, Role.ADMIN]
       .map(role => {
         return {
           label: RoleLabels[role] || role,
@@ -92,7 +95,7 @@ export class UserModalAddEditComponent implements OnInit{
       city: [""],
       country: [""],
       selectedScoutGroup: [],
-      selectedRole: [null, Validators.required]
+      selectedRoles: [[], Validators.required]
     });
   }
 
@@ -108,7 +111,7 @@ export class UserModalAddEditComponent implements OnInit{
       this.loading = true;
       const userForm: UserForm = {...this.form.value};
       userForm.scoutGroupId = this.form.get('selectedScoutGroup')?.value?.id;
-      userForm.role = this.form.get('selectedRole')?.value;
+      userForm.roles = this.form.get('selectedRoles')?.value;
       if (this.dialogMode == 'Edit'){
         this.userService.updateUser(this.userToEdit.id!, userForm).subscribe({
           next: () => {
@@ -119,13 +122,6 @@ export class UserModalAddEditComponent implements OnInit{
               severity: 'success',
               summary: 'Confirmado',
               detail: 'Se ha actualizado correctamente el usuario'
-            })
-          },
-          error: err => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: err.message
             })
           }
         })
@@ -167,7 +163,7 @@ export class UserModalAddEditComponent implements OnInit{
       city: [this.userToEdit.profile?.city],
       country: [this.userToEdit.profile?.country],
       selectedScoutGroup: [this.userToEdit.profile?.scoutGroup],
-      selectedRole: [this.userToEdit.role, Validators.required]
+      selectedRoles: [this.userToEdit.roles, Validators.required]
     });
   }
 }
