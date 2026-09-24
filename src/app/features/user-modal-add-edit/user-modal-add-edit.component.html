@@ -12,7 +12,7 @@
     } @else {
       <div class="flex flex-col">
         <span class="font-bold text-xl">
-          {{ form.get('selectedRole')?.value === 'ADMIN' ? 'Administrador' : (userToEdit.profile?.name + ' ' + userToEdit.profile?.surname) }}
+          {{ form.get('selectedRoles')?.value?.includes('ADMIN') ? 'Administrador' : (userToEdit.profile?.name + ' ' + userToEdit.profile?.surname) }}
         </span>
         <small class="text-surface-500">Actualice la información del usuario.</small>
       </div>
@@ -30,13 +30,22 @@
             <label for="email">Correo Electrónico</label>
           </p-floatlabel>
           <p-floatlabel variant="on">
-            <p-select id="role" [options]="roles" formControlName="selectedRole" appendTo="body" class="w-full" required/>
-            <label for="role">Rol asignado</label>
+            <p-multiSelect
+              id="roles"
+              [options]="roles"
+              formControlName="selectedRoles"
+              appendTo="body"
+              class="w-full"
+              styleClass="w-full"
+              display="chip"
+              required>
+            </p-multiSelect>
+            <label for="role">Roles asignados</label>
           </p-floatlabel>
         </div>
       </div>
 
-      @if (form.get('selectedRole')?.value !== 'ADMIN') {
+      @if (!form.get('selectedRoles')?.value?.includes('ADMIN')) {
         <div class="flex flex-col gap-3 animate-fade-in mt-2">
           <p class="text-cyan-900 font-bold border-b border-gray-200">Datos Personales (Perfil)</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">

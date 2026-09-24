@@ -19,6 +19,10 @@ export class PendingUserService {
     return this.http.get<PendingUser[]>(`${environment.apiUrl}/pending-user/admin/all`);
   }
 
+  getPendingUsersForMyScoutGroup(): Observable<PendingUser[]> {
+    return this.http.get<PendingUser[]>(`${environment.apiUrl}/pending-user/head-education/my-scout-group`);
+  }
+
   createUserFromRequest(pendingUser: PendingUser): Observable<PendingUser>{
     return this.http.post<PendingUser>(`${environment.apiUrl}/pending-user/admin/create-user`, pendingUser);
   }
@@ -26,4 +30,6 @@ export class PendingUserService {
   deletePendingUser(pendingUser: PendingUser): Observable<any>{
     return this.http.put<any>(`${environment.apiUrl}/pending-user/admin/delete`, pendingUser);
   }
+
+
 }

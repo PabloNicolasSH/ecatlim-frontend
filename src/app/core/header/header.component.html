@@ -87,9 +87,7 @@
             {{ user.name || 'Administrador' }} {{ user.surname || 'Global' }}
           </span>
           <span class="text-xs sm:text-sm text-gray-600 font-medium truncate w-full">
-            @if (user.role === 'ADMIN') { Administrador }
-            @else if (user.role === 'STUDENT') { Alumno }
-            @else { Formador }
+            {{ getUserRolesTag() }}
           </span>
           <span class="text-xs text-gray-400 truncate w-full">
             {{ user.email }}

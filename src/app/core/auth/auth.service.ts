@@ -4,20 +4,18 @@ import {UserToLog} from './user-to-log.model';
 import {Observable, tap} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
-import {User} from '../../shared/models/user.model';
 import {Profile} from '../../shared/models/profile.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
   protected readonly http = inject(HttpClient);
-  protected readonly router = inject(Router)
+  protected readonly router = inject(Router);
 
-  login(userToLog: UserToLog): Observable<any>{
+  login(userToLog: UserToLog): Observable<any> {
     return this.http.post(`${environment.apiUrl}/auth/login`, userToLog).pipe(
-      tap((res:any) => {
+      tap((res: any) => {
         localStorage.setItem('token', res.token);
 
         const name = res.profile?.name || 'Administrador';
@@ -27,10 +25,10 @@ export class AuthService {
           name: name,
           surname: surname,
           email: res.email,
-          role: res.role
+          roles: res.roles
         }));
       })
-    )
+    );
   }
 
   logout() {

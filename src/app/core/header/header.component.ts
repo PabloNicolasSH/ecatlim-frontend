@@ -13,6 +13,7 @@ import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
 import {Notification} from '../../shared/models/notification.model';
 import {FileService} from '../../shared/services/file.service';
+import {Role} from '../../shared/models/role.model';
 
 @Component({
   selector: 'app-header',
@@ -137,9 +138,28 @@ export class HeaderComponent implements OnInit {
         ]
       }
     ];
-    if (this.user?.role == "ADMIN"){
+
+    if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)){
+      this.addHeadEducationOptions();
+    }
+
+    if (this.user?.roles.includes(Role.ADMIN)) {
       this.addAdminOptions();
     }
+  }
+
+  private addHeadEducationOptions() {
+    this.sidebarMenu.push({
+      label: 'Responsable de Formación',
+      items: [
+        {
+          label: 'Solicitudes de Alta', icon: 'pi pi-user-plus', command: () => {
+            this.router.navigateByUrl('/app/responsable-formacion/solicitudes-alta');
+            this.sidebarVisible = false;
+          }
+        }
+      ]
+    });
   }
 
   private addAdminOptions() {
@@ -168,5 +188,26 @@ export class HeaderComponent implements OnInit {
 
   protected logout() {
     this.authService.logout()
+  }
+
+  protected getUserRolesTag() {
+    if (!this.user.roles || this.user.roles.length === 0) {
+      return [{ label: 'Sin Rol', severity: 'secondary' }];
+    }
+
+    return this.user.roles.map(role => {
+      switch (role.toUpperCase()) {
+        case 'ADMIN':
+          return 'Administración';
+        case 'EVENT_DIRECTOR':
+          return 'Dirección de Eventos';
+        case 'HEAD_OF_EDUCATION':
+          return 'Coord. Formación';
+        case 'STUDENT':
+          return 'Persona en Formación';
+        default:
+          return role;
+      }
+    }).join(", ");
   }
 }

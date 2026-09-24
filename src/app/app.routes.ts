@@ -1,10 +1,10 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {LoginComponent} from './features/login/login.component';
 import {RegisterRequestComponent} from './features/register-request/register-request.component';
 import {MainComponent} from './core/main/main.component';
-import {authGuard} from './core/auth/auth.guard';
+import {authGuard} from './core/auth/guards/auth-guard';
 import {HomeComponent} from './features/home/home.component';
-import {redirect} from './core/auth/redirect.guard';
+import {noAuthGuard} from './core/auth/guards/no-auth-guard';
 import {UserProfileComponent} from './features/profile/user-profile/user-profile.component';
 import {UserListComponent} from './features/user-list/user-list.component';
 import {ResetPasswordComponent} from './features/reset-password/reset-password.component';
@@ -22,17 +22,23 @@ import {EducationOfferComponent} from './features/education-offer/education-offe
 import {
   UserEducationStagesProgressComponent
 } from './features/user-education-stages-progress/user-education-stages-progress.component';
-import {AdminEditCreateEventComponent} from './features/event-creator/admin-create-event/admin-edit-create-event.component';
+import {
+  AdminEditCreateEventComponent
+} from './features/event-creator/admin-create-event/admin-edit-create-event.component';
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
 import {AdminEventCalendarComponent} from './features/admin-event-calendar/admin-event-calendar.component';
 import {AdminCreateActivityComponent} from './features/admin-create-activity/admin-create-activity.component';
 import {UserActivityViewComponent} from './features/user-activity-view/user-activity-view.component';
 import {ResourceLibraryComponent} from './features/resource-library/resource-library.component';
-import {EducationProgressComponent} from './features/education-progress/education-progress.component';
+import {
+  HeadEducationPendingUsersListComponent
+} from './features/head-education-pending-users-list/head-education-pending-users-list.component';
+import {Role} from './shared/models/role.model';
+import {baseRedirect} from './core/auth/redirect-function';
 
 export const routes: Routes = [
   {
-    path:"",
+    path: "",
     component: InformationFormPagesComponent,
     children: [
       {
@@ -42,22 +48,26 @@ export const routes: Routes = [
       },
       {
         path: "login",
-        component: LoginComponent
+        component: LoginComponent,
+        canActivate: [noAuthGuard]
       },
       {
         path: "solicitud-registro",
-        component: RegisterRequestComponent
+        component: RegisterRequestComponent,
+        canActivate: [noAuthGuard]
       },
       {
         path: "resetear-contraseña",
-        component: ResetPasswordComponent
+        component: ResetPasswordComponent,
+        canActivate: [noAuthGuard]
       },
       {
         path: "cambiar-contraseña",
         component: ResetPasswordComponent,
         data: {
           changePassword: true
-        }
+        },
+        canActivate: [authGuard]
       },
       {
         path: "politica-privacidad",
@@ -68,11 +78,11 @@ export const routes: Routes = [
   {
     path: "app",
     component: MainComponent,
-    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
       {
         path: "home",
-        component: HomeComponent
+        component: HomeComponent,
       },
       {
         path: "informacion-general",
@@ -96,56 +106,77 @@ export const routes: Routes = [
       },
       {
         path: ":eventId/actividades",
-        component: UserActivityViewComponent
+        component: UserActivityViewComponent,
+        data: {roles: [Role.STUDENT]}
       },
       {
         path: "mi-progreso",
-        component: UserEducationStagesProgressComponent
+        component: UserEducationStagesProgressComponent,
+        data: {roles: [Role.STUDENT]}
       },
       {
-        path: "admin/usuarios",
-        component: UserListComponent
+        path: "responsable-formacion/solicitudes-alta",
+        component: HeadEducationPendingUsersListComponent,
+        data: {roles: [Role.HEAD_OF_EDUCATION]}
       },
       {
-        path: "admin/entidades",
-        component: EntityListComponent
+        path: "admin", //todo for subroutes with common roles do this, everything here is protected under the admin role
+        data: {roles: [Role.ADMIN]},
+        children: [
+          {
+            path: "usuarios",
+            component: UserListComponent
+          },
+          {
+            path: "entidades",
+            component: EntityListComponent
+          },
+          {
+            path: "formacion",
+            component: AdminEducationalHomeComponent
+          },
+          {
+            path: "eventos-formativos",
+            component: AdminEventCalendarComponent
+          },
+          {
+            path: "eventos-formativos/crear-evento",
+            component: AdminEditCreateEventComponent
+          },
+          {
+            path: "eventos-formativos/editar/:id",
+            component: AdminEditCreateEventComponent
+          },
+          {
+            path: "eventos-formativos/:eventId/actividades/crear-nueva",
+            component: AdminCreateActivityComponent
+          },
+          {
+            path: "oferta-educativa",
+            component: AdminEducationOfferComponent
+          },
+          {
+            path: "oferta-educativa/detalle-etapa/:id",
+            component: EducationStageDetailComponent
+          },
+          {
+            path: "oferta-educativa/crear-etapa-educativa",
+            component: AdminCreateEducationStageComponent
+          },
+          {
+            path: "**",
+            redirectTo: "usuarios"
+          }
+        ]
       },
       {
-        path: "admin/formacion",
-        component: DashboardComponent
-      },
-      {
-        path: "admin/eventos-formativos",
-        component: AdminEventCalendarComponent
-      },
-      {
-        path: "admin/eventos-formativos/crear-evento",
-        component: AdminEditCreateEventComponent
-      },
-      {
-        path: "admin/eventos-formativos/editar/:id",
-        component: AdminEditCreateEventComponent
-      },
-      {
-        path: "admin/eventos-formativos/:eventId/actividades/crear-nueva",
-        component: AdminCreateActivityComponent
-      },
-      {
-        path: "admin/oferta-educativa",
-        component: AdminEducationOfferComponent
-      },
-      {
-        path: "admin/oferta-educativa/detalle-etapa/:id",
-        component: EducationStageDetailComponent
-      },
-      {
-        path: "admin/oferta-educativa/crear-etapa-educativa",
-        component: AdminCreateEducationStageComponent
+        path: "**",
+        redirectTo: baseRedirect
       }
     ]
   },
   {
     path: "**",
-    redirectTo: redirect
+    redirectTo: baseRedirect
   }
 ];
