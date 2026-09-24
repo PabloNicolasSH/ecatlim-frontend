@@ -21,11 +21,13 @@
           {{ user.profile?.surname || 'Global' }}
         </h2>
 
-        <span class="mt-2 px-3 py-1 bg-orange-50 text-ecatlim  text-xs font-semibold rounded-full tracking-wide">
-          @if (user.role === 'ADMIN') { Administrador }
-          @else if (user.role === 'STUDENT') { Alumno / Cursante }
-          @else { Formador }
-        </span>
+        <div class="flex flex-wrap gap-2 mt-2">
+          @for (roleName of getRoleNames(user.roles); track $index) {
+            <span class="px-3 py-1 bg-orange-50 text-ecatlim text-xs font-semibold rounded-full tracking-wide">
+              {{ roleName }}
+            </span>
+          }
+        </div>
       </div>
 
       <div class="mt-6 flex flex-col gap-3 w-full">

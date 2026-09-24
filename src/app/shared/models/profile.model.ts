@@ -4,5 +4,5 @@ export interface Profile {
   name: string;
   surname: string;
   email: string;
-  role: Role;
+  roles: Role[];
 }
