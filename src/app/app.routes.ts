@@ -11,14 +11,12 @@ import {ResetPasswordComponent} from './features/reset-password/reset-password.c
 import {PrivacyPolicyComponent} from './info-pages/privacy-policy/privacy-policy.component';
 import {InformationFormPagesComponent} from './core/information-form-pages/information-form-pages.component';
 import {GeneralInfoComponent} from './info-pages/general-info/general-info.component';
-import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 import {EntityListComponent} from './features/entity-list/entity-list.component';
 import {AdminEducationOfferComponent} from './features/admin-education-offer/admin-education-offer.component';
 import {
   AdminCreateEducationStageComponent
 } from './features/admin-create-education-stage/admin-create-education-stage.component';
 import {EducationStageDetailComponent} from './features/education-stage-detail/education-stage-detail.component';
-import {EducationOfferComponent} from './features/education-offer/education-offer.component';
 import {
   UserEducationStagesProgressComponent
 } from './features/user-education-stages-progress/user-education-stages-progress.component';
@@ -35,6 +33,8 @@ import {
 } from './features/head-education-pending-users-list/head-education-pending-users-list.component';
 import {Role} from './shared/models/role.model';
 import {baseRedirect} from './core/auth/redirect-function';
+import {EducationProgressComponent} from './features/education-progress/education-progress.component';
+import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 
 export const routes: Routes = [
   {
@@ -120,7 +120,7 @@ export const routes: Routes = [
         data: {roles: [Role.HEAD_OF_EDUCATION]}
       },
       {
-        path: "admin", //todo for subroutes with common roles do this, everything here is protected under the admin role
+        path: "admin",
         data: {roles: [Role.ADMIN]},
         children: [
           {
@@ -133,7 +133,7 @@ export const routes: Routes = [
           },
           {
             path: "formacion",
-            component: AdminEducationalHomeComponent
+            component: DashboardComponent
           },
           {
             path: "eventos-formativos",
