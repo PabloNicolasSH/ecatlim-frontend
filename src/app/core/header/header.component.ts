@@ -119,25 +119,12 @@ export class HeaderComponent implements OnInit {
           this.router.navigateByUrl('/app/biblioteca');
           this.sidebarVisible = false;
         }
-      },
-      {
-        label: 'Mi formación',
-        items: [
-          {
-            label: 'Oferta Educativa', icon: 'pi pi-graduation-cap', command: () => {
-              this.router.navigateByUrl('/app/oferta-educativa');
-              this.sidebarVisible = false;
-            }
-          },
-          {
-            label: 'Mi Progreso', icon: 'pi pi-book', command: () => {
-              this.router.navigateByUrl('/app/mi-progreso');
-              this.sidebarVisible = false;
-            }
-          }
-        ]
       }
     ];
+
+    if (this.user?.roles.includes(Role.STUDENT)) {
+      this.addStudentOptions();
+    }
 
     if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)){
       this.addHeadEducationOptions();
@@ -146,6 +133,20 @@ export class HeaderComponent implements OnInit {
     if (this.user?.roles.includes(Role.ADMIN)) {
       this.addAdminOptions();
     }
+  }
+
+  private addStudentOptions() {
+    this.sidebarMenu.push({
+      label: 'Mi formación',
+      items: [
+        {
+          label: 'Mi Progreso', icon: 'pi pi-graduation-cap', command: () => {
+            this.router.navigateByUrl('/app/mi-ruta-formacion');
+            this.sidebarVisible = false;
+          }
+        }
+      ]
+    })
   }
 
   private addHeadEducationOptions() {
@@ -177,10 +178,6 @@ export class HeaderComponent implements OnInit {
         {label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
             this.router.navigateByUrl('/app/admin/formacion');
             this.sidebarVisible = false;
-          }},
-        {label: 'Eventos Formativos', icon: "pi pi-calendar", command: () => {
-          this.router.navigateByUrl('/app/admin/eventos-formativos');
-          this.sidebarVisible = false;
         }}
       ]
     });

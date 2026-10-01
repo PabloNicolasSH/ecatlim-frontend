@@ -18,9 +18,6 @@ import {
 } from './features/admin-create-education-stage/admin-create-education-stage.component';
 import {EducationStageDetailComponent} from './features/education-stage-detail/education-stage-detail.component';
 import {
-  UserEducationStagesProgressComponent
-} from './features/user-education-stages-progress/user-education-stages-progress.component';
-import {
   AdminEditCreateEventComponent
 } from './features/event-creator/admin-create-event/admin-edit-create-event.component';
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
@@ -33,7 +30,7 @@ import {
 } from './features/head-education-pending-users-list/head-education-pending-users-list.component';
 import {Role} from './shared/models/role.model';
 import {baseRedirect} from './core/auth/redirect-function';
-import {EducationProgressComponent} from './features/education-progress/education-progress.component';
+import {EducationProgressComponent} from './features/education-progresss/education-progress/education-progress.component';
 import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 
 export const routes: Routes = [
@@ -97,10 +94,6 @@ export const routes: Routes = [
         component: UserEventCalendarComponent
       },
       {
-        path: "oferta-educativa",
-        component: EducationProgressComponent
-      },
-      {
         path: "biblioteca",
         component: ResourceLibraryComponent
       },
@@ -110,8 +103,8 @@ export const routes: Routes = [
         data: {roles: [Role.STUDENT]}
       },
       {
-        path: "mi-progreso",
-        component: UserEducationStagesProgressComponent,
+        path: "mi-ruta-formacion",
+        component: EducationProgressComponent,
         data: {roles: [Role.STUDENT]}
       },
       {
