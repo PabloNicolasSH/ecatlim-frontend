@@ -15,9 +15,11 @@
       >
         <ng-template #caption>
           <div class="flex items-center justify-between">
-            <p>Actualmente se cuenta con <span class="font-black">{{users.length}} </span> @if (users.length == 1) {
+            <p>Actualmente se cuenta con <span class="font-black">{{ users.length }} </span> @if (users.length == 1) {
               usuario <span class="text-green-600 font-bold"> activo</span>
-            } @else {usuarios <span class="text-green-600 font-bold"> activos</span>}</p>
+            } @else {
+              usuarios <span class="text-green-600 font-bold"> activos</span>
+            }</p>
             <p-button
               (onClick)="showDialog()"
               icon="pi pi-plus"
@@ -49,10 +51,10 @@
         </ng-template>
         <ng-template #body let-user>
           <tr>
-            <td>{{user.profile?.surname}}, {{user.profile?.name}}</td>
-            <td>{{user.email}}</td>
+            <td>{{ user.profile?.surname }}, {{ user.profile?.name }}</td>
+            <td>{{ user.email }}</td>
             <td>@if (user.profile?.scoutGroup != null) {
-              {{user.profile?.scoutGroup.name}}
+              {{ user.profile?.scoutGroup.name }}
             }</td>
             <td class="flex gap-2 justify-end">
               <p-button
@@ -85,9 +87,12 @@
       >
         <ng-template #caption>
           <div class="flex items-center justify-between">
-            <p>En la base de datos hay <span class="font-black">{{inactiveUsers.length}}</span> @if (inactiveUsers.length == 1) {
+            <p>En la base de datos hay <span
+              class="font-black">{{ inactiveUsers.length }}</span> @if (inactiveUsers.length == 1) {
               usuario <span class="text-red-500 font-bold"> inactivo</span>
-            } @else { usuarios <span class="text-red-500 font-bold"> inactivos</span>}</p>
+            } @else {
+              usuarios <span class="text-red-500 font-bold"> inactivos</span>
+            }</p>
           </div>
         </ng-template>
         <ng-template #header>
@@ -100,10 +105,10 @@
         </ng-template>
         <ng-template #body let-user>
           <tr>
-            <td>{{user.profile?.surname}}, {{user.profile?.name}}</td>
-            <td>{{user.email}}</td>
+            <td>{{ user.profile?.surname }}, {{ user.profile?.name }}</td>
+            <td>{{ user.email }}</td>
             <td>@if (user.profile?.scoutGroup != null) {
-              {{user.profile?.scoutGroup.name}}
+              {{ user.profile?.scoutGroup.name }}
             }</td>
             <td class="flex gap-2 justify-end">
               <p-button
@@ -136,9 +141,12 @@
       >
         <ng-template #caption>
           <div class="flex items-center justify-between">
-            <p>En la base de datos hay <span class="font-black">{{pendingUserRequests.length}}</span> @if (pendingUserRequests.length == 1) {
+            <p>En la base de datos hay <span
+              class="font-black">{{ pendingUserRequests.length }}</span> @if (pendingUserRequests.length == 1) {
               solicitud
-            } @else { solicitudes }de alta en el aula virtual</p>
+            } @else {
+              solicitudes
+            }de alta en el aula virtual</p>
           </div>
         </ng-template>
         <ng-template #header>
@@ -152,12 +160,12 @@
         </ng-template>
         <ng-template #body let-pendingUser>
           <tr>
-            <td>{{pendingUser.surname}}, {{pendingUser.name}}</td>
-            <td>{{pendingUser.nif}}</td>
-            <td>{{pendingUser.email}}</td>
-            <td>@if (pendingUser.scoutGroup != null) {
-              {{pendingUser.scoutGroup.name}}
-            }</td>
+            <td>{{ pendingUser.surname }}, {{ pendingUser.name }}</td>
+            <td>{{ pendingUser.nif }}</td>
+            <td>{{ pendingUser.email }}</td>
+            <td>
+                {{ pendingUser.scoutGroup?.name ?? 'Sin especificar' }}
+            </td>
             <td class="flex gap-2 justify-end">
               <p-button
                 icon="pi pi-user-plus"

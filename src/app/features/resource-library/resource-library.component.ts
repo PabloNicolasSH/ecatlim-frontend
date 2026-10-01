@@ -14,6 +14,15 @@ import {InputText} from 'primeng/inputtext';
 import {Dialog} from 'primeng/dialog';
 import {TagService} from '../../shared/services/tag.service';
 import {MultiSelect} from 'primeng/multiselect';
+import {AuthService} from '../../core/auth/auth.service';
+import {Role} from '../../shared/models/role.model';
+
+const ROLES_ALLOWED_TO_ADD_RESOURCES: Role[] = [
+  Role.MANAGEMENT,
+  Role.EVENT_DIRECTOR,
+  Role.TRAINER,
+  Role.ADMIN
+];
 
 @Component({
   selector: 'app-resource-library',
@@ -41,6 +50,7 @@ export class ResourceLibraryComponent implements OnInit {
   protected readonly resourceService = inject(ResourceService);
   protected readonly tagService = inject(TagService);
   protected readonly fb = inject(FormBuilder);
+  protected readonly authService = inject(AuthService);
 
   categories = ['Todos', 'PDFs', 'Imágenes', 'Plantillas', 'Vídeos', 'Enlaces'];
 
@@ -53,17 +63,19 @@ export class ResourceLibraryComponent implements OnInit {
   isCreatingTag = signal<boolean>(false);
 
   resourceTypes = [
-    { label: 'Documento PDF', value: 'PDF' },
-    { label: 'Imagen', value: 'IMAGE' },
-    { label: 'Plantilla Editable', value: 'TEMPLATE' },
-    { label: 'Enlace Web', value: 'LINK' },
-    { label: 'Vídeo', value: 'VIDEO_LINK' }
+    {label: 'Documento PDF', value: 'PDF'},
+    {label: 'Imagen', value: 'IMAGE'},
+    {label: 'Plantilla Editable', value: 'TEMPLATE'},
+    {label: 'Enlace Web', value: 'LINK'},
+    {label: 'Vídeo', value: 'VIDEO_LINK'}
   ];
 
   availableTags = signal<LRTag[]>([]);
 
   resources = signal<LearningResource[]>([]);
   activeCategory = signal<string>('Todos');
+
+  canAddResources = signal<boolean>(false);
 
   filteredResources = computed(() => {
     const active = this.activeCategory();
@@ -87,6 +99,7 @@ export class ResourceLibraryComponent implements OnInit {
     this.tagService.getTags().subscribe(tags => {
       this.availableTags.set(tags);
     });
+    this.canAddResources.set(this.authService.hasAnyRole(...ROLES_ALLOWED_TO_ADD_RESOURCES));
     this.initForm();
   }
 
@@ -123,7 +136,7 @@ export class ResourceLibraryComponent implements OnInit {
         this.availableTags.update(tags => [...tags, newTag]);
 
         const currentSelected = this.resourceForm.get('tagNames')?.value || [];
-        this.resourceForm.patchValue({ tagNames: [...currentSelected, newTag.name] });
+        this.resourceForm.patchValue({tagNames: [...currentSelected, newTag.name]});
 
         this.isCreatingTag.set(false);
         this.currentSearch.set('');
@@ -167,9 +180,7 @@ export class ResourceLibraryComponent implements OnInit {
 
     this.resourceService.download(res.id).subscribe(blob => {
       const url = window.URL.createObjectURL(blob);
-
-      const win = window.open(url, '_blank');
-
+      window.open(url, '_blank');
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
       }, 10000);
@@ -190,7 +201,7 @@ export class ResourceLibraryComponent implements OnInit {
   }
 
   openAddModal() {
-    this.resourceForm.reset({ type: 'PDF', tagNames: [] });
+    this.resourceForm.reset({type: 'PDF', tagNames: []});
     this.selectedFile = null;
     this.displayAddModal.set(true);
   }
@@ -217,7 +228,7 @@ export class ResourceLibraryComponent implements OnInit {
       blobPath: formValue.blobPath
     };
 
-    formData.append('data', new Blob([JSON.stringify(dto)], { type: 'application/json' }));
+    formData.append('data', new Blob([JSON.stringify(dto)], {type: 'application/json'}));
 
     const isLinkOrVideo = formValue.type === 'LINK' || formValue.type === 'VIDEO_LINK';
 

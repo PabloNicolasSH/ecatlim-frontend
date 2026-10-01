@@ -12,7 +12,7 @@ export const authGuard: CanActivateFn = (route) => {
   }
 
   const roles: Role[] | undefined = route.data["roles"];
-  if (roles && roles.length > 0 && !authService.getProfile().roles.some(role => roles.includes(role))) {
+  if (roles && roles.length > 0 && !authService.hasAnyRole(...roles)) {
     return router.parseUrl("/app/home");
   }
 

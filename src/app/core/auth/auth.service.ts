@@ -5,6 +5,7 @@ import {Observable, tap} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
 import {Profile} from '../../shared/models/profile.model';
+import {Role} from '../../shared/models/role.model';
 
 @Injectable({
   providedIn: 'root'
@@ -48,5 +49,13 @@ export class AuthService {
   getProfile(): Profile {
     const profile = localStorage.getItem('me');
     return profile ? JSON.parse(profile) : null;
+  }
+
+  hasAnyRole(...roles: Role[]): boolean {
+    const profile = this.getProfile();
+    if (!profile) {
+      return false;
+    }
+    return profile.roles.some(role => roles.includes(role));
   }
 }
