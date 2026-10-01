@@ -184,6 +184,7 @@ export class AdminCreateEducationStageComponent implements OnInit{
   private createModuleGroup(): FormGroup {
     return this.formBuilder.group({
       name: ['', Validators.required],
+      number: ['', Validators.required],
       description: [''],
       type: ['', Validators.required],
       onlineHours: [0, [Validators.required, Validators.min(0)]],

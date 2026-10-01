@@ -15,7 +15,6 @@
       #fileUpload
       mode="advanced"
       accept="image/*"
-      maxFileSize="2000000"
       (onSelect)="onFileSelect($event)"
       [customUpload]="true"
       styleClass="w-full CustomUploadAdvanced"
@@ -41,14 +40,15 @@
         @if (files && files.length > 0) {
           <div class="flex flex-col items-center justify-center py-4 w-full animate-fade-in">
             <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-orange-200 shadow-sm">
-              <img [src]="files[0].objectURL" alt="Preview" class="w-full h-full object-cover" />
+              <img [src]="files[0].objectURL" alt="Preview" class="w-full h-full object-cover"/>
             </div>
-            <span class="text-sm font-semibold text-gray-700 mt-3 max-w-xs text-ellipsis overflow-hidden whitespace-nowrap">
-            {{ files[0].name }}
-          </span>
+            <span
+              class="text-sm font-semibold text-gray-700 mt-3 max-w-xs text-ellipsis overflow-hidden whitespace-nowrap">
+              {{ files[0].name }}
+            </span>
             <span class="text-xs font-medium text-[#aa642a] mt-1 flex items-center gap-1">
-            <i class="pi pi-check-circle"></i> Lista para guardar
-          </span>
+              <i class="pi pi-check-circle"></i> Lista para guardar
+            </span>
           </div>
         }
       </ng-template>
@@ -59,7 +59,16 @@
           <p class="text-sm font-semibold text-gray-700 m-0">
             Arrastra una imagen aquí
           </p>
-          <p class="text-xs text-gray-400 mt-1 mb-0">Sube archivos JPG o PNG (Máx. 2MB)</p>
+          <p class="text-xs text-gray-400 mt-1 mb-0">Sube archivos JPG o PNG</p>
+          <p-button
+            label="O selecciona un Archivo"
+            icon="pi pi-upload"
+            (onClick)="fileUpload.choose()"
+            [rounded]="true"
+            [outlined]="true"
+            severity="secondary"
+            styleClass="mt-4 text-xs py-1.5 px-2.5"
+          />
         </div>
       </ng-template>
     </p-fileupload>
@@ -74,8 +83,7 @@
         (onClick)="closeModal()"
       />
       <p-button
-        label="Guardar Foto"
-        [disabled]="!selectedFile"
+        [label]="selectedFile ? 'Guardar Foto' : 'Eliminar Foto Actual'"
         [loading]="loading"
         (onClick)="uploadAvatar()"
       />

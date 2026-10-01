@@ -11,7 +11,7 @@
     >Solicita una</a></p>
   @if (!recoverPassword) {
     <form (ngSubmit)="login()" [formGroup]="loginForm">
-      <div class="flex flex-col items-center mt-6">
+      <div class="flex flex-col items-center mt-6 w-80 max-w-[90vw]">
         <p-floatlabel variant="on" class="w-full">
           <input
             id="username"
@@ -28,6 +28,8 @@
             formControlName="password"
             [toggleMask]="true"
             [feedback]="false"
+            styleClass="w-full"
+            inputStyleClass="w-full"
           ></p-password>
           <label for="password">Contraseña</label>
         </p-floatlabel>
@@ -76,8 +78,5 @@
       ></p-button>
     </div>
   }
-  <div class="ms-6 hashtags text-center">
-    <h2><b>E</b>SCUELA <b>C</b>ANARIA de <b>A</b>NIMACIÓN en el <b>T</b>IEMPO <b>L</b>IBRE <b>I</b>NSIGNIA de <b>M</b>ADERA</h2>
-  </div>
 </div>
 

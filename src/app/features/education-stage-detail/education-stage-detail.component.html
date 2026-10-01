@@ -2,13 +2,6 @@
   <div class="pe-12 ps-12">
     <div class="flex flex-row justify-between items-center">
       <h1 class="text-center font-bold">{{ stage.name }} ({{ stage.code }})</h1>
-      <p-button
-        icon="pi pi-pencil"
-        label="Editar Etapa Formativa"
-        severity="info"
-        rounded
-        outlined
-      ></p-button>
     </div>
     <div class="flex flex-row justify-between mt-2 p-2">
       <div class="basis-2/3">
@@ -78,12 +71,6 @@
     </div>
     <div class="flex flex-row justify-between mb-3 items-center">
       <h2 class="title-2">Módulos de la Etapa</h2>
-      <p-button
-        label="Añadir Módulo"
-        severity="secondary"
-        rounded
-        outlined
-      ></p-button>
     </div>
     @if (hasModule(stage)) {
       <p-accordion [multiple]="true">
@@ -98,12 +85,6 @@
                 Presenciales {{ module.allocatedContactHours }}</p>
               <div class="flex flex-row justify-between items-center mb-2">
                 <h2>Bloques Formativos</h2>
-                <p-button
-                  label="Añadir Bloque"
-                  severity="secondary"
-                  rounded
-                  outlined
-                ></p-button>
               </div>
               @if (hasLessonBlock(module)) {
                 <p-accordion [multiple]="true">

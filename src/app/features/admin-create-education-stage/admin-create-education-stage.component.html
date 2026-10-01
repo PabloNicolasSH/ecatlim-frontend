@@ -170,7 +170,7 @@
                                   }
                               </div>
                               <div class="flex flex-row w-full gap-2 mt-2">
-                                  <div class="basis-1/4">
+                                  <div class="basis-1/5">
                                       <p-floatlabel variant="on">
                                           <input
                                                   id="moduleName"
@@ -182,7 +182,19 @@
                                           <label for="moduleName" class="required">Nombre del módulo</label>
                                       </p-floatlabel>
                                   </div>
-                                  <div class="basis-1/4">
+                                  <div class="basis-1/5">
+                                    <p-floatlabel variant="on">
+                                      <input
+                                        id="moduleNumber"
+                                        pInputText
+                                        formControlName="number"
+                                        type="text"
+                                        class="w-full"
+                                      />
+                                      <label for="moduleNumber" class="required">Número del módulo</label>
+                                    </p-floatlabel>
+                                  </div>
+                                  <div class="basis-1/5">
                                       <p-floatlabel variant="on">
                                           <input
                                                   id="moduleOnlineHours"
@@ -194,7 +206,7 @@
                                           <label for="moduleOnlineHours" class="required">Número de horas en formato online</label>
                                       </p-floatlabel>
                                   </div>
-                                  <div class="basis-1/4">
+                                  <div class="basis-1/5">
                                       <p-floatlabel variant="on">
                                           <input
                                                   id="moduleContactHours"
@@ -206,7 +218,7 @@
                                           <label for="moduleContactHours" class="required">Número de horas en formato presencial</label>
                                       </p-floatlabel>
                                   </div>
-                                  <div class="basis-1/4">
+                                  <div class="basis-1/5">
                                       <p-select
                                               id="moduleType"
                                               formControlName="type"

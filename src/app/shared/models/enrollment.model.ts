@@ -7,9 +7,16 @@ export interface Activity {
 export interface Block {
   id: string;
   name: string;
+  code: string;
   status: 'Superada' | 'Pendiente' | 'En Curso';
-  date?: string;
+  completionDate?: string;
   activities: Activity[];
+}
+
+export interface Module {
+  name: string;
+  code: string;
+  blocks: Block[];
 }
 
 export interface Enrollment {
@@ -17,7 +24,7 @@ export interface Enrollment {
   stageName: string;
   completed: boolean;
   percentage: number;
-  blocks: Block[];
+  modules: Module[];
 }
 
 export interface EnrolledUser {

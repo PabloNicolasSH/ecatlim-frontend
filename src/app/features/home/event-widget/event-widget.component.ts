@@ -20,7 +20,7 @@ export class EventWidgetComponent implements OnInit, OnDestroy{
 
   private readonly eventService = inject(EventService);
 
-  private allEvents = toSignal(this.eventService.getEventsForHome(), { initialValue: [] });
+  private allEvents = toSignal(this.eventService.getEventsForHome(), { initialValue: [], rejectErrors: true });
   public nextEvent = computed(() => this.allEvents()[0]);
   public upcomingEvents = computed(() => this.allEvents().slice(1));
 
