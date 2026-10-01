@@ -14,8 +14,8 @@ import {InputText} from 'primeng/inputtext';
 import {Dialog} from 'primeng/dialog';
 import {TagService} from '../../shared/services/tag.service';
 import {MultiSelect} from 'primeng/multiselect';
-import {AuthService} from '../../core/auth/auth.service';
 import {Role} from '../../shared/models/role.model';
+import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
 
 const ROLES_ALLOWED_TO_ADD_RESOURCES: Role[] = [
   Role.MANAGEMENT,
@@ -50,7 +50,7 @@ export class ResourceLibraryComponent implements OnInit {
   protected readonly resourceService = inject(ResourceService);
   protected readonly tagService = inject(TagService);
   protected readonly fb = inject(FormBuilder);
-  protected readonly authService = inject(AuthService);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   categories = ['Todos', 'PDFs', 'Imágenes', 'Plantillas', 'Vídeos', 'Enlaces'];
 
@@ -99,7 +99,7 @@ export class ResourceLibraryComponent implements OnInit {
     this.tagService.getTags().subscribe(tags => {
       this.availableTags.set(tags);
     });
-    this.canAddResources.set(this.authService.hasAnyRole(...ROLES_ALLOWED_TO_ADD_RESOURCES));
+    this.canAddResources.set(this.loggedUserDataService.hasAnyRole(...ROLES_ALLOWED_TO_ADD_RESOURCES));
     this.initForm();
   }
 

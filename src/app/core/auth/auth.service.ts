@@ -1,11 +1,10 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {UserToLog} from './user-to-log.model';
 import {Observable, tap} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
-import {Profile} from '../../shared/models/profile.model';
-import {Role} from '../../shared/models/role.model';
+import {AuthLoginResponse, UserToLog} from './auth-models';
+import {LoggedUserDataService} from './logged-user-data-service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,21 +12,13 @@ import {Role} from '../../shared/models/role.model';
 export class AuthService {
   protected readonly http = inject(HttpClient);
   protected readonly router = inject(Router);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   login(userToLog: UserToLog): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/auth/login`, userToLog).pipe(
-      tap((res: any) => {
+    return this.http.post<AuthLoginResponse>(`${environment.apiUrl}/auth/login`, userToLog).pipe(
+      tap((res) => {
         localStorage.setItem('token', res.token);
-
-        const name = res.profile?.name || 'Administrador';
-        const surname = res.profile?.surname || 'Global';
-
-        localStorage.setItem('me', JSON.stringify({
-          name: name,
-          surname: surname,
-          email: res.email,
-          roles: res.roles
-        }));
+        this.loggedUserDataService.setUserData(res.user);
       })
     );
   }
@@ -44,18 +35,5 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('token');
-  }
-
-  getProfile(): Profile {
-    const profile = localStorage.getItem('me');
-    return profile ? JSON.parse(profile) : null;
-  }
-
-  hasAnyRole(...roles: Role[]): boolean {
-    const profile = this.getProfile();
-    if (!profile) {
-      return false;
-    }
-    return profile.roles.some(role => roles.includes(role));
   }
 }

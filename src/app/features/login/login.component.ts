@@ -5,10 +5,11 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {InputText} from 'primeng/inputtext';
 import {Password} from 'primeng/password';
 import {Router, RouterLink} from '@angular/router';
-import {UserToLog} from '../../core/auth/user-to-log.model';
 import {AuthService} from '../../core/auth/auth.service';
 import {UserService} from '../../shared/services/user.service';
 import {FormUtils} from '../../shared/form-utils';
+import {UserToLog} from '../../core/auth/auth-models';
+import {finalize, tap} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +26,6 @@ import {FormUtils} from '../../shared/form-utils';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
-
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
@@ -51,12 +51,10 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid && !this.loading) {
       this.loading = true;
       const userToLog: UserToLog = {...this.loginForm.value};
-      this.authService.login(userToLog).subscribe({
-        next: () => this.router.navigate(['/app/home']),
-        error: () => {
-          this.loading = false;
-        }
-      });
+      this.authService.login(userToLog).pipe(
+        finalize(() => this.loading = false),
+        tap(() => this.router.navigate(['/app/home'])),
+      ).subscribe();
     }
   }
 

@@ -36,7 +36,7 @@ export class UserModalMeEditComponent {
 
   protected form: FormGroup = inject(FormBuilder).group({
     name: ['', Validators.required],
-    surname: ['', Validators.required],
+    surname: [''],
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     census: [null],
@@ -61,7 +61,17 @@ export class UserModalMeEditComponent {
     this.form.markAsDirty();
     if (this.form.valid && !this.loading) {
       this.loading = true;
-      const userForm: UserMeForm = { ...this.form.value };
+      const formValue = this.form.getRawValue();
+      const userForm: UserMeForm = {
+        address: formValue.address,
+        census: formValue.census,
+        city: formValue.city,
+        country: formValue.country,
+        name: formValue.name,
+        nif: formValue.nif,
+        phone: formValue.phone,
+        surname: formValue.surname
+      };
 
       this.userService.updateMyInfo(userForm).subscribe({
         next: () => {
@@ -90,7 +100,7 @@ export class UserModalMeEditComponent {
     this.form = this.formBuilder.group({
       name: [this.userToEdit.profile?.name || '', Validators.required],
       surname: [this.userToEdit.profile?.surname || '', Validators.required],
-      email: [this.userToEdit.email, [Validators.required, Validators.email]],
+      email: [this.userToEdit.email],
       phone: [this.userToEdit.profile?.phone || ''],
       census: [this.userToEdit.profile?.census || null],
       nif: [this.userToEdit.profile?.nif || ''],
@@ -98,5 +108,6 @@ export class UserModalMeEditComponent {
       city: [this.userToEdit.profile?.city || ''],
       country: [this.userToEdit.profile?.country || '']
     });
+    this.form.get('email')!.disable();
   }
 }
