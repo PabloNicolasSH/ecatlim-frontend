@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EventWidgetComponent } from './event-widget.component';
+import {EventWidgetComponent} from './event-widget.component';
 
 describe('EventDashboardComponent', () => {
   let component: EventWidgetComponent;

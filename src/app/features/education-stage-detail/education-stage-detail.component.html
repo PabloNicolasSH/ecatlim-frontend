@@ -2,6 +2,14 @@
   <div class="pe-12 ps-12">
     <div class="flex flex-row justify-between items-center">
       <h1 class="text-center font-bold">{{ stage.name }} ({{ stage.code }})</h1>
+      @if (canEditStage) {
+        <p-button
+          icon="pi pi-pencil"
+          label="Editar Etapa"
+          routerLink="/app/oferta-educativa/crear-etapa-educativa"
+          [queryParams]="{etapa: stage.id}"
+        ></p-button>
+      }
     </div>
     <div class="flex flex-row justify-between mt-2 p-2">
       <div class="basis-2/3">
@@ -55,8 +63,8 @@
           </tr>
           <tr>
             <td><i class="pi pi-cog"></i> Prácticas</td>
-            <td>{{ stage.practicalHours }}</td>
-            <td>{{ stage.allocatedPracticalHours }}</td>
+            <td>{{ stage.practicalHours}}</td>
+            <td>{{ stage.allocatedPracticalHours}}</td>
             <td>
               {{
                 stage.practicalHours

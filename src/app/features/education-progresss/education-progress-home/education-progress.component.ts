@@ -1,13 +1,16 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {EducationStageService} from '../../shared/services/education-stage.service';
-import {EnrollmentService} from '../../shared/services/enrollment.service';
+import {EducationStageService} from '../../../shared/services/education-stage.service';
+import {EnrollmentService} from '../../../shared/services/enrollment.service';
 import {MessageService, PrimeTemplate} from 'primeng/api';
-import {EducationStageCard} from '../../shared/models/education-stage.model';
-import {Enrollment, Module} from '../../shared/models/enrollment.model';
+import {EducationStageCard} from '../../../shared/models/education-stage.model';
+import {Enrollment, EnrollmentDocuments, Module} from '../../../shared/models/enrollment.model';
 import {forkJoin} from 'rxjs';
 import {Carousel} from 'primeng/carousel';
 import {NgClass} from '@angular/common';
-import {EducationStageStatusPipe} from '../../shared/pipes/education-stage-status.pipe';
+import {EducationStageStatusPipe} from '../../../shared/pipes/education-stage-status.pipe';
+import {Button} from 'primeng/button';
+import {DocumentUploaderComponent} from '../document-uploader/document-uploader.component';
+import {AttendedEventsComponent} from '../attended-events/attended-events.component';
 
 @Component({
   selector: 'app-education-progress',
@@ -15,7 +18,10 @@ import {EducationStageStatusPipe} from '../../shared/pipes/education-stage-statu
     Carousel,
     NgClass,
     EducationStageStatusPipe,
-    PrimeTemplate
+    PrimeTemplate,
+    Button,
+    DocumentUploaderComponent,
+    AttendedEventsComponent
   ],
   templateUrl: './education-progress.component.html',
   styleUrl: './education-progress.component.scss'
@@ -28,8 +34,6 @@ export class EducationProgressComponent implements OnInit {
 
   stages = signal<EducationStageCard[]>([]);
   enrollments = signal<Enrollment[]>([]);
-  planUploaded = signal<boolean>(false);
-  fileUrl = signal<string | null>(null);
 
   selectedStage = signal<EducationStageCard | null>(null);
 
@@ -81,31 +85,38 @@ export class EducationProgressComponent implements OnInit {
     }
   }
 
-  enrollInStage(id: number): void {
+  enrollInStage(): void {
+    const id = this.selectedStage()?.id;
     this.loading.set(true);
-    this.enrollmentService.enrollInStage(id).subscribe({
-      next: (enrolledStage) => {
-        this.stages.update(currentStages =>
-          currentStages.map(s => s.id === enrolledStage.id ? enrolledStage : s)
-        );
+    if (id != null) {
+      this.enrollmentService.enrollInStage(id).subscribe({
+        next: (enrolledStage) => {
+          this.stages.update(currentStages =>
+            currentStages.map(s => s.id === enrolledStage.id ? enrolledStage : s)
+          );
 
-        this.enrollmentService.getUserProgress().subscribe(enrollments => {
-          this.enrollments.set(enrollments as unknown as Enrollment[]);
-          this.selectedStage.set(enrolledStage);
-        });
+          this.enrollmentService.getUserProgress().subscribe(enrollments => {
+            this.enrollments.set(enrollments as unknown as Enrollment[]);
+            this.selectedStage.set(enrolledStage);
+          });
 
-        this.loading.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: '¡Inscripción exitosa!',
-          detail: `Te has inscrito correctamente en la etapa ${enrolledStage.name}.`,
-          life: 5000
-        });
-      },
-      error: () => {
-        this.loading.set(false);
-      }
-    });
+          this.loading.set(false);
+          this.messageService.add({
+            severity: 'success',
+            summary: '¡Inscripción exitosa!',
+            detail: `Te has inscrito correctamente en la etapa ${enrolledStage.name}.`,
+            life: 5000
+          });
+        },
+        error: () => {
+          this.loading.set(false);
+        }
+      });
+    }
+  }
+
+  onDocumentsChange(enrollmentId: number, documents: EnrollmentDocuments): void {
+    this.enrollments.update(list => list.map(e => e.id === enrollmentId ? {...e, documents} : e));
   }
 
   toggleModule(code: string): void {
@@ -122,21 +133,5 @@ export class EducationProgressComponent implements OnInit {
     if (hasProgress) return 'En Curso';
 
     return 'Pendiente';
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-
-      this.fileUrl.set(URL.createObjectURL(file));
-      this.planUploaded.set(true);
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Archivo subido',
-        detail: `Se ha subido "${file.name}" correctamente.`
-      });
-    }
   }
 }

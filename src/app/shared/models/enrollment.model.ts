@@ -19,12 +19,27 @@ export interface Module {
   blocks: Block[];
 }
 
+export interface EnrollmentDocument {
+  fileId: number;
+  name: string;
+  mimeType: string;
+  uploadDate: string;
+}
+
+export interface EnrollmentDocuments {
+  personalPlan: EnrollmentDocument | null;
+  entityApproval: EnrollmentDocument | null;
+}
+
+export type EnrollmentDocumentType = 'PERSONAL_PLAN' | 'ENTITY_APPROVAL';
+
 export interface Enrollment {
   id: number;
   stageName: string;
   completed: boolean;
   percentage: number;
   modules: Module[];
+  documents: EnrollmentDocuments;
 }
 
 export interface EnrolledUser {

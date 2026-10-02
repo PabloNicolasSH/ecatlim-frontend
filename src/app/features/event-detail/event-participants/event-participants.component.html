@@ -1,0 +1,103 @@
+<section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6 space-y-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-[#3D2E24]">
+      <i class="pi pi-users text-[#795221]"></i>
+      <h2 class="text-sm font-bold m-0">Personas inscritas</h2>
+      <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">{{ participants().length }}</span>
+    </div>
+
+    @if (participants().length > 0) {
+      <div class="inline-flex bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1" role="group" aria-label="Datos a mostrar">
+        <button
+          type="button"
+          (click)="showFullData.set(true)"
+          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
+          [class]="showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+        >
+          <i class="pi pi-table text-[11px]"></i> Todos los datos
+        </button>
+        <button
+          type="button"
+          (click)="showFullData.set(false)"
+          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
+          [class]="!showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+        >
+          <i class="pi pi-th-large text-[11px]"></i> Solo nombre
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (participants().length === 0) {
+    <div class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-2xl p-10 text-center text-[#8C7A6B] text-sm">
+      <i class="pi pi-inbox text-2xl text-[#C2B7AC] block mb-2"></i>
+      Todavía no hay inscripciones en este evento.
+    </div>
+  } @else if (showFullData()) {
+    <p-table
+      [value]="participants()"
+      [rows]="pageSize"
+      [paginator]="participants().length > pageSize"
+      styleClass="participants-table"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Persona</th>
+          <th>Entidad de procedencia</th>
+          <th>Bloques</th>
+          <th class="!text-center">Pago</th>
+          @if (isPast()) {
+            <th class="!text-center">Asistió</th>
+          }
+        </tr>
+      </ng-template>
+      <ng-template #body let-p>
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <app-user-avatar [avatarUrl]="p.avatarUrl" [label]="initials(p)" customSize="2.75rem"></app-user-avatar>
+              <div class="flex flex-col">
+                <span class="font-bold text-base text-[#3D2E24]">{{ fullName(p) }}</span>
+                <span class="text-[0.85rem] text-[#8C7A6B]">{{ p.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="text-[0.95rem] text-[#51453a]">{{ p.entityName || '—' }}</td>
+          <td>
+            <div class="flex flex-wrap gap-1">
+              @for (b of p.blocks; track b.code) {
+                <span
+                  class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#633F17]"
+                  [pTooltip]="b.name"
+                >{{ b.code }}</span>
+              }
+            </div>
+          </td>
+          <td class="!text-center">
+            <span class="text-[11px] font-black uppercase px-3 py-1 rounded-full" [ngClass]="paymentStyle(p.paymentStatus).classes">
+              {{ paymentStyle(p.paymentStatus).label }}
+            </span>
+          </td>
+          @if (isPast()) {
+            <td class="!text-center">
+              @if (attendedAll(p)) {
+                <i class="pi pi-check-circle text-emerald-600 text-lg"></i>
+              } @else {
+                <i class="pi pi-minus-circle text-[#C2B7AC] text-lg"></i>
+              }
+            </td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      @for (p of participants(); track p.userId) {
+        <div class="flex items-center gap-3 bg-[#FAF8F5] border border-[#EBE5DC] rounded-2xl px-4 py-3 hover:bg-[#F3EEE6] transition-colors">
+          <app-user-avatar [avatarUrl]="p.avatarUrl" [label]="initials(p)" customSize="2.75rem"></app-user-avatar>
+          <span class="font-bold text-base text-[#3D2E24] truncate">{{ fullName(p) }}</span>
+        </div>
+      }
+    </div>
+  }
+</section>

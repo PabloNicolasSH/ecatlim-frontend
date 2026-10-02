@@ -1,7 +1,7 @@
 <div class="ps-14 pe-14">
   <div class="flex flex-row gap-4 items-center">
     <p-button
-      (onClick)="history.back()"
+      routerLink="/app/formacion"
       class="text-xl"
       icon="pi pi-arrow-left"
       rounded
@@ -20,13 +20,15 @@
       (onRowSelect)="openEducationStage($event)"
     >
       <ng-template #caption>
-        <div class="flex items-center justify-end">
-          <p-button
-            icon="pi pi-plus"
-            routerLink="/app/admin/oferta-educativa/crear-etapa-educativa"
-            label="Añadir Etapa Formativa"
-          ></p-button>
-        </div>
+        @if (canManageStages) {
+          <div class="flex items-center justify-end">
+            <p-button
+              icon="pi pi-plus"
+              routerLink="/app/oferta-educativa/crear-etapa-educativa"
+              label="Añadir Etapa Formativa"
+            ></p-button>
+          </div>
+        }
       </ng-template>
       <ng-template #header>
         <tr>

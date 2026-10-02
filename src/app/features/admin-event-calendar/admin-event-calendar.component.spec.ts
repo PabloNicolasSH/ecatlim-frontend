@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AdminEventCalendarComponent } from './admin-event-calendar.component';
+import {AdminEventCalendarComponent} from './admin-event-calendar.component';
 
 describe('AdminEventCalendarComponent', () => {
   let component: AdminEventCalendarComponent;

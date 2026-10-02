@@ -1,19 +1,20 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivityService } from '../../shared/services/activity.service';
+import {Component, inject, OnInit} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ActivityService} from '../../shared/services/activity.service';
 
-import { Button } from 'primeng/button';
-import { DatePicker } from 'primeng/datepicker';
-import { Select } from 'primeng/select';
-import { InputText } from 'primeng/inputtext';
-import { Textarea } from 'primeng/textarea';
-import { Checkbox } from 'primeng/checkbox';
-import { FloatLabel } from 'primeng/floatlabel';
-import { Tooltip } from 'primeng/tooltip';
+import {Button} from 'primeng/button';
+import {DatePicker} from 'primeng/datepicker';
+import {Select} from 'primeng/select';
+import {InputText} from 'primeng/inputtext';
+import {Textarea} from 'primeng/textarea';
+import {Checkbox} from 'primeng/checkbox';
+import {FloatLabel} from 'primeng/floatlabel';
+import {Tooltip} from 'primeng/tooltip';
 import {ToggleButton} from 'primeng/togglebutton';
 import {MessageService} from 'primeng/api';
 import {EventService} from '../../shared/services/event.service';
+import {SimpleUser} from '../../shared/models/user.model';
 
 @Component({
   selector: 'app-admin-create-activity',
@@ -41,11 +42,11 @@ export class AdminCreateActivityComponent implements OnInit {
   protected readonly eventService = inject(EventService);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
-  protected readonly history = history
 
   activityForm!: FormGroup;
   eventId!: number | null;
   availableBlocks: any[] = [];
+  trainers: (SimpleUser & { fullName: string })[] = [];
 
   activityTypes = [
     { label: 'Foro de Discusión', value: 'FORUM' },
@@ -72,6 +73,7 @@ export class AdminCreateActivityComponent implements OnInit {
       this.eventId = rawId ? Number(rawId) : null;
       if (this.eventId !== null) {
         this.loadEventBlocks(this.eventId);
+        this.loadEventTrainers(this.eventId);
       }
     })
 
@@ -94,6 +96,7 @@ export class AdminCreateActivityComponent implements OnInit {
       availableAt: ['', Validators.required],
       dueDate: ['', Validators.required],
       lessonBlockId: [null, Validators.required],
+      responsibleId: [null, Validators.required],
       isOptional: [false],
       isGradable: [false],
       maxAttempts: [null],
@@ -154,13 +157,26 @@ export class AdminCreateActivityComponent implements OnInit {
           summary: "Actividad creada",
           detail: "Se ha creado correctamente.",
         });
-        this.router.navigate(['/admin/eventos-formativos', this.eventId, 'actividades']).then();
+        this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]).then();
       },
       error: (err) => this.messageService.add({
         severity: "error",
         summary: "Error",
         detail: err.message,
       })
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(this.eventId !== null ? ["/app/eventos-formativos/detalle", this.eventId] : ["/app/eventos-formativos"]).then();
+  }
+
+  loadEventTrainers(id: number): void {
+    this.eventService.getEventDetail(id).subscribe(event => {
+      this.trainers = event.facilitators.map(t => ({
+        ...t,
+        fullName: [t.name, t.surname].filter(Boolean).join(" ") || t.email
+      }));
     });
   }
 

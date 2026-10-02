@@ -8,7 +8,7 @@
 >
   <ng-template pTemplate="header">
     @if (dialogMode == 'Add') {
-      <span class="font-bold text-xl">Añadir un Nuevo Usuario</span>
+      <span class="font-bold text-xl">{{ studentOnly ? 'Añadir un Nuevo Alumno' : (teamMode ? 'Añadir al Equipo Formativo' : 'Añadir un Nuevo Usuario') }}</span>
     } @else {
       <div class="flex flex-col">
         <span class="font-bold text-xl">
@@ -29,19 +29,21 @@
             <input id="email" pInputText formControlName="email" class="w-full" required/>
             <label for="email">Correo Electrónico</label>
           </p-floatlabel>
-          <p-floatlabel variant="on">
-            <p-multiSelect
-              id="roles"
-              [options]="roles"
-              formControlName="selectedRoles"
-              appendTo="body"
-              class="w-full"
-              styleClass="w-full"
-              display="chip"
-              required>
-            </p-multiSelect>
-            <label for="role">Roles asignados</label>
-          </p-floatlabel>
+          @if (!studentOnly) {
+            <p-floatlabel variant="on">
+              <p-multiSelect
+                id="roles"
+                [options]="roles"
+                formControlName="selectedRoles"
+                appendTo="body"
+                class="w-full"
+                styleClass="w-full"
+                display="chip"
+                required>
+              </p-multiSelect>
+              <label for="role">Roles asignados</label>
+            </p-floatlabel>
+          }
         </div>
       </div>
 
@@ -70,7 +72,7 @@
 
             <p-floatlabel variant="on">
               <p-select id="scoutGroup" [options]="scoutGroups" optionLabel="name" formControlName="selectedScoutGroup" appendTo="body" class="w-full" />
-              <label for="scoutGroup">Grupo Scout</label>
+              <label for="scoutGroup">Entidad de procedencia</label>
             </p-floatlabel>
 
             <p-floatlabel variant="on">

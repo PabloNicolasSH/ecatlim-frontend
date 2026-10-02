@@ -1,8 +1,8 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {DashboardData} from './dashboard-data.model';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
+import {HttpClient} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {DashboardData} from './dashboard-data.model';
 
 @Injectable({
   providedIn: 'root'

@@ -1,0 +1,88 @@
+<p-dialog
+  header="Añadir desde el alumnado"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '40rem' }"
+  [breakpoints]="{ '768px': '95vw' }"
+  appendTo="body"
+>
+  <div class="flex flex-col gap-4">
+    <p class="text-sm text-[#8C7A6B] m-0">
+      Busca a una persona del alumnado y dale un rol en el equipo formativo. Conservará sus otros roles.
+    </p>
+
+    <div class="inline-flex self-start bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1" role="group" aria-label="Rol a asignar">
+      @for (option of targetRoles; track option.value) {
+        <button
+          type="button"
+          (click)="targetRole.set(option.value)"
+          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold transition-colors"
+          [class]="targetRole() === option.value ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+        >{{ option.label }}</button>
+      }
+    </div>
+
+    <p-iconfield>
+      <p-inputicon class="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full !rounded-xl"
+        placeholder="Buscar por nombre, apellidos o correo"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+        autocomplete="off"
+      />
+    </p-iconfield>
+
+    <div class="flex flex-col gap-2 min-h-40 max-h-96 overflow-y-auto pr-1">
+      @if (query().trim().length < minQueryLength) {
+        <div class="text-center text-sm text-[#8C7A6B] py-10">
+          <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+          Escribe al menos {{ minQueryLength }} caracteres para buscar.
+        </div>
+      } @else if (searching()) {
+        <div class="text-center text-sm text-[#8C7A6B] py-10">
+          <i class="pi pi-spin pi-spinner text-xl text-[#795221] block mb-2"></i>
+          Buscando...
+        </div>
+      } @else if (candidates().length === 0) {
+        <div class="text-center text-sm text-[#8C7A6B] py-10">
+          <i class="pi pi-user-minus text-2xl text-[#C2B7AC] block mb-2"></i>
+          No hay alumnado que coincida con la búsqueda.
+        </div>
+      } @else {
+        @for (candidate of candidates(); track candidate.id) {
+          <div class="flex items-center gap-3 p-3 rounded-2xl border border-[#EBE5DC] bg-[#FAF8F5]">
+            <app-user-avatar [avatarUrl]="candidate.avatarUrl" [label]="initials(candidate)" customSize="2.75rem"></app-user-avatar>
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-[#3D2E24] m-0 truncate">{{ fullName(candidate) }}</p>
+              <p class="text-[0.85rem] text-[#8C7A6B] m-0 truncate">{{ candidate.email }}</p>
+              <div class="flex flex-wrap gap-1 mt-1">
+                @for (role of candidate.roles; track role) {
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" [class]="roleClasses[role] || 'bg-[#EFEAE2] text-[#633F17]'">{{ roleLabels[role] || role }}</span>
+                }
+              </div>
+            </div>
+            @if (alreadyHas(candidate)) {
+              <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                <i class="pi pi-check text-[10px]"></i> Ya lo tiene
+              </span>
+            } @else {
+              <p-button
+                label="Asignar"
+                icon="pi pi-user-plus"
+                size="small"
+                [loading]="assigningId() === candidate.id"
+                [disabled]="assigningId() !== null"
+                (onClick)="assign(candidate)"
+                styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl shrink-0"
+              ></p-button>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</p-dialog>

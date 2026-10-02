@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AdminEditCreateEventComponent } from './admin-edit-create-event.component';
+import {AdminEditCreateEventComponent} from './admin-edit-create-event.component';
 
 describe('AdminCreateEventComponent', () => {
   let component: AdminEditCreateEventComponent;

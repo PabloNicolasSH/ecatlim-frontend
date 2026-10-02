@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
+import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
@@ -9,10 +9,13 @@ import {Popover} from 'primeng/popover';
 import {Avatar} from 'primeng/avatar';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
+import {LoggedUserDataService} from '../auth/logged-user-data-service';
+import {ChatService} from '../../shared/services/chat.service';
+import {WebsocketService} from '../../shared/services/websocket.service';
+import {Subscription} from 'rxjs';
+import {User} from '../../shared/models/user.model';
 import {Notification} from '../../shared/models/notification.model';
 import {Role} from '../../shared/models/role.model';
-import {User} from '../../shared/models/user.model';
-import {LoggedUserDataService} from '../auth/logged-user-data-service';
 
 @Component({
   selector: 'app-header',
@@ -29,7 +32,11 @@ import {LoggedUserDataService} from '../auth/logged-user-data-service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+
+  protected readonly chatService = inject(ChatService);
+  protected readonly websocketService = inject(WebsocketService);
+  private notificationSub?: Subscription;
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
@@ -41,10 +48,11 @@ export class HeaderComponent implements OnInit {
   sidebarVisible: boolean = false;
 
   windowWidth = signal(window.innerWidth);
-
   messages = signal(["¿Vienes al curso de Agosto?"]);
   notifies: WritableSignal<Notification[]> = signal([]);
+
   sidebarMenu!: MenuItem[];
+  unreadChats: number = 0;
 
   ngOnInit() {
     const savedMe = localStorage.getItem('me');
@@ -53,6 +61,14 @@ export class HeaderComponent implements OnInit {
     }
     this.loggedUserDataService.avatarUrl$.subscribe(url => this.avatarUrl = url);
     this.createSidebarMenu();
+    this.chatService.unreadChats$.subscribe(count => this.unreadChats = count);
+    this.chatService.refreshUnreadChats();
+    this.notificationSub = this.websocketService.getNotifications()
+      .subscribe(notification => this.chatService.markChatUnread(notification.chatId));
+  }
+
+  ngOnDestroy() {
+    this.notificationSub?.unsubscribe();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -118,33 +134,39 @@ export class HeaderComponent implements OnInit {
           this.router.navigateByUrl('/app/biblioteca');
           this.sidebarVisible = false;
         }
-      },
-      {
-        label: 'Mi formación',
-        items: [
-          {
-            label: 'Oferta Educativa', icon: 'pi pi-graduation-cap', command: () => {
-              this.router.navigateByUrl('/app/oferta-educativa');
-              this.sidebarVisible = false;
-            }
-          },
-          {
-            label: 'Mi Progreso', icon: 'pi pi-book', command: () => {
-              this.router.navigateByUrl('/app/mi-progreso');
-              this.sidebarVisible = false;
-            }
-          }
-        ]
       }
     ];
 
-    if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)) {
+    if (this.user?.roles.includes(Role.STUDENT)) {
+      this.addStudentOptions();
+    }
+
+    if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)){
       this.addHeadEducationOptions();
+    }
+
+    const educationRoles = [Role.EVENT_DIRECTOR, Role.MANAGEMENT, Role.MANAGER_DIRECTOR, Role.TRAINER];
+    if (this.user?.roles.some(role => educationRoles.includes(role))) {
+      this.addEducationOptions();
     }
 
     if (this.user?.roles.includes(Role.ADMIN)) {
       this.addAdminOptions();
     }
+  }
+
+  private addStudentOptions() {
+    this.sidebarMenu.push({
+      label: 'Mi formación',
+      items: [
+        {
+          label: 'Mi Progreso', icon: 'pi pi-graduation-cap', command: () => {
+            this.router.navigateByUrl('/app/mi-ruta-formacion');
+            this.sidebarVisible = false;
+          }
+        }
+      ]
+    })
   }
 
   private addHeadEducationOptions() {
@@ -161,6 +183,16 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+  private addEducationOptions() {
+    this.sidebarMenu.push(
+      {
+        label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
+          this.router.navigateByUrl('/app/formacion');
+          this.sidebarVisible = false;
+        }}
+    );
+  }
+
   private addAdminOptions() {
     this.sidebarMenu.push({
       label: 'Administración',
@@ -174,18 +206,6 @@ export class HeaderComponent implements OnInit {
         {
           label: 'Entidades', icon: "pi pi-building-columns", command: () => {
             this.router.navigateByUrl('/app/admin/entidades');
-            this.sidebarVisible = false;
-          }
-        },
-        {
-          label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
-            this.router.navigateByUrl('/app/admin/formacion');
-            this.sidebarVisible = false;
-          }
-        },
-        {
-          label: 'Eventos Formativos', icon: "pi pi-calendar", command: () => {
-            this.router.navigateByUrl('/app/admin/eventos-formativos');
             this.sidebarVisible = false;
           }
         }
@@ -204,6 +224,8 @@ export class HeaderComponent implements OnInit {
 
     return this.user.roles.map(role => {
       switch (role.toUpperCase()) {
+        case 'MANAGER_DIRECTOR':
+          return 'Dirección ECATLIM';
         case 'ADMIN':
           return 'Administración';
         case 'EVENT_DIRECTOR':

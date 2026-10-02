@@ -1,18 +1,18 @@
 <div class="ps-12 pe-12">
   <div class="flex flex-row justify-between items-center">
-    <h1 class="font-bold">Crear Etapa Formativa</h1>
+    <h1 class="font-bold">{{ editingStageId !== null ? 'Editar Etapa Formativa' : 'Crear Etapa Formativa' }}</h1>
     <p-button
       severity="secondary"
-      routerLink="/app/admin/oferta-educativa"
+      routerLink="/app/oferta-educativa"
     >
       Ir a la Oferta Educativa
     </p-button>
   </div>
   <div class="mt-3">
-    <p-tabs value="0">
+    <p-tabs [(value)]="activeTab">
       <div class="flex flex-row justify-between items-center">
         <p-tablist>
-          <p-tab value="0">Crear Etapa Formativa</p-tab>
+          <p-tab value="0">{{ editingStageId !== null ? 'Editar Etapa Formativa' : 'Crear Etapa Formativa' }}</p-tab>
           <p-tab value="1">Crear Módulos</p-tab>
           <p-tab value="2">Crear Bloques Formativos</p-tab>
         </p-tablist>
@@ -120,14 +120,14 @@
                   <p-select
                     id="preEducationStage"
                     formControlName="preEducationStage"
-                    [options]="educationStages"
+                    [options]="previousStageOptions"
                     optionLabel="name"
                     placeholder="Selecciona una Etapa previa necesaria"
                   ></p-select>
                 </div>
               }
               <div class="flex justify-end">
-                <p-button label="Crear Etapa" icon="pi pi-plus" type="submit" [loading]="loading"/>
+                <p-button [label]="editingStageId !== null ? 'Guardar Cambios' : 'Crear Etapa'" [icon]="editingStageId !== null ? 'pi pi-save' : 'pi pi-plus'" type="submit" [loading]="loading"/>
               </div>
             </div>
           </form>

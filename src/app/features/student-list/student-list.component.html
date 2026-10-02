@@ -1,0 +1,222 @@
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <a
+    routerLink="/app/formacion"
+    class="inline-flex items-center gap-2 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-4 py-2 no-underline hover:bg-[#FAF8F5] transition-colors"
+  >
+    <i class="pi pi-arrow-left text-[10px]"></i> Volver al panel de formación
+  </a>
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h1 class="font-black text-3xl text-[#3D2E24] m-0">Listado de Alumnado</h1>
+      <p class="text-sm text-[#8C7A6B] mt-1 mb-0">Todo el alumnado de la ECATLIM, su entidad de procedencia y la etapa que cursa actualmente.</p>
+    </div>
+    @if (canAddStudents) {
+      <p-button
+        icon="pi pi-plus"
+        label="Añadir alumnado"
+        (onClick)="modalVisible = true"
+        styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl font-bold"
+      ></p-button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm mb-0">Cargando el alumnado...</p>
+    </div>
+  } @else if (failed()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No se pudo cargar el alumnado</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Comprueba tu conexión o inténtalo de nuevo.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="load()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+    </div>
+  } @else {
+
+    <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div class="relative overflow-hidden rounded-2xl text-white shadow-sm p-4 bg-gradient-to-br from-[#4D3112] via-[#633F17] to-[#9c6a33]">
+        <i class="pi pi-users absolute -right-2 -bottom-3 text-6xl opacity-15"></i>
+        <p class="text-[10px] font-black uppercase tracking-wider text-amber-200 m-0">Alumnado total</p>
+        <p class="text-4xl font-black m-0 mt-2">{{ students().length }}</p>
+      </div>
+
+      @for (stage of stages(); track stage.stageId) {
+        <button
+          type="button"
+          (click)="toggleStageFilter(stage.stageId)"
+          class="text-left bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition-all hover:-translate-y-0.5"
+          [class]="stageFilter() === stage.stageId ? 'border-[#795221] ring-2 ring-[#d9a45b]/50' : 'border-[#EBE5DC]'"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-black px-2.5 py-1 rounded-full" [class]="stageClass(stage.stageId)">{{ stage.code }}</span>
+            <i class="pi pi-graduation-cap text-[#C2B7AC]"></i>
+          </div>
+          <p class="text-3xl font-black text-[#7f521d] m-0 mt-3">{{ stage.count }}</p>
+          <p class="text-xs text-[#8C7A6B] m-0 mt-0.5 truncate">{{ stage.name }}</p>
+        </button>
+      }
+
+      <button
+        type="button"
+        (click)="toggleStageFilter(NO_STAGE)"
+        class="text-left bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition-all hover:-translate-y-0.5"
+        [class]="stageFilter() === NO_STAGE ? 'border-[#795221] ring-2 ring-[#d9a45b]/50' : 'border-[#EBE5DC]'"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-stone-200 text-stone-700">SIN ETAPA</span>
+          <i class="pi pi-minus-circle text-[#C2B7AC]"></i>
+        </div>
+        <p class="text-3xl font-black text-[#7f521d] m-0 mt-3">{{ overview()?.withoutStage }}</p>
+        <p class="text-xs text-[#8C7A6B] m-0 mt-0.5">Sin etapa en curso</p>
+      </button>
+    </section>
+
+    <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col xl:flex-row xl:items-center gap-3">
+      <p-iconfield class="flex-1">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full !rounded-xl"
+          placeholder="Buscar por nombre, correo, entidad o etapa"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </p-iconfield>
+
+      <p-select
+        [options]="stageOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="stageFilter()"
+        (ngModelChange)="stageFilter.set($event)"
+        placeholder="Todas las etapas"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full xl:w-64"
+      />
+
+      <p-select
+        [options]="entityOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="entityFilter()"
+        (ngModelChange)="entityFilter.set($event)"
+        placeholder="Todas las entidades"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="label"
+        appendTo="body"
+        styleClass="w-full xl:w-64"
+      />
+
+      @if (hasActiveFilters()) {
+        <p-button label="Limpiar" icon="pi pi-filter-slash" severity="secondary" [text]="true" (onClick)="clearFilters()" />
+      }
+
+      <div class="inline-flex bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1 self-start xl:self-auto" role="group" aria-label="Datos a mostrar">
+        <button
+          type="button"
+          (click)="showFullData.set(true)"
+          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
+          [class]="showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+        >
+          <i class="pi pi-table text-[11px]"></i> Datos completos
+        </button>
+        <button
+          type="button"
+          (click)="showFullData.set(false)"
+          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
+          [class]="!showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+        >
+          <i class="pi pi-th-large text-[11px]"></i> Foto y nombre
+        </button>
+      </div>
+    </div>
+
+    @if (showFullData()) {
+      <p-table
+        [value]="filteredStudents()"
+        [rows]="pageSize"
+        [paginator]="filteredStudents().length > pageSize"
+        styleClass="student-table"
+      >
+        <ng-template #caption>
+          <p class="m-0 text-sm text-[#51453a]">
+            Mostrando <span class="font-black">{{ filteredStudents().length }}</span> de {{ students().length }}
+            {{ students().length === 1 ? 'persona' : 'personas' }}
+          </p>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo Electrónico</th>
+            <th>Entidad de procedencia</th>
+            <th>Etapa educativa actual</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-student>
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <app-user-avatar [avatarUrl]="student.avatarUrl" [label]="initials(student)" customSize="2.75rem"></app-user-avatar>
+                <span class="font-bold text-base text-[#3D2E24]">{{ fullName(student) }}</span>
+              </div>
+            </td>
+            <td class="text-[0.95rem] text-[#51453a]">{{ student.email }}</td>
+            <td class="text-[0.95rem] text-[#51453a]">{{ student.entityName || '—' }}</td>
+            <td>
+              @if (student.currentStage; as stage) {
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-black px-2.5 py-1 rounded-full" [class]="stageClass(stage.id)">{{ stage.code }}</span>
+                  <span class="text-[0.95rem] text-[#51453a]">{{ stage.name }}</span>
+                </div>
+              } @else {
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-200 text-stone-700">Sin etapa en curso</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="4" class="text-center !p-10 text-[#8C7A6B] text-sm">
+              <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+              Ninguna persona coincide con los filtros aplicados.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    } @else {
+      @if (filteredStudents().length === 0) {
+        <div class="bg-white border border-[#EBE5DC] rounded-2xl p-10 text-center text-[#8C7A6B] text-sm">
+          <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+          Ninguna persona coincide con los filtros aplicados.
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          @for (student of filteredStudents(); track student.id) {
+            <div class="flex items-center gap-3 bg-white border border-[#EBE5DC] rounded-2xl px-4 py-3 hover:bg-[#FAF8F5] transition-colors">
+              <app-user-avatar [avatarUrl]="student.avatarUrl" [label]="initials(student)" customSize="2.75rem"></app-user-avatar>
+              <span class="font-bold text-base text-[#3D2E24] truncate">{{ fullName(student) }}</span>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+</div>
+
+<app-user-modal-add-edit
+
+  [(visible)]="modalVisible"
+
+  dialogMode="Add"
+
+  [studentOnly]="true"
+
+  (userUpdated)="load()"
+
+></app-user-modal-add-edit>
