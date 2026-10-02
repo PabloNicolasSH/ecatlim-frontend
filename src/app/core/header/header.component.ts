@@ -145,6 +145,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.addHeadEducationOptions();
     }
 
+    const educationRoles = [Role.EVENT_DIRECTOR, Role.MANAGEMENT, Role.MANAGER_DIRECTOR, Role.TRAINER];
+    if (this.user?.roles.some(role => educationRoles.includes(role))) {
+      this.addEducationOptions();
+    }
+
     if (this.user?.roles.includes(Role.ADMIN)) {
       this.addAdminOptions();
     }
@@ -178,6 +183,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  private addEducationOptions() {
+    this.sidebarMenu.push(
+      {
+        label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
+          this.router.navigateByUrl('/app/formacion');
+          this.sidebarVisible = false;
+        }}
+    );
+  }
+
   private addAdminOptions() {
     this.sidebarMenu.push({
       label: 'Administración',
@@ -193,12 +208,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.router.navigateByUrl('/app/admin/entidades');
             this.sidebarVisible = false;
           }
-        },
-        {
-          label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
-            this.router.navigateByUrl('/app/admin/formacion');
-            this.sidebarVisible = false;
-        }}
+        }
       ]
     });
   }

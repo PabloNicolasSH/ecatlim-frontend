@@ -123,6 +123,46 @@ export const routes: Routes = [
         data: {roles: [Role.HEAD_OF_EDUCATION]}
       },
       {
+        path: "formacion",
+        component: DashboardComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos",
+        component: AdminEventCalendarComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos/crear-evento",
+        component: AdminEditCreateEventComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos/editar/:id",
+        component: AdminEditCreateEventComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR]}
+      },
+      {
+        path: "eventos-formativos/:eventId/actividades/crear-nueva",
+        component: AdminCreateActivityComponent,
+        data: {roles: [Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "oferta-educativa",
+        component: AdminEducationOfferComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "oferta-educativa/detalle-etapa/:id",
+        component: EducationStageDetailComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "oferta-educativa/crear-etapa-educativa",
+        component: AdminCreateEducationStageComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT]}
+      },
+      {
         path: "admin",
         data: {roles: [Role.ADMIN]},
         children: [
@@ -133,38 +173,6 @@ export const routes: Routes = [
           {
             path: "entidades",
             component: EntityListComponent
-          },
-          {
-            path: "formacion",
-            component: DashboardComponent
-          },
-          {
-            path: "eventos-formativos",
-            component: AdminEventCalendarComponent
-          },
-          {
-            path: "eventos-formativos/crear-evento",
-            component: AdminEditCreateEventComponent
-          },
-          {
-            path: "eventos-formativos/editar/:id",
-            component: AdminEditCreateEventComponent
-          },
-          {
-            path: "eventos-formativos/:eventId/actividades/crear-nueva",
-            component: AdminCreateActivityComponent
-          },
-          {
-            path: "oferta-educativa",
-            component: AdminEducationOfferComponent
-          },
-          {
-            path: "oferta-educativa/detalle-etapa/:id",
-            component: EducationStageDetailComponent
-          },
-          {
-            path: "oferta-educativa/crear-etapa-educativa",
-            component: AdminCreateEducationStageComponent
           },
           {
             path: "**",
