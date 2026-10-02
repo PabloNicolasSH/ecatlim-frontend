@@ -1,10 +1,10 @@
-import {Component, EventEmitter, inject, model, Output} from '@angular/core';
+import {Component, EventEmitter, inject, model, Output, viewChild} from '@angular/core';
 import {UserService} from '../../../shared/services/user.service';
 import {MessageService} from 'primeng/api';
 import {Button} from 'primeng/button';
 import {FileUpload} from 'primeng/fileupload';
 import {Dialog} from 'primeng/dialog';
-import {Tooltip} from 'primeng/tooltip';
+import {finalize, tap} from 'rxjs';
 
 @Component({
   selector: 'app-user-avatar-modal',
@@ -22,6 +22,7 @@ export class UserAvatarModalComponent {
 
   visible = model<boolean>(false);
   @Output() avatarUpdated = new EventEmitter<void>();
+  fileUpload = viewChild.required<FileUpload>('fileUpload');
 
   selectedFile: File | null = null;
   imagePreview: string | null = null;
@@ -40,32 +41,32 @@ export class UserAvatarModalComponent {
   }
 
   uploadAvatar() {
-    if (!this.selectedFile || this.loading) return;
+    if (this.loading) {
+      return;
+    }
 
     this.loading = true;
     const formData = new FormData();
-    formData.append('file', this.selectedFile);
+    if (this.selectedFile) {
+      formData.append('file', this.selectedFile ?? null);
+    }
 
-    this.userService.uploadAvatar(formData).subscribe({
-      next: () => {
+    this.userService.uploadAvatar(formData).pipe(
+      finalize(() => {
         this.loading = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Foto actualizada',
-          detail: 'Tu nueva imagen de perfil se ha guardado correctamente'
-        });
-        this.avatarUpdated.emit();
-        this.closeModal();
-      },
-      error: (err) => {
-        this.loading = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error de subida',
-          detail: err.message || 'No se pudo subir la imagen'
-        });
-      }
-    });
+      }),
+      tap(() => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Foto actualizada',
+            detail: 'Tu nueva imagen de perfil se ha guardado correctamente'
+          });
+          this.selectedFile = null;
+          this.fileUpload().clear();
+          this.avatarUpdated.emit();
+          this.closeModal();
+        }
+      )).subscribe();
   }
 
   triggerUpload(fileUpload: any) {

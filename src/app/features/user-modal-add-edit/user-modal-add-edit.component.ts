@@ -13,6 +13,7 @@ import {UserForm} from '../../shared/models/user-form.model';
 import {Role} from '../../shared/models/role.model';
 import {MessageService, PrimeTemplate} from 'primeng/api';
 import {MultiSelect} from 'primeng/multiselect';
+import {finalize, tap} from 'rxjs';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -30,7 +31,7 @@ import {MultiSelect} from 'primeng/multiselect';
   templateUrl: './user-modal-add-edit.component.html',
   styleUrl: './user-modal-add-edit.component.scss'
 })
-export class UserModalAddEditComponent implements OnInit{
+export class UserModalAddEditComponent implements OnInit {
 
   protected readonly formBuilder = inject(FormBuilder);
   protected readonly scoutGroupService = inject(EntityService);
@@ -51,10 +52,10 @@ export class UserModalAddEditComponent implements OnInit{
 
   constructor() {
     effect(() => {
-      if (this.dialogMode == 'Edit'){
+      if (this.dialogMode == 'Edit') {
         this.initializeEditForm();
       }
-      if (!this.visible()){
+      if (!this.visible()) {
         this.form.reset();
         this.loading = false;
       }
@@ -79,7 +80,7 @@ export class UserModalAddEditComponent implements OnInit{
         return {
           label: RoleLabels[role] || role,
           value: role
-        }
+        };
       });
   }
 
@@ -101,52 +102,45 @@ export class UserModalAddEditComponent implements OnInit{
 
   private getScoutGroups() {
     this.scoutGroupService.getEntities().subscribe({
-      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
-    })
+      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a, b) => a.name.localeCompare(b.name))
+    });
   }
 
   onSubmit() {
     this.form.markAsDirty();
-    if (this.form.valid && !this.loading){
+    if (this.form.valid && !this.loading) {
       this.loading = true;
       const userForm: UserForm = {...this.form.value};
       userForm.scoutGroupId = this.form.get('selectedScoutGroup')?.value?.id;
       userForm.roles = this.form.get('selectedRoles')?.value;
-      if (this.dialogMode == 'Edit'){
-        this.userService.updateUser(this.userToEdit.id!, userForm).subscribe({
-          next: () => {
-            this.loading = false;
-            this.visible.set(false);
-            this.userUpdated.emit();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Confirmado',
-              detail: 'Se ha actualizado correctamente el usuario'
-            })
-          }
-        })
+      if (this.dialogMode == 'Edit') {
+        this.userService.updateUser(this.userToEdit.id!, userForm).pipe(
+          finalize(() => this.loading = false),
+          tap(() => {
+              this.visible.set(false);
+              this.userUpdated.emit();
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Confirmado',
+                detail: 'Se ha actualizado correctamente el usuario'
+              });
+            }
+          )
+        ).subscribe();
       } else {
-        this.userService.addUser(userForm).subscribe({
-          next: () => {
-            this.loading = false;
-            this.visible.set(false);
-            this.userUpdated.emit();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Confirmado',
-              detail: 'Se ha añadido el usuario al Aula Virtual'
-            })
-          },
-          error: err => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: err.message
-            })
-            this.visible.set(false);
-            this.loading = false;
-          }
-        })
+        this.userService.addUser(userForm).pipe(
+          finalize(() => this.loading = false),
+          tap(() => {
+              this.loading = false;
+              this.visible.set(false);
+              this.userUpdated.emit();
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Confirmado',
+                detail: 'Se ha añadido el usuario al Aula Virtual'
+              });
+            }
+          )).subscribe();
       }
     }
   }

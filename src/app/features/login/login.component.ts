@@ -5,9 +5,11 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {InputText} from 'primeng/inputtext';
 import {Password} from 'primeng/password';
 import {Router, RouterLink} from '@angular/router';
-import {UserToLog} from '../../core/auth/user-to-log.model';
 import {AuthService} from '../../core/auth/auth.service';
 import {UserService} from '../../shared/services/user.service';
+import {FormUtils} from '../../shared/form-utils';
+import {UserToLog} from '../../core/auth/auth-models';
+import {finalize, tap} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -23,8 +25,7 @@ import {UserService} from '../../shared/services/user.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent  implements OnInit{
-
+export class LoginComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
@@ -42,25 +43,23 @@ export class LoginComponent  implements OnInit{
         username: ["", [Validators.required, Validators.email]],
         password: ["", Validators.required]
       }
-    )
+    );
   }
 
-  login(){
-    this.loginForm.markAllAsTouched();
-    if (this.loginForm.valid && !this.loading){
+  login() {
+    FormUtils.markAllAsDirtyAndTouched(this.loginForm);
+    if (this.loginForm.valid && !this.loading) {
       this.loading = true;
       const userToLog: UserToLog = {...this.loginForm.value};
-      this.authService.login(userToLog).subscribe({
-        next: () => this.router.navigate(['/app/home']),
-        error: (err) => {
-            this.loading = false;
-        }
-      });
+      this.authService.login(userToLog).pipe(
+        finalize(() => this.loading = false),
+        tap(() => this.router.navigate(['/app/home'])),
+      ).subscribe();
     }
   }
 
-  sendRecoverEmail(){
-    if (this.forgotUsername && !this.loading){
+  sendRecoverEmail() {
+    if (this.forgotUsername && !this.loading) {
       this.loading = true;
       this.userService.forgotPassword(this.forgotUsername).subscribe({
         next: () => {

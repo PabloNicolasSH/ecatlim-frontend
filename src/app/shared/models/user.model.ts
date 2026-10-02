@@ -1,6 +1,5 @@
 import {ScoutGroup} from './scout-group.model';
 import {Role} from './role.model';
-import {Profile} from './profile.model';
 
 export interface User {
   id?: number;
