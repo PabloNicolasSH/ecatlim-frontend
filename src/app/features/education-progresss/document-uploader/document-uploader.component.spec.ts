@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MessageService } from 'primeng/api';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {MessageService} from 'primeng/api';
 
-import { DocumentUploaderComponent } from './document-uploader.component';
+import {DocumentUploaderComponent} from './document-uploader.component';
 
 describe('DocumentUploaderComponent', () => {
   let component: DocumentUploaderComponent;

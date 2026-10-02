@@ -7,7 +7,6 @@ import {Password} from 'primeng/password';
 import {Router, RouterLink} from '@angular/router';
 import {AuthService} from '../../core/auth/auth.service';
 import {UserService} from '../../shared/services/user.service';
-import {WebsocketService} from '../../shared/services/websocket.service';
 import {FormUtils} from '../../shared/form-utils';
 import {UserToLog} from '../../core/auth/auth-models';
 import {finalize, tap} from 'rxjs';

@@ -1,16 +1,16 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivityService } from '../../shared/services/activity.service';
+import {Component, inject, OnInit} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ActivityService} from '../../shared/services/activity.service';
 
-import { Button } from 'primeng/button';
-import { DatePicker } from 'primeng/datepicker';
-import { Select } from 'primeng/select';
-import { InputText } from 'primeng/inputtext';
-import { Textarea } from 'primeng/textarea';
-import { Checkbox } from 'primeng/checkbox';
-import { FloatLabel } from 'primeng/floatlabel';
-import { Tooltip } from 'primeng/tooltip';
+import {Button} from 'primeng/button';
+import {DatePicker} from 'primeng/datepicker';
+import {Select} from 'primeng/select';
+import {InputText} from 'primeng/inputtext';
+import {Textarea} from 'primeng/textarea';
+import {Checkbox} from 'primeng/checkbox';
+import {FloatLabel} from 'primeng/floatlabel';
+import {Tooltip} from 'primeng/tooltip';
 import {ToggleButton} from 'primeng/togglebutton';
 import {MessageService} from 'primeng/api';
 import {EventService} from '../../shared/services/event.service';

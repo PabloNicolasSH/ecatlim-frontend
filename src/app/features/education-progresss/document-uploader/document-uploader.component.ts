@@ -2,11 +2,7 @@ import {Component, inject, input, output, signal} from '@angular/core';
 import {MessageService} from 'primeng/api';
 import {DatePipe, NgClass} from '@angular/common';
 import {EnrollmentService} from '../../../shared/services/enrollment.service';
-import {
-  EnrollmentDocument,
-  EnrollmentDocuments,
-  EnrollmentDocumentType
-} from '../../../shared/models/enrollment.model';
+import {EnrollmentDocument, EnrollmentDocuments, EnrollmentDocumentType} from '../../../shared/models/enrollment.model';
 
 interface DocumentSlot {
   type: EnrollmentDocumentType;

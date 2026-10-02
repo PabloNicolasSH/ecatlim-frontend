@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
 
-import { AttendedEventsComponent } from './attended-events.component';
+import {AttendedEventsComponent} from './attended-events.component';
 
 describe('AttendedEventsComponent', () => {
   let fixture: ComponentFixture<AttendedEventsComponent>;

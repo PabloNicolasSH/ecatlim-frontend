@@ -1,12 +1,12 @@
-import { Component, EventEmitter, Input, model, Output, inject, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { ScoutGroup } from '../../shared/models/scout-group.model';
-import { Dialog } from 'primeng/dialog';
-import { Button } from 'primeng/button';
-import { FloatLabel } from 'primeng/floatlabel';
-import { InputText } from 'primeng/inputtext';
-import { Select } from 'primeng/select';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PrimeTemplate } from 'primeng/api';
+import {Component, EventEmitter, inject, Input, model, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {ScoutGroup} from '../../shared/models/scout-group.model';
+import {Dialog} from 'primeng/dialog';
+import {Button} from 'primeng/button';
+import {FloatLabel} from 'primeng/floatlabel';
+import {InputText} from 'primeng/inputtext';
+import {Select} from 'primeng/select';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {PrimeTemplate} from 'primeng/api';
 import {EntityService} from '../../shared/services/entity.service';
 import {UserService} from '../../shared/services/user.service';
 

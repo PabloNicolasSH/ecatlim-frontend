@@ -1,17 +1,17 @@
-import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
-import { EventService } from '../../shared/services/event.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CalendarOptions } from '@fullcalendar/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
+import {EventService} from '../../shared/services/event.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {CalendarOptions} from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { map, tap } from 'rxjs';
-import { Button } from 'primeng/button';
-import { DatePipe, UpperCasePipe } from '@angular/common';
-import { Menu } from 'primeng/menu';
+import {map, tap} from 'rxjs';
+import {Button} from 'primeng/button';
+import {DatePipe, UpperCasePipe} from '@angular/common';
+import {Menu} from 'primeng/menu';
 import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {ConfirmDialog} from 'primeng/confirmdialog';
-import { LoggedUserDataService } from '../../core/auth/logged-user-data-service';
-import { Role } from '../../shared/models/role.model';
+import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
+import {Role} from '../../shared/models/role.model';
 
 @Component({
   selector: 'app-admin-event-calendar',

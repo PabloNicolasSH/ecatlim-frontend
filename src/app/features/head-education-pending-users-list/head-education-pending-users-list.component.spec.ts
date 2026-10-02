@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { HeadEducationPendingUsersListComponent } from './head-education-pending-users-list.component';
+import {HeadEducationPendingUsersListComponent} from './head-education-pending-users-list.component';
 
 describe('HeadEducationPendingUsersListComponent', () => {
   let component: HeadEducationPendingUsersListComponent;

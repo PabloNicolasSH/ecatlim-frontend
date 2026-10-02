@@ -2,7 +2,15 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {Event, UserEventCalendar, EventDashboard, EventForm, AdminEventCalendar, EventSuggestions, EventDetail} from '../models/event.model';
+import {
+  AdminEventCalendar,
+  Event,
+  EventDashboard,
+  EventDetail,
+  EventForm,
+  EventSuggestions,
+  UserEventCalendar
+} from '../models/event.model';
 import {LessonBlock} from '../models/lesson-block.model';
 
 @Injectable({

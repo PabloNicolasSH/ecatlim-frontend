@@ -1,14 +1,14 @@
-import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { CalendarOptions } from '@fullcalendar/core';
-import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {CalendarOptions} from '@fullcalendar/core';
+import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { EventService } from '../../shared/services/event.service';
-import { UserEventCalendar } from '../../shared/models/event.model';
-import { DatePipe } from '@angular/common';
-import { Button } from 'primeng/button';
-import { Tag } from 'primeng/tag';
-import { ActivatedRoute, Router } from '@angular/router';
-import { map, tap } from 'rxjs';
+import {EventService} from '../../shared/services/event.service';
+import {UserEventCalendar} from '../../shared/models/event.model';
+import {DatePipe} from '@angular/common';
+import {Button} from 'primeng/button';
+import {Tag} from 'primeng/tag';
+import {ActivatedRoute, Router} from '@angular/router';
+import {map, tap} from 'rxjs';
 
 @Component({
   selector: 'app-user-event-calendar',

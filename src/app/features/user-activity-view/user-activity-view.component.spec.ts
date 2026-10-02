@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { UserActivityViewComponent } from './user-activity-view.component';
+import {UserActivityViewComponent} from './user-activity-view.component';
 
 describe('UserActivityViewComponent', () => {
   let component: UserActivityViewComponent;

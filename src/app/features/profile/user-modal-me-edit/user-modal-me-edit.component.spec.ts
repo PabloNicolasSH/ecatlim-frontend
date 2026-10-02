@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { UserModalMeEditComponent } from './user-modal-me-edit.component';
+import {UserModalMeEditComponent} from './user-modal-me-edit.component';
 
 describe('UserModalMeEditComponent', () => {
   let component: UserModalMeEditComponent;

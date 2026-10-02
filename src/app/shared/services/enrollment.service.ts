@@ -4,7 +4,7 @@ import {EducationStageCard} from '../models/education-stage.model';
 import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {Enrollment, EnrollmentDocuments, EnrollmentDocumentType} from '../models/enrollment.model';
-import {AttendedEvent, Event, EventForm} from '../models/event.model';
+import {AttendedEvent, Event} from '../models/event.model';
 
 @Injectable({
   providedIn: 'root'
