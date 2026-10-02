@@ -187,50 +187,8 @@
         </div>
 
         <div class="col-span-12 lg:col-span-4 space-y-6">
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-[#EBE5DC]">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-sm font-bold text-[#3D2E24]">Eventos Asistidos</h3>
-              <i class="pi pi-history text-xs text-[#8C7A6B]"></i>
-            </div>
-
-            <div class="space-y-3.5">
-              <div class="flex items-start gap-3 text-xs">
-                <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">E</span>
-                <div>
-                  <h4 class="font-bold text-[#3D2E24]">Escuela de Primavera 2026</h4>
-                  <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5">
-                    <span><i class="pi pi-calendar text-[9px]"></i> 12-14 Abr</span>
-                    <span><i class="pi pi-map-marker text-[9px]"></i> Guadarrama</span>
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-3 text-xs">
-                <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">T</span>
-                <div>
-                  <h4 class="font-bold text-[#3D2E24]">Taller de Resolución de Conflictos</h4>
-                  <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5">
-                    <span><i class="pi pi-calendar text-[9px]"></i> 05 Mar</span>
-                    <span><i class="pi pi-globe text-[9px]"></i> Online</span>
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-3 text-xs">
-                <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">P</span>
-                <div>
-                  <h4 class="font-bold text-[#3D2E24]">Encuentro de Formación Inicial</h4>
-                  <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5">
-                    <span><i class="pi pi-calendar text-[9px]"></i> 20 Ene</span>
-                    <span><i class="pi pi-building text-[9px]"></i> Sede Central</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <button class="w-full mt-4 py-2 text-xs font-bold text-[#633F17] bg-[#EFEAE2] rounded-xl hover:bg-[#E5DDD2] border-0 cursor-pointer flex items-center justify-center gap-1">
-              Ver todo el historial <i class="pi pi-arrow-right text-[10px]"></i>
-            </button>
+          <div class="mb-7">
+            <app-attended-events [stageId]="selectedStage()?.id ?? null"></app-attended-events>
           </div>
 
           <div class="relative rounded-2xl overflow-hidden shadow-sm text-white h-52 group">
@@ -239,7 +197,7 @@
               alt="Fototeca Scout"
               class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-5 flex flex-col justify-end">
+            <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent p-5 flex flex-col justify-end">
               <i class="pi pi-images text-xl text-amber-200 mb-1"></i>
               <h4 class="font-black text-base">Fototeca de Formación</h4>
               <p class="text-[10px] text-gray-200 opacity-90 mt-0.5 leading-snug">Revive tus momentos y descarga tus certificados grupales.</p>

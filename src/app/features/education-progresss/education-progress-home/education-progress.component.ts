@@ -10,6 +10,7 @@ import {NgClass} from '@angular/common';
 import {EducationStageStatusPipe} from '../../../shared/pipes/education-stage-status.pipe';
 import {Button} from 'primeng/button';
 import {DocumentUploaderComponent} from '../document-uploader/document-uploader.component';
+import {AttendedEventsComponent} from '../attended-events/attended-events.component';
 
 @Component({
   selector: 'app-education-progress',
@@ -19,7 +20,8 @@ import {DocumentUploaderComponent} from '../document-uploader/document-uploader.
     EducationStageStatusPipe,
     PrimeTemplate,
     Button,
-    DocumentUploaderComponent
+    DocumentUploaderComponent,
+    AttendedEventsComponent
   ],
   templateUrl: './education-progress.component.html',
   styleUrl: './education-progress.component.scss'

@@ -63,3 +63,12 @@ export interface EventDashboard extends Pick<
   UserEventCalendar,
   'id' | 'title' | 'startDate' | 'location' | 'educationStageCode' | 'isCurrentUserAttending' | 'canParticipate'
 > {}
+
+export interface AttendedEvent {
+  id: number;
+  title: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  lessonBlocks: LessonBlockCalendarSummary[];
+}

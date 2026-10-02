@@ -30,7 +30,7 @@ import {
 } from './features/head-education-pending-users-list/head-education-pending-users-list.component';
 import {Role} from './shared/models/role.model';
 import {baseRedirect} from './core/auth/redirect-function';
-import {EducationProgressComponent} from './features/education-progresss/education-progress/education-progress.component';
+import {EducationProgressComponent} from './features/education-progresss/education-progress-home/education-progress.component';
 import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 import {ChatComponent} from './features/chat/chat.component';
 import {ChatListComponent} from './features/chat-list/chat-list.component';

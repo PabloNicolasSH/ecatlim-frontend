@@ -4,7 +4,7 @@ import {EducationStageCard} from '../models/education-stage.model';
 import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {Enrollment, EnrollmentDocuments, EnrollmentDocumentType} from '../models/enrollment.model';
-import {Event, EventForm} from '../models/event.model';
+import {AttendedEvent, Event, EventForm} from '../models/event.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +19,10 @@ export class EnrollmentService {
 
   getUserProgress(): Observable<Enrollment[]> {
     return this.http.get<Enrollment[]>(`${environment.apiUrl}/enrollments/stages/my-progress`);
+  }
+
+  getAttendedEvents(stageId: number): Observable<AttendedEvent[]> {
+    return this.http.get<AttendedEvent[]>(`${environment.apiUrl}/enrollments/stages/${stageId}/attended-events`);
   }
 
   uploadDocument(enrollmentId: number, type: EnrollmentDocumentType, file: File): Observable<EnrollmentDocuments> {
