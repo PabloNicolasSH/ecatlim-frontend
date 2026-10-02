@@ -1,0 +1,73 @@
+<div class="bg-white p-5 rounded-2xl shadow-sm border border-[#EBE5DC]">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-sm font-bold text-[#3D2E24]">Eventos Asistidos</h3>
+    <i class="pi pi-history text-xs text-[#8C7A6B]"></i>
+  </div>
+
+  @if (events().length === 0) {
+    <p class="text-xs italic text-[#8C7A6B] py-2 m-0">Todavía no has asistido a ningún evento de esta etapa.</p>
+  } @else {
+    <div class="space-y-3.5">
+      @for (event of previewEvents(); track event.id) {
+        <div class="flex items-start gap-3 text-xs">
+          <span class="w-6 h-6 rounded-full bg-[#795221] text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+            {{ event.title.charAt(0).toUpperCase() }}
+          </span>
+          <div>
+            <h4 class="font-bold text-[#3D2E24] m-0">{{ event.title }}</h4>
+            <p class="text-[10px] text-[#8C7A6B] flex items-center gap-2 mt-0.5 mb-0">
+              <span><i class="pi pi-calendar text-[9px]"></i> {{ event.startDate | date: 'dd MMM yyyy' }}</span>
+              <span><i class="pi pi-map-marker text-[9px]"></i> {{ event.location }}</span>
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <button
+      (click)="historyVisible.set(true)"
+      class="w-full mt-4 py-2 text-xs font-bold text-[#633F17] bg-[#EFEAE2] rounded-xl hover:bg-[#E5DDD2] border-0 cursor-pointer flex items-center justify-center gap-1"
+    >
+      Ver todo el historial <i class="pi pi-arrow-right text-[10px]"></i>
+    </button>
+  }
+</div>
+
+<p-dialog
+  header="Historial de eventos"
+  [(visible)]="historyVisible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '40rem' }"
+  [breakpoints]="{ '768px': '92vw' }"
+>
+  <p-timeline [value]="events()" align="left">
+    <ng-template #marker>
+      <span class="w-3 h-3 rounded-full bg-[#795221] block"></span>
+    </ng-template>
+
+    <ng-template #opposite let-event>
+      <div class="text-right text-xs font-bold text-[#795221] whitespace-nowrap">
+        <i class="pi pi-calendar text-[10px]"></i>
+        {{ event.startDate | date: 'dd MMM yyyy' }}
+        @if (isMultiDay(event)) {
+          <div class="font-normal text-[#8C7A6B]">hasta {{ event.endDate | date: 'dd MMM yyyy' }}</div>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #content let-event>
+      <div class="pb-6">
+        <h4 class="text-sm font-bold text-[#3D2E24] m-0">{{ event.title }}</h4>
+        <p class="text-xs text-[#8C7A6B] mt-1 mb-2">
+          <i class="pi pi-map-marker text-[10px]"></i> {{ event.location }}
+        </p>
+        <div class="flex flex-wrap gap-1.5">
+          @for (block of event.lessonBlocks; track block.id) {
+            <p-tag [value]="block.code" [pTooltip]="block.name" severity="secondary" [rounded]="true" />
+          }
+        </div>
+      </div>
+    </ng-template>
+  </p-timeline>
+</p-dialog>

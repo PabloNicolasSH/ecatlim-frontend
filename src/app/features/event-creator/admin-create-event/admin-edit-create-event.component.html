@@ -1,9 +1,9 @@
 <div class="w-full flex flex-col gap-4 px-2">
   <div class="w-full flex justify-start">
     <p-button
-      (onClick)="history.back()"
+      (onClick)="goBack()"
       icon="pi pi-arrow-left"
-      label="Volver a la agenda de eventos"
+      [label]="isEdit ? 'Volver al evento' : 'Volver a la agenda de eventos'"
       [rounded]="true"
       [outlined]="true"
       styleClass="text-xs font-semibold text-amber-800 border-amber-200 bg-white hover:bg-amber-50/50 px-4 py-2"
@@ -84,7 +84,7 @@
             </p-floatlabel>
 
             <p-floatlabel variant="on">
-              <p-select id="director" [options]="directors" optionLabel="name" formControlName="selectedDirector" appendTo="body" styleClass="w-full" required/>
+              <p-select id="director" [options]="directors" optionLabel="fullName" formControlName="selectedDirector" appendTo="body" styleClass="w-full" required/>
               <label for="director">Dirección del Evento</label>
             </p-floatlabel>
 
@@ -94,7 +94,18 @@
             </p-floatlabel>
 
             <p-floatlabel variant="on">
-              <input id="location" pInputText formControlName="location" type="text" class="w-full" required/>
+              <p-autocomplete
+                inputId="location"
+                formControlName="location"
+                [suggestions]="filteredLocations"
+                (completeMethod)="searchLocations($event)"
+                [dropdown]="true"
+                [forceSelection]="false"
+                appendTo="body"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                emptyMessage="Sin sugerencias"
+                required/>
               <label for="location">Lugar de realización</label>
             </p-floatlabel>
           </div>
@@ -120,10 +131,10 @@
             </p-floatlabel>
 
             <p-floatlabel variant="on">
-              <p-multi-select id="facilitators" [options]="facilitators" optionLabel="name" formControlName="selectedFacilitators" display="chip" [filter]="true" filterBy="name" appendTo="body" styleClass="w-full" scrollHeight="200px" required>
+              <p-multi-select id="facilitators" [options]="facilitators" optionLabel="fullName" formControlName="selectedFacilitators" display="chip" [filter]="true" filterBy="fullName" appendTo="body" styleClass="w-full" scrollHeight="200px" required>
                 <ng-template let-user pTemplate="item">
                   <div class="flex items-center gap-2">
-                    <span>{{ user.name }}</span>
+                    <span>{{ user.fullName }}</span>
                   </div>
                 </ng-template>
               </p-multi-select>
@@ -176,11 +187,33 @@
             <label for="cost">Coste de la Actividad</label>
           </p-floatlabel>
           <p-floatlabel variant="on">
-            <input id="transferBankNumber" pInputText formControlName="transferBankNumber" type="text" class="w-full font-mono" required/>
+            <p-autocomplete
+              inputId="transferBankNumber"
+              formControlName="transferBankNumber"
+              [suggestions]="filteredBankNumbers"
+              (completeMethod)="searchBankNumbers($event)"
+              [dropdown]="true"
+              [forceSelection]="false"
+              appendTo="body"
+              styleClass="w-full"
+              inputStyleClass="w-full font-mono"
+              emptyMessage="Sin sugerencias"
+              required/>
             <label for="transferBankNumber">Nº Cuenta Bancaria (IBAN)</label>
           </p-floatlabel>
           <p-floatlabel variant="on">
-            <input id="transferCode" pInputText formControlName="transferCode" type="text" class="w-full" required/>
+            <p-autocomplete
+              inputId="transferCode"
+              formControlName="transferCode"
+              [suggestions]="filteredTransferCodes"
+              (completeMethod)="searchTransferCodes($event)"
+              [dropdown]="true"
+              [forceSelection]="false"
+              appendTo="body"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+              emptyMessage="Sin sugerencias"
+              required/>
             <label for="transferCode">Código de Transferencia Requerido</label>
           </p-floatlabel>
         </div>

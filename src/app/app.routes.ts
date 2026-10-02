@@ -18,9 +18,6 @@ import {
 } from './features/admin-create-education-stage/admin-create-education-stage.component';
 import {EducationStageDetailComponent} from './features/education-stage-detail/education-stage-detail.component';
 import {
-  UserEducationStagesProgressComponent
-} from './features/user-education-stages-progress/user-education-stages-progress.component';
-import {
   AdminEditCreateEventComponent
 } from './features/event-creator/admin-create-event/admin-edit-create-event.component';
 import {UserEventCalendarComponent} from './features/user-event-calendar/user-event-calendar.component';
@@ -33,10 +30,16 @@ import {
 } from './features/head-education-pending-users-list/head-education-pending-users-list.component';
 import {Role} from './shared/models/role.model';
 import {baseRedirect} from './core/auth/redirect-function';
-import {EducationProgressComponent} from './features/education-progress/education-progress.component';
+import {
+  EducationProgressComponent
+} from './features/education-progresss/education-progress-home/education-progress.component';
 import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 import {ChatComponent} from './features/chat/chat.component';
 import {ChatListComponent} from './features/chat-list/chat-list.component';
+import {EventDetailComponent} from './features/event-detail/event-detail.component';
+import {StudentListComponent} from './features/student-list/student-list.component';
+import {TrainingTeamComponent} from './features/training-team/training-team.component';
+import {UserEventDetailComponent} from './features/user-event-detail/user-event-detail.component';
 
 export const routes: Routes = [
   {
@@ -103,12 +106,12 @@ export const routes: Routes = [
         component: UserProfileComponent
       },
       {
-        path: "calendario",
-        component: UserEventCalendarComponent
+        path: "calendario/evento/:id",
+        component: UserEventDetailComponent
       },
       {
-        path: "oferta-educativa",
-        component: EducationProgressComponent
+        path: "calendario",
+        component: UserEventCalendarComponent
       },
       {
         path: "biblioteca",
@@ -120,14 +123,69 @@ export const routes: Routes = [
         data: {roles: [Role.STUDENT]}
       },
       {
-        path: "mi-progreso",
-        component: UserEducationStagesProgressComponent,
+        path: "mi-ruta-formacion",
+        component: EducationProgressComponent,
         data: {roles: [Role.STUDENT]}
       },
       {
         path: "responsable-formacion/solicitudes-alta",
         component: HeadEducationPendingUsersListComponent,
         data: {roles: [Role.HEAD_OF_EDUCATION]}
+      },
+      {
+        path: "formacion",
+        component: DashboardComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "alumnado",
+        component: StudentListComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "equipo-formativo",
+        component: TrainingTeamComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos",
+        component: AdminEventCalendarComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos/crear-evento",
+        component: AdminEditCreateEventComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos/detalle/:id",
+        component: EventDetailComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "eventos-formativos/editar/:id",
+        component: AdminEditCreateEventComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR]}
+      },
+      {
+        path: "eventos-formativos/:eventId/actividades/crear-nueva",
+        component: AdminCreateActivityComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "oferta-educativa",
+        component: AdminEducationOfferComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "oferta-educativa/detalle-etapa/:id",
+        component: EducationStageDetailComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "oferta-educativa/crear-etapa-educativa",
+        component: AdminCreateEducationStageComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT]}
       },
       {
         path: "admin",
@@ -140,38 +198,6 @@ export const routes: Routes = [
           {
             path: "entidades",
             component: EntityListComponent
-          },
-          {
-            path: "formacion",
-            component: DashboardComponent
-          },
-          {
-            path: "eventos-formativos",
-            component: AdminEventCalendarComponent
-          },
-          {
-            path: "eventos-formativos/crear-evento",
-            component: AdminEditCreateEventComponent
-          },
-          {
-            path: "eventos-formativos/editar/:id",
-            component: AdminEditCreateEventComponent
-          },
-          {
-            path: "eventos-formativos/:eventId/actividades/crear-nueva",
-            component: AdminCreateActivityComponent
-          },
-          {
-            path: "oferta-educativa",
-            component: AdminEducationOfferComponent
-          },
-          {
-            path: "oferta-educativa/detalle-etapa/:id",
-            component: EducationStageDetailComponent
-          },
-          {
-            path: "oferta-educativa/crear-etapa-educativa",
-            component: AdminCreateEducationStageComponent
           },
           {
             path: "**",

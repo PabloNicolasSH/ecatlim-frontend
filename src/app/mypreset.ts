@@ -1,5 +1,5 @@
 import Aura from "@primeng/themes/aura";
-import { definePreset } from "@primeng/themes";
+import {definePreset} from "@primeng/themes";
 
 export const MyPreset = definePreset(Aura, {
     primitive: {

@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AdminCreateActivityComponent } from './admin-create-activity.component';
+import {AdminCreateActivityComponent} from './admin-create-activity.component';
 
 describe('AdminCreateActivityComponent', () => {
   let component: AdminCreateActivityComponent;

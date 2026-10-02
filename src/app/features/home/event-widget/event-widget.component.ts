@@ -3,7 +3,6 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {EventService} from '../../../shared/services/event.service';
 import {DatePipe} from '@angular/common';
 import {Button} from 'primeng/button';
-import {Tag} from 'primeng/tag';
 import {RouterLink} from '@angular/router';
 
 @Component({

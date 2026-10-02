@@ -1,0 +1,96 @@
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-[#EBE5DC] space-y-4">
+
+  <div class="flex items-center gap-2 text-[#3D2E24]">
+    <i class="pi pi-folder text-[#795221]"></i>
+    <h3 class="text-sm font-bold">Documentación y Archivos</h3>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    @for (slot of slots; track slot.type) {
+      @let doc = documentOf(slot);
+      <div class="p-4 rounded-xl border border-[#EBE5DC] bg-[#FAF8F5] flex flex-col justify-between gap-3 min-h-28">
+        <div class="flex justify-between items-start gap-2">
+          <div class="flex items-center gap-2">
+            <i class="pi text-sm" [ngClass]="[slot.icon, iconClass(slot)]"></i>
+            <span class="text-xs font-bold text-[#3D2E24]">{{ slot.title }}</span>
+          </div>
+
+          <span
+            class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+            [ngClass]="doc ? 'bg-emerald-100 text-emerald-800' : 'bg-[#F3E3C3] text-[#795221]'"
+          >
+            {{ doc ? 'Entregado' : 'Pendiente' }}
+          </span>
+        </div>
+
+        @if (doc) {
+          <p class="text-[10px] text-[#8C7A6B] truncate m-0" [title]="doc.name">
+            {{ doc.name }} · {{ doc.uploadDate | date: 'dd/MM/yyyy' }}
+          </p>
+        }
+
+        <input
+          #fileInput
+          type="file"
+          class="hidden"
+          (change)="onFileSelected($event, slot)"
+          accept=".pdf,.doc,.docx"
+        />
+
+        <div class="flex gap-2">
+          @if (slot.downloadableTemplate) {
+            <a
+              href="assets/templates/plan_personal_formacion_es.docx"
+              download="Plan_Personal_Formacion_ECATLIM.docx"
+              class="flex-1 py-1 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer flex items-center justify-center gap-1 no-underline"
+              title="Descargar plantilla base"
+            >
+              <i class="pi pi-download text-[10px]"></i> Plantilla
+            </a>
+          }
+
+          @if (!doc) {
+            <button
+              (click)="fileInput.click()"
+              [disabled]="uploading() === slot.type"
+              class="flex-1 py-1 text-xs font-bold bg-[#633F17] text-white rounded-lg hover:bg-[#4D3112] border-0 cursor-pointer flex items-center justify-center gap-1 disabled:opacity-60"
+            >
+              <i class="pi text-[10px]" [ngClass]="uploading() === slot.type ? 'pi-spin pi-spinner' : 'pi-upload'"></i> Subir
+            </button>
+          } @else {
+            @if (canView(doc)) {
+              <button
+                (click)="view(doc)"
+                class="flex-1 py-1 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer flex items-center justify-center gap-1"
+                title="Ver archivo"
+              >
+                <i class="pi pi-eye text-[10px]"></i> Ver
+              </button>
+            }
+
+            <button
+              (click)="download(doc)"
+              class="py-1 px-2.5 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer flex items-center justify-center gap-1"
+              [ngClass]="{'flex-1': !canView(doc)}"
+              title="Descargar archivo"
+            >
+              <i class="pi pi-download text-[10px]"></i>
+              @if (!canView(doc)) { Descargar }
+            </button>
+
+            <button
+              (click)="fileInput.click()"
+              [disabled]="uploading() === slot.type"
+              class="py-1 px-2.5 text-xs font-bold bg-[#633F17] text-white rounded-lg hover:bg-[#4D3112] border-0 cursor-pointer flex items-center justify-center gap-1 disabled:opacity-60"
+              title="Reemplazar archivo existente"
+            >
+              <i class="pi text-[10px]" [ngClass]="uploading() === slot.type ? 'pi-spin pi-spinner' : 'pi-refresh'"></i> Sustituir
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

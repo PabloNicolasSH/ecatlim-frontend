@@ -1,46 +1,69 @@
-<div class="max-w-9/12 mx-auto">
-  <div class="mb-4">
-    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Solicitudes de Alta</h1>
-    <p class="text-gray-600 mt-1">Estas personas dicen pertenecer a tu entidad y quieren unirse al aula. Gestiona su creación de usuarios.</p>
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+  <div>
+    <h1 class="font-black text-3xl text-[#3D2E24] m-0">Solicitudes de Alta</h1>
+    <p class="text-sm text-[#8C7A6B] mt-1 mb-0">
+      Estas personas dicen pertenecer a tu entidad y quieren unirse al aula. Gestiona su creación de usuarios.
+    </p>
   </div>
+
   <p-table
-    #dt
     [value]="pendingUserRequests"
     [rows]="25"
-    [paginator]="true"
+    [paginator]="pendingUserRequests.length > 25"
+    styleClass="user-table"
   >
+    <ng-template #caption>
+      <p class="m-0 text-sm text-[#51453a]">
+        Hay <span class="font-black">{{ pendingUserRequests.length }}</span>
+        {{ pendingUserRequests.length === 1 ? 'solicitud pendiente' : 'solicitudes pendientes' }} de tu entidad
+      </p>
+    </ng-template>
     <ng-template #header>
       <tr>
-        <th>Apellidos, Nombre</th>
+        <th>Nombre</th>
         <th>DNI/Documento de identificación</th>
         <th>Correo Electrónico</th>
-        <th>Entidad de Procedencia</th>
+        <th>Entidad de procedencia</th>
         <th></th>
       </tr>
     </ng-template>
     <ng-template #body let-pendingUser>
       <tr>
-        <td>{{pendingUser.surname}}, {{pendingUser.name}}</td>
-        <td>{{pendingUser.nif}}</td>
-        <td>{{pendingUser.email}}</td>
-        <td>@if (pendingUser.scoutGroup != null) {
-          {{pendingUser.scoutGroup.name}}
-        }</td>
-        <td class="flex gap-2 justify-end">
-          <p-button
-            icon="pi pi-user-plus"
-            (onClick)="confirmDialog($event,'Create User', pendingUser)"
-            severity="info"
-            rounded
-            outlined
-          ></p-button>
-          <p-button
-            icon="pi pi-trash"
-            (onClick)="confirmDialog($event, 'Delete request', pendingUser)"
-            severity="danger"
-            rounded
-            outlined
-          ></p-button>
+        <td>
+          <div class="flex items-center gap-3">
+            <app-user-avatar [label]="pendingUser.name?.charAt(0)?.toUpperCase()" customSize="2.75rem"></app-user-avatar>
+            <span class="font-bold text-base text-[#3D2E24]">{{ pendingUser.surname }}, {{ pendingUser.name }}</span>
+          </div>
+        </td>
+        <td class="text-[0.95rem] text-[#51453a] font-mono">{{ pendingUser.nif }}</td>
+        <td class="text-[0.95rem] text-[#51453a]">{{ pendingUser.email }}</td>
+        <td class="text-[0.95rem] text-[#51453a]">{{ pendingUser.scoutGroup?.name ?? 'Sin especificar' }}</td>
+        <td>
+          <div class="flex gap-1 justify-end">
+            <p-button
+              icon="pi pi-user-plus"
+              label="Crear usuario"
+              size="small"
+              (onClick)="confirmDialog($event, 'Create User', pendingUser)"
+              styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              (onClick)="confirmDialog($event, 'Delete request', pendingUser)"
+              ariaLabel="Eliminar solicitud"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5" class="text-center !p-10 text-[#8C7A6B] text-sm">
+          <i class="pi pi-inbox text-2xl text-[#C2B7AC] block mb-2"></i>
+          No hay solicitudes de alta pendientes.
         </td>
       </tr>
     </ng-template>

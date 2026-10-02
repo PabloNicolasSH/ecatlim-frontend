@@ -4,6 +4,7 @@ import {TableModule} from "primeng/table";
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {PendingUserService} from '../../shared/services/pending-user.service';
 import {ConfirmDialog} from 'primeng/confirmdialog';
+import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avatar.component';
 import {ConfirmationService, MessageService} from 'primeng/api';
 
 @Component({
@@ -11,7 +12,8 @@ import {ConfirmationService, MessageService} from 'primeng/api';
   imports: [
     Button,
     TableModule,
-    ConfirmDialog
+    ConfirmDialog,
+    UserAvatarComponent
   ],
   templateUrl: './head-education-pending-users-list.component.html',
   styleUrl: './head-education-pending-users-list.component.scss'

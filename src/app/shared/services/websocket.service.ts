@@ -1,10 +1,10 @@
-import { inject, Injectable } from '@angular/core';
-import { Client, IMessage } from '@stomp/stompjs';
-import { environment } from '../../../environments/environment';
-import { Observable, Subject } from 'rxjs';
-import { ChatMessage } from '../models/chat-message.model';
-import { Chat } from '../models/chat.model';
-import { HttpClient } from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {Client, IMessage} from '@stomp/stompjs';
+import {environment} from '../../../environments/environment';
+import {Observable, Subject} from 'rxjs';
+import {ChatMessage} from '../models/chat-message.model';
+import {Chat} from '../models/chat.model';
+import {HttpClient} from '@angular/common/http';
 
 interface ChatStreams {
   messages: Subject<ChatMessage>;

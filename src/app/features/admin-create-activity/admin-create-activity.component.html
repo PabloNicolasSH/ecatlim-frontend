@@ -1,7 +1,7 @@
 <div class="w-full flex flex-col gap-4 px-2">
   <div class="w-full flex justify-start">
     <p-button
-      (onClick)="history.back()"
+      (onClick)="goBack()"
       icon="pi pi-arrow-left"
       label="Volver al detalle del evento"
       [rounded]="true"
@@ -53,6 +53,22 @@
             </ng-template>
           </p-select>
           <label for="lessonBlock">Bloque Formativo de la actividad</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on">
+          <p-select
+            id="responsible"
+            [options]="trainers"
+            optionLabel="fullName"
+            optionValue="id"
+            formControlName="responsibleId"
+            appendTo="body"
+            styleClass="w-full"
+            [filter]="true"
+            filterBy="fullName"
+            emptyMessage="Este evento no tiene equipo de formación"
+          ></p-select>
+          <label for="responsible">Formador responsable (corrige la actividad)</label>
         </p-floatlabel>
 
         <p-floatlabel variant="on">

@@ -1,63 +1,142 @@
-<h1 class="font-bold">Entidades</h1>
-<p class="mb-4 font-semibold text-gray-500">
-  En la tabla a continuación se muestran todas las entidades de las que proceden las personas que reciben formación en la ECATLIM.
-</p>
-<p-table
-  #dt
-  [value]="entities"
-  [rows]="10"
-  [rowsPerPageOptions]="[10, 25, 50]"
-  [paginator]="true"
-  stripedRows
->
-  <ng-template #caption>
-    <div class="flex items-center justify-between">
-      <p>Actualmente se cuenta con <span class="font-black">{{entities.length}} </span> @if (entities.length == 1) {
-        entidad
-      } @else {entidades}</p>
-      <p-button
-        icon="pi pi-plus"
-        label="Añadir Entidad"
-        (onClick)="showDialog()"
-      ></p-button>
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h1 class="font-black text-3xl text-[#3D2E24] m-0">Entidades</h1>
+      <p class="text-sm text-[#8C7A6B] mt-1 mb-0">
+        Entidades de las que proceden las personas que reciben formación en la ECATLIM.
+      </p>
     </div>
-  </ng-template>
-  <ng-template #header>
-    <tr>
-      <th>Nombre de la Entidad</th>
-      <th>Correo Electrónico</th>
-      <th>Código de Provincia</th>
-      <th>Tipo de Entidad</th>
-      <th></th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-entity>
-    <tr>
-      <td>{{entity.name}} {{entity.scoutGroupId}}</td>
-      <td>{{entity.email}}</td>
-      <td>{{entity.provinceId}}</td>
-      <td>Grupo Scout</td>
-      <td class="flex gap-2 justify-end">
-        <p-button
-          icon="pi pi-pen-to-square"
-          label="Editar"
-          [rounded]="true"
-          severity="info"
-          outlined
-          (onClick)="openEditDialog(entity)"
-        ></p-button>
-        <p-button
-          icon="pi pi-trash"
-          label="Eliminar"
-          [rounded]="true"
-          severity="danger"
-          (onClick)="confirmDialog($event, entity)"
-          outlined
-        ></p-button>
-      </td>
-    </tr>
-  </ng-template>
-</p-table>
+    <p-button
+      icon="pi pi-plus"
+      label="Añadir Entidad"
+      (onClick)="showDialog()"
+      styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl font-bold"
+    ></p-button>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col lg:flex-row lg:items-center gap-3">
+    <p-iconfield class="flex-1">
+      <p-inputicon class="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        class="w-full !rounded-xl"
+        placeholder="Buscar por nombre, correo, número o provincia"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      />
+    </p-iconfield>
+
+    <p-select
+      [options]="provinceOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="provinceFilter()"
+      (ngModelChange)="provinceFilter.set($event)"
+      placeholder="Todas las provincias"
+      [showClear]="true"
+      appendTo="body"
+      styleClass="w-full lg:w-64"
+    />
+
+    <div class="flex items-center gap-1">
+      <p-select
+        [options]="sortOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="sortField()"
+        (ngModelChange)="sortField.set($event)"
+        appendTo="body"
+        styleClass="w-full lg:w-56"
+        placeholder="Ordenar por"
+      >
+        <ng-template #selectedItem let-selected>
+          <span class="text-[#8C7A6B]">Ordenar por:</span> <span class="font-semibold">{{ selected.label }}</span>
+        </ng-template>
+      </p-select>
+      <p-button
+        [icon]="sortDirection() === 'asc' ? 'pi pi-sort-alpha-down' : 'pi pi-sort-alpha-up-alt'"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="toggleSortDirection()"
+        [ariaLabel]="sortDirection() === 'asc' ? 'Orden ascendente' : 'Orden descendente'"
+      />
+    </div>
+
+    @if (hasActiveFilters()) {
+      <p-button
+        label="Limpiar"
+        icon="pi pi-filter-slash"
+        severity="secondary"
+        [text]="true"
+        (onClick)="clearFilters()"
+      />
+    }
+  </div>
+
+  <p-table
+    [value]="filteredEntities()"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [paginator]="filteredEntities().length > 10"
+    styleClass="entity-table"
+  >
+    <ng-template #caption>
+      <p class="m-0 text-sm text-[#51453a]">
+        Mostrando <span class="font-black">{{ filteredEntities().length }}</span> de {{ entities().length }}
+        {{ entities().length === 1 ? 'entidad' : 'entidades' }}
+      </p>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Nombre de la Entidad</th>
+        <th>Correo Electrónico</th>
+        <th>Provincia</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-entity>
+      <tr>
+        <td class="font-bold text-[#3D2E24]">{{ entity.name }}{{ entity.groupNumber ? " " + entity.groupNumber : "" }}</td>
+        <td class="text-xs text-[#51453a]">{{ entity.email }}</td>
+        <td>
+          <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">{{ provinceName(entity.provinceId) }}</span>
+        </td>
+        <td>
+          <div class="flex gap-1 justify-end">
+            <p-button
+              icon="pi pi-pen-to-square"
+              [rounded]="true"
+              [text]="true"
+              severity="info"
+              (onClick)="openEditDialog(entity)"
+              ariaLabel="Editar"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              (onClick)="confirmDialog($event, entity)"
+              ariaLabel="Eliminar"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="4" class="text-center !p-10 text-[#8C7A6B] text-sm">
+          <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+          Ninguna entidad coincide con los filtros aplicados.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
 <app-entity-modal-add-edit
   (entityUpdated)="loadEntities()"
   [(visible)]="visible"

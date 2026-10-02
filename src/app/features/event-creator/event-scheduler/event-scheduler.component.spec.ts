@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EventSchedulerComponent } from './event-scheduler.component';
+import {EventSchedulerComponent} from './event-scheduler.component';
 
 describe('EventSchedulerComponent', () => {
   let component: EventSchedulerComponent;

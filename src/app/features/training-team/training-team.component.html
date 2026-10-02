@@ -1,0 +1,168 @@
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <a
+    routerLink="/app/formacion"
+    class="inline-flex items-center gap-2 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-4 py-2 no-underline hover:bg-[#FAF8F5] transition-colors"
+  >
+    <i class="pi pi-arrow-left text-[10px]"></i> Volver al panel de formación
+  </a>
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h1 class="font-black text-3xl text-[#3D2E24] m-0">Equipo Formativo</h1>
+      <p class="text-sm text-[#8C7A6B] mt-1 mb-0">Personas formadoras, de dirección de eventos y de gestión de la ECATLIM.</p>
+    </div>
+    @if (canManage) {
+      <div class="flex flex-wrap gap-2">
+        <p-button
+          icon="pi pi-user-edit"
+          label="Desde el alumnado"
+          (onClick)="candidateDialogVisible = true"
+          styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl font-bold"
+        ></p-button>
+        <p-button
+          icon="pi pi-plus"
+          label="Crear persona nueva"
+          [outlined]="true"
+          (onClick)="modalVisible = true"
+          styleClass="!text-[#633F17] !border-[#633F17] !rounded-xl font-bold"
+        ></p-button>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm mb-0">Cargando el equipo formativo...</p>
+    </div>
+  } @else if (failed()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No se pudo cargar el equipo formativo</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Comprueba tu conexión o inténtalo de nuevo.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="load()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+    </div>
+  } @else {
+
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="relative overflow-hidden rounded-2xl text-white shadow-sm p-4 bg-gradient-to-br from-[#4D3112] via-[#633F17] to-[#9c6a33]">
+        <i class="pi pi-id-card absolute -right-2 -bottom-3 text-6xl opacity-15"></i>
+        <p class="text-[10px] font-black uppercase tracking-wider text-amber-200 m-0">Equipo total</p>
+        <p class="text-4xl font-black m-0 mt-2">{{ members().length }}</p>
+      </div>
+
+      @for (role of teamRoles; track role) {
+        <button
+          type="button"
+          (click)="toggleRoleFilter(role)"
+          class="text-left bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition-all hover:-translate-y-0.5"
+          [class]="roleFilter() === role ? 'border-[#795221] ring-2 ring-[#d9a45b]/50' : 'border-[#EBE5DC]'"
+        >
+          <span class="text-[10px] font-black px-2.5 py-1 rounded-full" [class]="roleClasses[role]">{{ roleLabels[role] }}</span>
+          <p class="text-3xl font-black text-[#7f521d] m-0 mt-3">{{ countByRole()[role] }}</p>
+          <p class="text-xs text-[#8C7A6B] m-0 mt-0.5">{{ countByRole()[role] === 1 ? 'persona' : 'personas' }}</p>
+        </button>
+      }
+    </section>
+
+    <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col lg:flex-row lg:items-center gap-3">
+      <p-iconfield class="flex-1">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full !rounded-xl"
+          placeholder="Buscar por nombre o correo"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </p-iconfield>
+
+      <div class="flex flex-wrap gap-2">
+        @for (role of teamRoles; track role) {
+          <button
+            type="button"
+            (click)="toggleRoleFilter(role)"
+            class="px-3 py-1.5 rounded-full border text-xs font-bold cursor-pointer transition-colors"
+            [class]="roleFilter() === role ? 'bg-[#633F17] text-white border-[#633F17]' : 'bg-[#FAF8F5] text-[#633F17] border-[#EBE5DC] hover:bg-[#F3EEE6]'"
+          >{{ roleLabels[role] }}</button>
+        }
+      </div>
+
+      @if (hasActiveFilters()) {
+        <p-button label="Limpiar" icon="pi pi-filter-slash" severity="secondary" [text]="true" (onClick)="clearFilters()" />
+      }
+    </div>
+
+    <p-table
+      [value]="filteredMembers()"
+      [rows]="pageSize"
+      [paginator]="filteredMembers().length > pageSize"
+      styleClass="team-table"
+    >
+      <ng-template #caption>
+        <p class="m-0 text-sm text-[#51453a]">
+          Mostrando <span class="font-black">{{ filteredMembers().length }}</span> de {{ members().length }}
+          {{ members().length === 1 ? 'persona' : 'personas' }}
+        </p>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th>Nombre</th>
+          <th>Correo Electrónico</th>
+          <th>Roles</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-member>
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <app-user-avatar [avatarUrl]="member.avatarUrl" [label]="initials(member)" customSize="2.75rem"></app-user-avatar>
+              <span class="font-bold text-base text-[#3D2E24]">{{ fullName(member) }}</span>
+            </div>
+          </td>
+          <td class="text-[0.95rem] text-[#51453a]">{{ member.email }}</td>
+          <td>
+            <div class="flex flex-wrap gap-1.5">
+              @for (role of member.roles; track role) {
+                <span class="inline-flex items-center gap-1 text-[11px] font-bold pl-2.5 py-1 rounded-full"
+                      [class]="(roleClasses[role] || 'bg-[#EFEAE2] text-[#633F17]') + (canRemoveRole(role) ? ' pr-1' : ' pr-2.5')">
+                  {{ roleLabels[role] || role }}
+                  @if (canRemoveRole(role)) {
+                    <button
+                      type="button"
+                      (click)="confirmRemoveRole($event, member, role)"
+                      class="w-4 h-4 rounded-full border-0 bg-black/15 hover:bg-black/30 text-inherit flex items-center justify-center cursor-pointer p-0"
+                      [attr.aria-label]="'Quitar el rol ' + (roleLabels[role] || role)"
+                    ><i class="pi pi-times text-[8px]"></i></button>
+                  }
+                </span>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="3" class="text-center !p-10 text-[#8C7A6B] text-sm">
+            <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+            Ninguna persona coincide con los filtros aplicados.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<app-user-modal-add-edit
+  [(visible)]="modalVisible"
+  dialogMode="Add"
+  [teamMode]="true"
+  (userUpdated)="load()"
+></app-user-modal-add-edit>
+<p-confirm-dialog styleClass="max-w-[40rem]" />
+<app-team-candidate-dialog
+  [(visible)]="candidateDialogVisible"
+  (memberUpdated)="load()"
+></app-team-candidate-dialog>

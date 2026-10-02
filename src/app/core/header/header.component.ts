@@ -134,33 +134,39 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.router.navigateByUrl('/app/biblioteca');
           this.sidebarVisible = false;
         }
-      },
-      {
-        label: 'Mi formación',
-        items: [
-          {
-            label: 'Oferta Educativa', icon: 'pi pi-graduation-cap', command: () => {
-              this.router.navigateByUrl('/app/oferta-educativa');
-              this.sidebarVisible = false;
-            }
-          },
-          {
-            label: 'Mi Progreso', icon: 'pi pi-book', command: () => {
-              this.router.navigateByUrl('/app/mi-progreso');
-              this.sidebarVisible = false;
-            }
-          }
-        ]
       }
     ];
 
-    if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)) {
+    if (this.user?.roles.includes(Role.STUDENT)) {
+      this.addStudentOptions();
+    }
+
+    if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)){
       this.addHeadEducationOptions();
+    }
+
+    const educationRoles = [Role.EVENT_DIRECTOR, Role.MANAGEMENT, Role.MANAGER_DIRECTOR, Role.TRAINER];
+    if (this.user?.roles.some(role => educationRoles.includes(role))) {
+      this.addEducationOptions();
     }
 
     if (this.user?.roles.includes(Role.ADMIN)) {
       this.addAdminOptions();
     }
+  }
+
+  private addStudentOptions() {
+    this.sidebarMenu.push({
+      label: 'Mi formación',
+      items: [
+        {
+          label: 'Mi Progreso', icon: 'pi pi-graduation-cap', command: () => {
+            this.router.navigateByUrl('/app/mi-ruta-formacion');
+            this.sidebarVisible = false;
+          }
+        }
+      ]
+    })
   }
 
   private addHeadEducationOptions() {
@@ -177,6 +183,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  private addEducationOptions() {
+    this.sidebarMenu.push(
+      {
+        label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
+          this.router.navigateByUrl('/app/formacion');
+          this.sidebarVisible = false;
+        }}
+    );
+  }
+
   private addAdminOptions() {
     this.sidebarMenu.push({
       label: 'Administración',
@@ -190,18 +206,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         {
           label: 'Entidades', icon: "pi pi-building-columns", command: () => {
             this.router.navigateByUrl('/app/admin/entidades');
-            this.sidebarVisible = false;
-          }
-        },
-        {
-          label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
-            this.router.navigateByUrl('/app/admin/formacion');
-            this.sidebarVisible = false;
-          }
-        },
-        {
-          label: 'Eventos Formativos', icon: "pi pi-calendar", command: () => {
-            this.router.navigateByUrl('/app/admin/eventos-formativos');
             this.sidebarVisible = false;
           }
         }
@@ -220,6 +224,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     return this.user.roles.map(role => {
       switch (role.toUpperCase()) {
+        case 'MANAGER_DIRECTOR':
+          return 'Dirección ECATLIM';
         case 'ADMIN':
           return 'Administración';
         case 'EVENT_DIRECTOR':

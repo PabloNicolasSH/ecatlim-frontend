@@ -1,4 +1,20 @@
-@if (dashboardData$ | async; as data) {
+@if (loading()) {
+  <div class="w-full max-w-7xl mx-auto px-6 py-8" aria-busy="true" aria-live="polite">
+    <div class="grid grid-cols-12 gap-6 animate-pulse">
+      <div class="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="h-36 bg-white rounded-xl border border-[#d5c3b5]/30"></div>
+        <div class="h-36 bg-white rounded-xl border border-[#d5c3b5]/30"></div>
+        <div class="h-36 bg-white rounded-xl border border-[#d5c3b5]/30"></div>
+        <div class="col-span-1 md:col-span-3 h-52 bg-[#9c6a33]/40 rounded-xl"></div>
+      </div>
+      <div class="col-span-12 lg:col-span-4 h-96 bg-[#7d7361]/40 rounded-xl"></div>
+    </div>
+    <p class="text-center text-sm text-[#8C7A6B] mt-6 flex items-center justify-center gap-2">
+      <i class="pi pi-spin pi-spinner text-[#795221]"></i> Cargando el panel de formación...
+    </p>
+  </div>
+} @else if (dashboard()) {
+  @let data = dashboard()!;
   <div class="w-full max-w-7xl mx-auto px-6 py-8">
     <div class="grid grid-cols-12 gap-6">
 
@@ -139,7 +155,7 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
 
-                <a routerLink="/app/admin/oferta-educativa" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                <a routerLink="/app/oferta-educativa" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
                   <div class="w-10 h-10 rounded-lg bg-[#9c6a33] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
                     <i class="pi pi-book text-base"></i>
                   </div>
@@ -149,17 +165,17 @@
                   </div>
                 </a>
 
-                <a routerLink="/app/admin/usuarios" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                <a routerLink="/app/alumnado" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
                   <div class="w-10 h-10 rounded-lg bg-[#7f521d] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
                     <i class="pi pi-users text-base"></i>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-bold text-[#554430]">Listado de Alumnos</span>
+                    <span class="text-sm font-bold text-[#554430]">Listado de Alumnado</span>
                     <span class="text-xs opacity-75">Matrículas y progreso</span>
                   </div>
                 </a>
 
-                <a routerLink="/events" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                <a routerLink="/app/eventos-formativos" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
                   <div class="w-10 h-10 rounded-lg bg-[#7d7361] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
                     <i class="pi pi-calendar text-base"></i>
                   </div>
@@ -169,12 +185,12 @@
                   </div>
                 </a>
 
-                <a routerLink="/trainers" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                <a routerLink="/app/equipo-formativo" class="flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
                   <div class="w-10 h-10 rounded-lg bg-[#51453a] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
                     <i class="pi pi-id-card text-base"></i>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-bold text-[#554430]">Formadores</span>
+                    <span class="text-sm font-bold text-[#554430]">Equipo Formativo</span>
                     <span class="text-xs opacity-75">Equipo de la ECATLIM</span>
                   </div>
                 </a>
@@ -214,3 +230,10 @@
     </div>
   </div>
 }
+
+<app-user-modal-add-edit
+  [(visible)]="studentModalVisible"
+  dialogMode="Add"
+  [studentOnly]="true"
+  (userUpdated)="reloadDashboardData()"
+></app-user-modal-add-edit>

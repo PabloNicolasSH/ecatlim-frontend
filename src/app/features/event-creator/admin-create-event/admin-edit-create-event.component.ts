@@ -1,29 +1,37 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { EventSchedulerComponent } from '../event-scheduler/event-scheduler.component';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FloatLabel } from 'primeng/floatlabel';
-import { Select } from 'primeng/select';
-import { InputText } from 'primeng/inputtext';
-import { MessageService, PrimeTemplate, SelectItemGroup } from 'primeng/api';
-import { Button } from 'primeng/button';
-import { DatePicker } from 'primeng/datepicker';
-import { MultiSelect } from 'primeng/multiselect';
-import { EventService } from '../../../shared/services/event.service';
-import { Textarea } from 'primeng/textarea';
-import { UserService } from '../../../shared/services/user.service';
-import { LessonBlockService } from '../../../shared/services/lesson-block.service';
-import { Role } from '../../../shared/models/role.model';
-import { User } from '../../../shared/models/user.model';
-import { LessonBlock } from '../../../shared/models/lesson-block.model';
-import { EventCreatorService } from '../event-creator.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { TimelineItem } from '../../../shared/models/timeline-item.model';
-import { InputNumber } from 'primeng/inputnumber';
-import { NgClass } from '@angular/common';
-import { EducationStageService } from '../../../shared/services/education-stage.service';
-import { EducationStage } from '../../../shared/models/education-stage.model';
-import { forkJoin } from 'rxjs';
-import {EventForm} from '../../../shared/models/event.model';
+import {Component, inject, OnInit} from '@angular/core';
+import {EventSchedulerComponent} from '../event-scheduler/event-scheduler.component';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FloatLabel} from 'primeng/floatlabel';
+import {Select} from 'primeng/select';
+import {InputText} from 'primeng/inputtext';
+import {MessageService, PrimeTemplate, SelectItemGroup} from 'primeng/api';
+import {Button} from 'primeng/button';
+import {DatePicker} from 'primeng/datepicker';
+import {MultiSelect} from 'primeng/multiselect';
+import {AutoComplete, AutoCompleteCompleteEvent} from 'primeng/autocomplete';
+import {EventService} from '../../../shared/services/event.service';
+import {Textarea} from 'primeng/textarea';
+import {UserService} from '../../../shared/services/user.service';
+import {LessonBlockService} from '../../../shared/services/lesson-block.service';
+import {Role} from '../../../shared/models/role.model';
+import {SimpleUser} from '../../../shared/models/user.model';
+import {LessonBlock} from '../../../shared/models/lesson-block.model';
+import {EventCreatorService} from '../event-creator.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {TimelineItem} from '../../../shared/models/timeline-item.model';
+import {InputNumber} from 'primeng/inputnumber';
+import {NgClass} from '@angular/common';
+import {EducationStageService} from '../../../shared/services/education-stage.service';
+import {EducationStage} from '../../../shared/models/education-stage.model';
+import {forkJoin} from 'rxjs';
+import {EventForm, EventSuggestions} from '../../../shared/models/event.model';
+
+type StaffOption = SimpleUser & { fullName: string };
+
+const toStaffOption = (user: SimpleUser): StaffOption => ({
+  ...user,
+  fullName: [user.name, user.surname].filter(Boolean).join(' ') || user.email
+});
 
 @Component({
   selector: 'app-admin-create-event',
@@ -39,6 +47,7 @@ import {EventForm} from '../../../shared/models/event.model';
     Textarea,
     PrimeTemplate,
     InputNumber,
+    AutoComplete,
     NgClass
   ],
   templateUrl: './admin-edit-create-event.component.html',
@@ -60,8 +69,13 @@ export class AdminEditCreateEventComponent implements OnInit {
   step: number = 1;
   savedTimeline: any[] = [];
 
-  directors: User[] = [];
-  facilitators: User[] = [];
+  suggestions: EventSuggestions = {locations: [], transferBankNumbers: [], transferCodes: []};
+  filteredLocations: string[] = [];
+  filteredBankNumbers: string[] = [];
+  filteredTransferCodes: string[] = [];
+
+  directors: StaffOption[] = [];
+  facilitators: StaffOption[] = [];
 
   allBlocks: LessonBlock[] = [];
   availableBlocks: SelectItemGroup[] = [];
@@ -92,6 +106,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadSuggestions();
     const start = new Date();
     start.setHours(20, 0, 0, 0);
     this.defaultStartDate = start;
@@ -136,17 +151,41 @@ export class AdminEditCreateEventComponent implements OnInit {
     });
   }
 
+  private loadSuggestions() {
+    this.eventService.getSuggestions().subscribe({
+      next: suggestions => this.suggestions = suggestions,
+      error: () => {}
+    });
+  }
+
+  private filterSuggestions(source: string[], event: AutoCompleteCompleteEvent): string[] {
+    const query = event.query.trim().toLowerCase();
+    return source.filter(value => value.toLowerCase().includes(query));
+  }
+
+  searchLocations(event: AutoCompleteCompleteEvent) {
+    this.filteredLocations = this.filterSuggestions(this.suggestions.locations, event);
+  }
+
+  searchBankNumbers(event: AutoCompleteCompleteEvent) {
+    this.filteredBankNumbers = this.filterSuggestions(this.suggestions.transferBankNumbers, event);
+  }
+
+  searchTransferCodes(event: AutoCompleteCompleteEvent) {
+    this.filteredTransferCodes = this.filterSuggestions(this.suggestions.transferCodes, event);
+  }
+
   private loadDataAndEvent() {
     this.loading = true;
     forkJoin({
-      directors: this.userService.getUsersByRole(Role.EVENT_DIRECTOR),
-      facilitators: this.userService.getUsersByRole(Role.TRAINER),
+      directors: this.userService.getEventStaff(Role.EVENT_DIRECTOR),
+      facilitators: this.userService.getEventStaff(Role.TRAINER),
       stages: this.educationStageService.getEducationStages(),
       blocks: this.lessonBlockService.getAll()
     }).subscribe({
       next: (res) => {
-        this.directors = res.directors;
-        this.facilitators = res.facilitators;
+        this.directors = res.directors.map(toStaffOption);
+        this.facilitators = res.facilitators.map(toStaffOption);
         this.availableEducationStages = res.stages;
         this.allBlocks = res.blocks;
 
@@ -297,7 +336,7 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.eventId = res.id;
         this.messageService.add({ severity: 'success', summary: 'Borrador Guardado', detail: 'El evento se ha guardado correctamente como Borrador.' });
         this.loading = false;
-        this.router.navigate(['/app/admin/eventos-formativos'], { queryParams: { openEventId: this.eventId } });
+        this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]);
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
@@ -322,7 +361,7 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.eventId = res.id;
         this.messageService.add({ severity: 'success', summary: 'Evento Guardado', detail: 'El evento se ha guardado, para que sea visible, el director debe darle a publicar.' });
         this.loading = false;
-        this.router.navigate(['/app/admin/eventos-formativos'], { queryParams: { openEventId: this.eventId } });
+        this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]);
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
@@ -346,7 +385,7 @@ export class AdminEditCreateEventComponent implements OnInit {
       next: (res: any) => {
         const finalId = this.eventId || res?.id;
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Evento y cronograma guardados' });
-        this.router.navigate(['/app/admin/eventos-formativos'], { queryParams: { openEventId: finalId } });
+        this.router.navigate(['/app/eventos-formativos/detalle', finalId]);
       },
       error: () => {
         this.loading = false;
@@ -454,5 +493,11 @@ export class AdminEditCreateEventComponent implements OnInit {
     return presetColors[Math.floor(Math.random() * presetColors.length)];
   }
 
-  protected readonly history = history;
+  protected goBack() {
+    if (this.isEdit && this.eventId) {
+      this.router.navigate(["/app/eventos-formativos/detalle", this.eventId]);
+      return;
+    }
+    this.router.navigate(["/app/eventos-formativos"]);
+  }
 }

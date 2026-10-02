@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AdminCreateEducationStageComponent } from './admin-create-education-stage.component';
+import {AdminCreateEducationStageComponent} from './admin-create-education-stage.component';
 
 describe('AdminCreateEducationStageComponent', () => {
   let component: AdminCreateEducationStageComponent;

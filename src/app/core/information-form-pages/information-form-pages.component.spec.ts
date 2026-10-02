@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { InformationFormPagesComponent } from './information-form-pages.component';
+import {InformationFormPagesComponent} from './information-form-pages.component';
 
 describe('InformationFormPagesComponent', () => {
   let component: InformationFormPagesComponent;

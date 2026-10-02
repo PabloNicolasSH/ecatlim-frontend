@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EntityModalAddEditComponent } from './entity-modal-add-edit.component';
+import {EntityModalAddEditComponent} from './entity-modal-add-edit.component';
 
 describe('EntityModalAddEditComponent', () => {
   let component: EntityModalAddEditComponent;
