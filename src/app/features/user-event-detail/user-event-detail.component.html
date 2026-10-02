@@ -1,0 +1,404 @@
+<div class="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+
+  <a
+    routerLink="/app/calendario"
+    class="inline-flex items-center gap-2 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-4 py-2 no-underline hover:bg-[#FAF8F5] transition-colors"
+  >
+    <i class="pi pi-arrow-left text-[10px]"></i> Volver a mi calendario
+  </a>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm">Cargando el evento...</p>
+    </div>
+  } @else if (failed() || !event()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3">No se encontró el evento</h2>
+      <p class="text-sm text-[#8C7A6B] mt-1">Puede que no exista, que no esté publicado o que no tengas acceso.</p>
+    </div>
+  } @else {
+    @let ev = event()!;
+
+    <section class="relative overflow-hidden rounded-3xl text-white shadow-sm bg-linear-to-br from-[#4D3112] via-[#633F17] to-[#9c6a33]">
+      <i class="pi pi-calendar absolute -right-6 -bottom-8 text-[220px] opacity-10 pointer-events-none"></i>
+      <div class="relative p-6 md:p-8 flex flex-col gap-5">
+        <div class="flex flex-wrap items-center gap-2">
+          @if (ev.isCurrentUserAttending) {
+            <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+              ✓ {{ fullyEnrolled() ? 'Inscripción completa' : 'Inscripción parcial' }}
+            </span>
+          } @else {
+            <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/15 border border-white/20">
+              No inscrito
+            </span>
+          }
+          @if (ev.educationStageCode) {
+            <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/15 border border-white/20">
+              Etapa {{ ev.educationStageCode }}
+            </span>
+          }
+          <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/15 border border-white/20">
+            {{ isPast() ? 'Evento finalizado' : (ev.isEventClosed ? 'Inscripción cerrada' : 'Próximamente') }}
+          </span>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-4xl text-white! font-black tracking-tight m-0">{{ ev.title }}</h1>
+          <p class="text-sm text-amber-100/90 mt-1 mb-0">Organiza {{ ev.organizer }}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+          <div class="flex items-center gap-3">
+            <i class="pi pi-calendar bg-white/15 p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Fecha</p>
+              @if (isMultiDay()) {
+                <p class="font-bold m-0">{{ ev.startDate | date:'d MMM, HH:mm' }}h → {{ ev.endDate | date:'d MMM yyyy, HH:mm' }}h</p>
+              } @else {
+                <p class="font-bold m-0 capitalize">{{ ev.startDate | date:'EEEE, d MMMM y' }} · {{ ev.startDate | date:'HH:mm' }}-{{ ev.endDate | date:'HH:mm' }}h</p>
+              }
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="pi pi-map-marker bg-white/15 p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Lugar</p>
+              <p class="font-bold m-0">{{ ev.location }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="pi pi-users bg-white/15 p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Participantes</p>
+              <p class="font-bold m-0">{{ ev.attendeesCount ?? 0 }} inscritos</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          @if (canEnroll()) {
+            @if (orderedBlocks().length > 1) {
+              <p-button
+                label="Inscripción parcial..."
+                icon="pi pi-list"
+                [disabled]="saving()"
+                (onClick)="opRegister.toggle($event)"
+                styleClass="!bg-white/15 !text-white !font-bold !border !border-white/30 !rounded-xl"
+              ></p-button>
+            }
+            <p-button
+              [label]="ev.isCurrentUserAttending ? 'Inscribirme en los bloques restantes' : 'Inscripción completa'"
+              icon="pi pi-check-circle"
+              [loading]="saving()"
+              (onClick)="registerToAll()"
+              styleClass="!bg-white !text-[#633F17] !font-bold !border-none !rounded-xl"
+            ></p-button>
+          }
+
+          @if (canUnenroll()) {
+            @if (enrolledCount() > 1) {
+              <p-button
+                label="Baja parcial..."
+                icon="pi pi-sliders-h"
+                [disabled]="saving()"
+                (onClick)="opUnregister.toggle($event)"
+                styleClass="!bg-white/15 !text-white !font-bold !border !border-white/30 !rounded-xl"
+              ></p-button>
+            }
+            <p-button
+              label="Baja de todo el evento"
+              icon="pi pi-trash"
+              [loading]="saving()"
+              (onClick)="unregisterFromAll()"
+              styleClass="!bg-[#F3E3C3] !text-[#8a2f1d] !font-bold !border-none !rounded-xl"
+            ></p-button>
+          }
+
+          @if (!canEnroll() && !canUnenroll()) {
+            <span class="text-xs text-amber-100/90 italic">
+              @if (isPast()) {
+                Este evento ya ha finalizado.
+              } @else if (ev.isEventClosed) {
+                El plazo de inscripción está cerrado.
+              } @else if (!ev.canParticipate && !ev.isCurrentUserAttending) {
+                Aún no cumples los requisitos para inscribirte en este evento.
+              } @else {
+                Ya estás inscrito en todos los bloques.
+              }
+            </span>
+          }
+
+          @if (isStudent && ev.isCurrentUserAttending) {
+            <p-button
+              label="Actividades del Evento"
+              icon="pi pi-list-check"
+              [badge]="pendingActivities() > 0 ? pendingActivities().toString() : undefined"
+              badgeSeverity="danger"
+              [pTooltip]="pendingActivities() > 0
+                ? (pendingActivities() === 1 ? 'Tienes 1 actividad pendiente de responder' : 'Tienes ' + pendingActivities() + ' actividades pendientes de responder')
+                : 'No tienes actividades pendientes'"
+              tooltipPosition="bottom"
+              [routerLink]="['/app', ev.id, 'actividades']"
+              styleClass="!bg-[#F3E3C3] !text-[#633F17] !font-bold !border-none !rounded-xl"
+            ></p-button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- MAIN COLUMN -->
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+
+        @if (ev.isCurrentUserAttending) {
+          <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5 flex flex-col md:flex-row md:items-center gap-5">
+            <div class="flex items-center gap-4 flex-1">
+              <span
+                class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0"
+                [ngClass]="fullyEnrolled() ? 'bg-emerald-500' : 'bg-[#d9a45b]'"
+              ><i class="pi" [ngClass]="fullyEnrolled() ? 'pi-check' : 'pi-info-circle'"></i></span>
+              <div>
+                <p class="text-sm font-bold text-[#3D2E24] m-0">{{ fullyEnrolled() ? '¡Inscripción completa!' : 'Inscripción parcial activa' }}</p>
+                <p class="text-xs text-[#8C7A6B] mt-1 mb-2">
+                  {{ fullyEnrolled() ? 'Estás inscrito en todos los bloques de este evento formativo.' : 'Estás cursando una parte de este evento. Bloques asignados:' }}
+                </p>
+                <div class="flex flex-wrap gap-1.5">
+                  @for (block of enrolledBlocks(); track block.id) {
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F3E3C3] text-[#795221]" [pTooltip]="block.name">{{ block.code }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="md:w-48">
+              <div class="flex justify-between text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mb-1">
+                <span>Progreso</span>
+                <span class="text-[#795221]">{{ enrolledCount() }}/{{ totalBlocks() }}</span>
+              </div>
+              <div class="h-2 bg-[#EFEAE2] rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#795221] to-[#d9a45b] rounded-full" [style.width.%]="progressPercent()"></div>
+              </div>
+            </div>
+          </section>
+        }
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6">
+          <div class="flex items-center gap-2 text-[#3D2E24] mb-4">
+            <i class="pi pi-bookmark text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Bloques formativos</h2>
+          </div>
+          @if (orderedBlocks().length > 0) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              @for (block of orderedBlocks(); track block.id) {
+                <div
+                  class="flex items-center gap-3 p-3 rounded-xl border"
+                  [ngClass]="isBlockEnrolled(block) ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#EBE5DC] bg-[#FAF8F5]'"
+                >
+                  <span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-[#F3E3C3] text-[#795221] shrink-0">{{ block.code }}</span>
+                  <span class="text-xs font-semibold text-[#3D2E24] flex-1">{{ block.name }}</span>
+                  @if (isBlockEnrolled(block)) {
+                    <i class="pi pi-check-circle text-emerald-600 text-sm shrink-0" pTooltip="Estás inscrito"></i>
+                  }
+                  <span class="text-[10px] text-[#8C7A6B] shrink-0">{{ block.hours }} h</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] m-0">No hay bloques específicos asignados.</p>
+          }
+        </section>
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6 space-y-5">
+          <div class="flex items-center gap-2 text-[#3D2E24]">
+            <i class="pi pi-align-left text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Contenidos y logística</h2>
+          </div>
+          <div class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-xl p-4">
+            <p class="text-[10px] font-black uppercase tracking-wider text-[#795221] mt-0 mb-2">Contenidos</p>
+            <p class="text-sm text-[#51453a] leading-relaxed m-0 whitespace-pre-line">{{ ev.contents || 'No hay contenidos detallados para este evento todavía.' }}</p>
+          </div>
+          <div class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-xl p-4">
+            <p class="text-[10px] font-black uppercase tracking-wider text-[#795221] mt-0 mb-2">Logística</p>
+            <p class="text-sm text-[#51453a] leading-relaxed m-0 whitespace-pre-line">{{ ev.description || 'No se han especificado detalles logísticos adicionales.' }}</p>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2 text-[#3D2E24]">
+              <i class="pi pi-list-check text-[#795221]"></i>
+              <h2 class="text-sm font-bold m-0">Actividades del evento</h2>
+            </div>
+            <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">{{ activities().length }}</span>
+          </div>
+          @if (activities().length > 0) {
+            <div class="space-y-3">
+              @for (activity of activities(); track activity.id) {
+                <div class="flex items-start gap-3 p-3 rounded-xl border border-[#EBE5DC] bg-[#FAF8F5]">
+                  <i class="pi pi-file-edit text-[#795221] bg-[#F3E3C3] p-2.5 rounded-xl"></i>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-sm font-bold text-[#3D2E24]">{{ activity.title }}</span>
+                      <span
+                        class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+                        [ngClass]="phase(activity) === 'PREVIA' ? 'bg-[#633F17] text-white' : 'bg-[#d9a45b] text-[#3D2E24]'"
+                        [pTooltip]="phase(activity) === 'PREVIA' ? 'Cierra antes o durante el evento' : 'Cierra después del evento'"
+                      >{{ phase(activity) === 'PREVIA' ? 'Previa' : 'Post' }}</span>
+                      @if (activity.isOptional) {
+                        <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Opcional</span>
+                      }
+                    </div>
+                    <p class="text-xs text-[#8C7A6B] mt-1 mb-0 line-clamp-2">{{ activity.description }}</p>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                      <p class="text-[10px] text-[#8C7A6B] m-0">
+                        <i class="pi pi-calendar text-[9px]"></i>
+                        {{ activity.availableAt | date:'dd/MM/yyyy' }} → cierra {{ activity.dueDate | date:'dd/MM/yyyy HH:mm' }}
+                      </p>
+                      @if (activity.responsible; as responsible) {
+                        <p class="text-[10px] text-[#633F17] font-semibold m-0 flex items-center gap-1.5">
+                          <app-user-avatar [avatarUrl]="responsible.avatarUrl" [label]="fullName(responsible).charAt(0)" customSize="1.25rem"></app-user-avatar>
+                          Te corrige: {{ fullName(responsible) }}
+                        </p>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] m-0">Aún no hay actividades publicadas para este evento.</p>
+          }
+        </section>
+      </div>
+
+      <!-- SIDE COLUMN -->
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5 space-y-4">
+          <div class="flex items-center gap-2 text-[#3D2E24]">
+            <i class="pi pi-info-circle text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Resumen</h2>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+            <i class="pi pi-calendar text-[#795221] bg-[#F3E3C3] p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] m-0">Inicio</p>
+              <p class="text-sm font-bold text-[#3D2E24] m-0">{{ ev.startDate | date:'d MMM y, HH:mm' }}h</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+            <i class="pi pi-flag text-[#795221] bg-[#F3E3C3] p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] m-0">Fin</p>
+              <p class="text-sm font-bold text-[#3D2E24] m-0">{{ ev.endDate | date:'d MMM y, HH:mm' }}h</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+            <i class="pi pi-hourglass text-[#795221] bg-[#F3E3C3] p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] m-0">Horas de los bloques</p>
+              <p class="text-sm font-bold text-[#3D2E24] m-0">{{ totalHours() }} h</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+            <i class="pi pi-building text-[#795221] bg-[#F3E3C3] p-2.5 rounded-xl"></i>
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] m-0">Organiza</p>
+              <p class="text-sm font-bold text-[#3D2E24] m-0 truncate">{{ ev.organizer }}</p>
+            </div>
+          </div>
+        </section>
+
+        @if (isStudent) {
+          <section class="bg-[#633F17] text-white rounded-2xl shadow-sm p-5 space-y-2">
+            <span class="text-[9px] font-black uppercase tracking-widest opacity-75">Tu formación</span>
+            <p class="text-xs leading-relaxed font-medium m-0">
+              Revisa tu ruta de formación para ver cómo encaja este evento con los bloques que te quedan.
+            </p>
+            <a
+              routerLink="/app/mi-ruta-formacion"
+              class="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-white text-[#633F17] text-xs font-black rounded-full no-underline hover:bg-amber-50 transition-colors"
+            >
+              <i class="pi pi-graduation-cap text-xs"></i> Mi ruta de formación
+            </a>
+          </section>
+        }
+      </div>
+    </div>
+
+    <!-- PARTIAL REGISTER / UNREGISTER POPOVERS -->
+    <p-popover #opRegister [style]="{ width: '350px' }" styleClass="shadow-2xl border border-gray-100 rounded-2xl p-2">
+      <div class="flex flex-col gap-3">
+        <div class="border-b border-gray-100 pb-2">
+          <p class="font-bold text-[#3D2E24] text-sm m-0">Selecciona los bloques a cursar</p>
+          <p class="text-[11px] text-[#8C7A6B] m-0">Se te inscribirá únicamente en los que marques.</p>
+        </div>
+        <div class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+          @for (lb of orderedBlocks(); track lb.id) {
+            @let enrolled = isBlockEnrolled(lb);
+            <div class="flex items-center gap-3 p-2 hover:bg-[#FAF8F5] rounded-lg transition-colors" [class.opacity-50]="enrolled">
+              <input
+                type="checkbox"
+                [id]="'reg-' + lb.id"
+                [checked]="enrolled"
+                [disabled]="enrolled"
+                class="w-4 h-4 border-gray-300 rounded disabled:cursor-not-allowed accent-[#795221]"
+                (change)="toggleBlockSelection(lb.id!, $any($event.target).checked)"
+              />
+              <label [for]="'reg-' + lb.id" class="text-xs font-semibold text-[#3D2E24] cursor-pointer flex-1 truncate">
+                <span class="text-[#795221] font-bold mr-1">[{{ lb.code }}]</span> {{ lb.name }}
+                @if (enrolled) {
+                  <span class="text-[10px] text-emerald-600 font-normal ml-1">(Ya inscrito)</span>
+                }
+              </label>
+            </div>
+          }
+        </div>
+        <p-button
+          label="Confirmar bloques"
+          icon="pi pi-check"
+          styleClass="w-full !bg-[#633F17] !border-[#633F17] font-bold"
+          [disabled]="selectedBlockIds().length === 0"
+          (onClick)="registerToBlocks(selectedBlockIds()); opRegister.hide()"
+        />
+      </div>
+    </p-popover>
+
+    <p-popover #opUnregister [style]="{ width: '350px' }" styleClass="shadow-2xl border border-gray-100 rounded-2xl p-2">
+      <div class="flex flex-col gap-3">
+        <div class="border-b border-gray-100 pb-2">
+          <p class="font-bold text-[#3D2E24] text-sm m-0">Selecciona los bloques a dar de baja</p>
+          <p class="text-[11px] text-[#8C7A6B] m-0">Se eliminará tu inscripción de los bloques marcados.</p>
+        </div>
+        <div class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+          @for (lb of enrolledBlocks(); track lb.id) {
+            <div class="flex items-center gap-3 p-2 hover:bg-[#FAF8F5] rounded-lg transition-colors">
+              <input
+                type="checkbox"
+                [id]="'unreg-' + lb.id"
+                class="w-4 h-4 border-gray-300 rounded accent-[#b3402a]"
+                (change)="toggleBlockSelection(lb.id!, $any($event.target).checked)"
+              />
+              <label [for]="'unreg-' + lb.id" class="text-xs font-semibold text-[#3D2E24] cursor-pointer flex-1 truncate">
+                <span class="text-[#795221] font-bold mr-1">[{{ lb.code }}]</span> {{ lb.name }}
+              </label>
+            </div>
+          } @empty {
+            <span class="text-xs text-[#8C7A6B] italic p-2 text-center block">No tienes bloques disponibles para dar de baja.</span>
+          }
+        </div>
+        <p-button
+          label="Eliminar bloques"
+          icon="pi pi-times"
+          severity="danger"
+          styleClass="w-full font-bold"
+          [disabled]="selectedBlockIds().length === 0"
+          (onClick)="unregisterFromBlocks(selectedBlockIds()); opUnregister.hide()"
+        />
+      </div>
+    </p-popover>
+  }
+</div>

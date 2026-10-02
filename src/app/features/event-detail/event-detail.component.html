@@ -1,0 +1,404 @@
+<div class="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+
+  <a
+    routerLink="/app/eventos-formativos"
+    class="inline-flex items-center gap-2 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-4 py-2 no-underline hover:bg-[#FAF8F5] transition-colors"
+  >
+    <i class="pi pi-arrow-left text-[10px]"></i> Volver a la agenda de eventos
+  </a>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm">Cargando el evento...</p>
+    </div>
+  } @else if (failed() || !event()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3">No se pudo cargar el evento</h2>
+      <p class="text-sm text-[#8C7A6B] mt-1">Puede que no exista o que no tengas permiso para verlo.</p>
+    </div>
+  } @else {
+    @let ev = event()!;
+
+    <section class="relative overflow-hidden rounded-3xl text-white shadow-sm bg-linear-to-br from-[#4D3112] via-[#633F17] to-[#9c6a33]">
+      <i class="pi pi-calendar absolute -right-6 -bottom-8 text-[220px] opacity-10 pointer-events-none"></i>
+      <div class="relative p-6 md:p-8 flex flex-col gap-5">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full" [ngClass]="statusStyles[ev.status].classes">
+            ● {{ statusStyles[ev.status].label }}
+          </span>
+          @if (ev.educationStage) {
+            <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/15 border border-white/20">
+              {{ ev.educationStage.code }} · {{ ev.educationStage.name }}
+            </span>
+          }
+          <span class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/15 border border-white/20">
+            {{ isPast() ? 'Evento finalizado' : 'Próximamente' }}
+          </span>
+        </div>
+
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black text-white! tracking-tight m-0">{{ ev.title }}</h1>
+          <p class="text-sm text-amber-100/90 mt-1 mb-0">{{ ev.shortName }} · organiza {{ ev.organizer }}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+          <div class="flex items-center gap-3">
+            <i class="pi pi-calendar bg-white/15 p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Fecha</p>
+              @if (isMultiDay()) {
+                <p class="font-bold m-0">{{ ev.startDate | date:'dd MMM yyyy, HH:mm' }}h → {{ ev.endDate | date:'dd MMM yyyy, HH:mm' }}h</p>
+              } @else {
+                <p class="font-bold m-0">{{ ev.startDate | date:'dd MMM yyyy' }} · {{ ev.startDate | date:'HH:mm' }}h a {{ ev.endDate | date:'HH:mm' }}h</p>
+              }
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="pi pi-map-marker bg-white/15 p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Lugar</p>
+              <p class="font-bold m-0">{{ ev.location }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="pi pi-clock bg-white/15 p-2.5 rounded-xl"></i>
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Duración formativa</p>
+              <p class="font-bold m-0">{{ totalHours() }} h</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 pt-1">
+          <p-button
+            label="Editar Evento"
+            icon="pi pi-pencil"
+            [routerLink]="['/app/eventos-formativos/editar', ev.id]"
+            styleClass="!bg-white !text-[#633F17] !font-bold !border-none !rounded-xl"
+          ></p-button>
+          <p-button
+            label="Nueva Actividad"
+            icon="pi pi-plus"
+            [routerLink]="['/app/eventos-formativos', ev.id, 'actividades', 'crear-nueva']"
+            styleClass="!bg-[#F3E3C3] !text-[#633F17] !font-bold !border-none !rounded-xl"
+          ></p-button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-4">
+        <div class="flex items-center justify-between">
+          <span class="p-2 bg-[#f9dec3] rounded-lg text-[#554430]"><i class="pi pi-users"></i></span>
+          <span class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B]">Inscritos</span>
+        </div>
+        <p class="text-3xl font-black text-[#7f521d] mt-3 mb-1">{{ ev.participants.length }}
+          <span class="text-sm font-semibold text-[#8C7A6B]">/ mín. {{ ev.config?.minParticipants ?? 0 }}</span>
+        </p>
+        <div class="h-1.5 bg-[#EFEAE2] rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-[#795221] to-[#d9a45b] rounded-full" [style.width.%]="quorumPercent()"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-4">
+        <div class="flex items-center justify-between">
+          <span class="p-2 bg-emerald-100 rounded-lg text-emerald-800"><i class="pi pi-wallet"></i></span>
+          <span class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B]">Pagos</span>
+        </div>
+        <p class="text-3xl font-black text-[#7f521d] mt-3 mb-1">{{ paidCount() }}
+          <span class="text-sm font-semibold text-[#8C7A6B]">pagados</span>
+        </p>
+        <p class="text-xs text-[#8C7A6B] m-0">{{ pendingCount() }} pendientes</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-4">
+        <div class="flex items-center justify-between">
+          <span class="p-2 bg-[#eee1cb] rounded-lg text-[#4e4636]"><i class="pi pi-check-circle"></i></span>
+          <span class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B]">Asistencia</span>
+        </div>
+        @if (isPast()) {
+          <p class="text-3xl font-black text-[#7f521d] mt-3 mb-1">{{ attendedCount() }}
+            <span class="text-sm font-semibold text-[#8C7A6B]">/ {{ ev.participants.length }}</span>
+          </p>
+          <p class="text-xs text-[#8C7A6B] m-0">han asistido a todos sus bloques</p>
+        } @else {
+          <p class="text-lg font-bold text-[#8C7A6B] mt-3 mb-1">Aún no disponible</p>
+          <p class="text-xs text-[#8C7A6B] m-0">se registra al finalizar</p>
+        }
+      </div>
+
+      <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-4">
+        <div class="flex items-center justify-between">
+          <span class="p-2 bg-[#F3E3C3] rounded-lg text-[#795221]"><i class="pi pi-euro"></i></span>
+          <span class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B]">Cuota</span>
+        </div>
+        <p class="text-3xl font-black text-[#7f521d] mt-3 mb-1">{{ ev.config?.cost | currency:'EUR':'symbol':'1.0-2':'es-ES' }}</p>
+        <p class="text-xs text-[#8C7A6B] m-0">por persona</p>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-12 gap-6">
+
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6 space-y-5">
+          <div class="flex items-center gap-2 text-[#3D2E24]">
+            <i class="pi pi-align-left text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Descripción y contenidos</h2>
+          </div>
+          <p class="text-sm text-[#51453a] leading-relaxed m-0 whitespace-pre-line">{{ ev.description }}</p>
+          @if (ev.contents) {
+            <div class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-xl p-4">
+              <p class="text-[10px] font-black uppercase tracking-wider text-[#795221] mt-0 mb-2">Contenidos</p>
+              <p class="text-sm text-[#51453a] leading-relaxed m-0 whitespace-pre-line">{{ ev.contents }}</p>
+            </div>
+          }
+        </section>
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6">
+          <div class="flex items-center gap-2 text-[#3D2E24] mb-4">
+            <i class="pi pi-bookmark text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Bloques formativos del evento</h2>
+          </div>
+          @if (ev.lessonBlocks.length > 0) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              @for (block of ev.lessonBlocks; track block.id) {
+                <div class="flex items-center gap-3 p-3 rounded-xl border border-[#EBE5DC] bg-[#FAF8F5]">
+                  <span class="text-[10px] font-black px-2.5 py-1 rounded-lg bg-[#F3E3C3] text-[#795221] shrink-0">{{ block.code }}</span>
+                  <span class="text-xs font-semibold text-[#3D2E24] flex-1">{{ block.name }}</span>
+                  <span class="text-[10px] text-[#8C7A6B] shrink-0">{{ block.hours }} h</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] m-0">Este evento todavía no tiene bloques formativos asignados.</p>
+          }
+        </section>
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6">
+          <div class="flex items-center gap-2 text-[#3D2E24] mb-5">
+            <i class="pi pi-clock text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Cronograma</h2>
+          </div>
+          @if (timelineDays().length > 0) {
+            <div class="space-y-6">
+              @for (day of timelineDays(); track day.date) {
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-[#795221] mt-0 mb-3">
+                    {{ day.date | date:"EEEE d 'de' MMMM":'':'es-ES' }}
+                  </p>
+                  <div class="relative border-l-2 border-[#EBE5DC] ml-1.5 space-y-4">
+                    @for (entry of day.entries; track entry.id) {
+                      <div class="relative pl-5">
+                        <span
+                          class="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full border-2 border-white"
+                          [ngClass]="entry.type === 'FORMATIVE' ? 'bg-[#795221]' : 'bg-[#d9a45b]'"
+                        ></span>
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <span class="text-xs font-bold text-[#633F17] font-mono">
+                            {{ entry.startTime | date:'HH:mm' }} – {{ entry.endTime | date:'HH:mm' }}
+                          </span>
+                          <span class="text-sm font-bold text-[#3D2E24]">{{ entry.title }}</span>
+                          <span
+                            class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+                            [ngClass]="entry.type === 'FORMATIVE' ? 'bg-[#F3E3C3] text-[#795221]' : 'bg-[#EFEAE2] text-[#8C7A6B]'"
+                          >{{ entry.type === 'FORMATIVE' ? 'Formativa' : 'Logística' }}</span>
+                        </div>
+                        @if (entry.description) {
+                          <p class="text-xs text-[#8C7A6B] mt-1 mb-0">{{ entry.description }}</p>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] m-0">Todavía no se ha definido el cronograma de este evento.</p>
+          }
+        </section>
+
+        <div class="mb-7">
+          <app-event-participants [participants]="ev.participants" [isPast]="isPast()"></app-event-participants>
+        </div>
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2 text-[#3D2E24]">
+              <i class="pi pi-list-check text-[#795221]"></i>
+              <h2 class="text-sm font-bold m-0">Actividades</h2>
+            </div>
+            <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">{{ ev.activities.length }}</span>
+          </div>
+          @if (ev.activities.length > 0) {
+            <div class="space-y-3">
+              @for (activity of ev.activities; track activity.id) {
+                <div class="flex items-start gap-3 p-3 rounded-xl border border-[#EBE5DC] bg-[#FAF8F5]">
+                  <i class="pi {{ activityType(activity).icon }} text-[#795221] bg-[#F3E3C3] p-2.5 rounded-xl"></i>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-sm font-bold text-[#3D2E24]">{{ activity.title }}</span>
+                      <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-[#EFEAE2] text-[#8C7A6B]">{{ activityType(activity).label }}</span>
+                      <span
+                        class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+                        [ngClass]="phase(activity) === 'PREVIA' ? 'bg-[#633F17] text-white' : 'bg-[#d9a45b] text-[#3D2E24]'"
+                        [pTooltip]="phase(activity) === 'PREVIA' ? 'Cierra antes o durante el evento' : 'Cierra después del evento'"
+                      >{{ phase(activity) === 'PREVIA' ? 'Previa' : 'Post' }}</span>
+                      @if (activity.isOptional) {
+                        <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Opcional</span>
+                      }
+                    </div>
+                    <p class="text-xs text-[#8C7A6B] mt-1 mb-0 line-clamp-2">{{ activity.description }}</p>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                      <p class="text-[10px] text-[#8C7A6B] m-0">
+                        <i class="pi pi-calendar text-[9px]"></i>
+                        {{ activity.availableAt | date:'dd/MM/yyyy' }} → cierra {{ activity.dueDate | date:'dd/MM/yyyy HH:mm' }}
+                      </p>
+                      @if (activity.responsible; as responsible) {
+                        <p class="text-[10px] text-[#633F17] font-semibold m-0 flex items-center gap-1.5">
+                          <app-user-avatar [avatarUrl]="responsible.avatarUrl" [label]="initials(responsible)" customSize="1.25rem"></app-user-avatar>
+                          Corrige: {{ fullName(responsible) }}
+                        </p>
+                      } @else {
+                        <p class="text-[10px] italic text-[#8C7A6B] m-0">Sin formador responsable</p>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] m-0">Aún no hay actividades creadas para este evento.</p>
+          }
+        </section>
+      </div>
+
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5">
+          <div class="flex items-center gap-2 text-[#3D2E24] mb-4">
+            <i class="pi pi-id-card text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Equipo del evento</h2>
+          </div>
+
+          <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">Dirección</p>
+          @if (ev.director) {
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC] mb-4">
+              <app-user-avatar [avatarUrl]="ev.director.avatarUrl" [label]="initials(ev.director)" customSize="2.25rem"></app-user-avatar>
+              <div class="flex flex-col min-w-0">
+                <span class="text-sm font-bold text-[#3D2E24] truncate">{{ fullName(ev.director) }}</span>
+                <span class="text-[11px] text-[#8C7A6B] font-mono truncate">{{ ev.director.email }}</span>
+              </div>
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] mb-4 mt-0">Por asignar</p>
+          }
+
+          <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">Equipo de formación</p>
+          @if (ev.facilitators.length > 0) {
+            <div class="space-y-2 mb-4">
+              @for (f of ev.facilitators; track f.id) {
+                <div class="flex items-center gap-3">
+                  <app-user-avatar [avatarUrl]="f.avatarUrl" [label]="initials(f)" customSize="2rem"></app-user-avatar>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-xs font-bold text-[#3D2E24] truncate">{{ fullName(f) }}</span>
+                    <span class="text-[10px] text-[#8C7A6B] font-mono truncate">{{ f.email }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-xs italic text-[#8C7A6B] mb-4 mt-0">Sin equipo asignado</p>
+          }
+
+          @if (ev.staff.length > 0) {
+            <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">Logística</p>
+            <div class="space-y-2">
+              @for (s of ev.staff; track s.id) {
+                <div class="flex items-center gap-3">
+                  <app-user-avatar [avatarUrl]="s.avatarUrl" [label]="initials(s)" customSize="2rem"></app-user-avatar>
+                  <span class="text-xs font-bold text-[#3D2E24] truncate">{{ fullName(s) }}</span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+        @if (ev.config; as cfg) {
+          <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2 text-[#3D2E24]">
+                <i class="pi pi-calendar-clock text-[#795221]"></i>
+                <h2 class="text-sm font-bold m-0">Inscripción</h2>
+              </div>
+              <span
+                class="text-[9px] font-black uppercase px-2.5 py-1 rounded-full"
+                [ngClass]="inscriptionOpen() ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-200 text-stone-700'"
+              >{{ inscriptionOpen() ? 'Abierta' : 'Cerrada' }}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+                <p class="text-[10px] font-bold text-[#8C7A6B] uppercase m-0">Apertura</p>
+                <p class="text-xs font-bold text-[#3D2E24] mt-1 mb-0">{{ cfg.dateOpenInscription | date:'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+              <div class="p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+                <p class="text-[10px] font-bold text-[#8C7A6B] uppercase m-0">Cierre</p>
+                <p class="text-xs font-bold text-[#3D2E24] mt-1 mb-0">{{ cfg.dateCloseInscription | date:'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+            </div>
+            @if (cfg.notificationTargets.length > 0) {
+              <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">Se notifica a</p>
+              <div class="flex flex-wrap gap-1.5">
+                @for (target of cfg.notificationTargets; track target) {
+                  <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#633F17]">
+                    {{ notificationLabels[target] || target }}
+                  </span>
+                }
+              </div>
+            }
+          </section>
+
+          <section class="bg-[#633F17] text-white rounded-2xl shadow-sm p-5 space-y-4">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-wallet text-amber-200"></i>
+              <h2 class="text-sm font-bold m-0">Parámetros financieros</h2>
+            </div>
+            <div class="flex items-end justify-between border-b border-white/15 pb-3">
+              <span class="text-xs text-amber-100/80">Cuota de inscripción</span>
+              <span class="text-2xl font-black">{{ cfg.cost | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</span>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3">
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Referencia de pago</p>
+              <p class="font-mono font-bold text-sm tracking-wide mt-1 mb-0 break-all">{{ cfg.transferCode }}</p>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3">
+              <p class="text-[10px] uppercase tracking-wider text-amber-200 font-bold m-0">Cuenta IBAN</p>
+              <p class="font-mono text-sm tracking-wide mt-1 mb-0 break-all">{{ cfg.transferBankNumber }}</p>
+            </div>
+          </section>
+        }
+
+        <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5">
+          <div class="flex items-center gap-2 text-[#3D2E24] mb-4">
+            <i class="pi pi-hourglass text-[#795221]"></i>
+            <h2 class="text-sm font-bold m-0">Horas del evento</h2>
+          </div>
+          <div class="space-y-3">
+            @for (item of [
+              {label: 'Teóricas', icon: 'pi-book', value: ev.theoreticalHours ?? 0},
+              {label: 'Prácticas', icon: 'pi-cog', value: ev.practicalHours ?? 0},
+              {label: 'Online', icon: 'pi-globe', value: ev.onlineHours ?? 0}
+            ]; track item.label) {
+              <div class="flex items-center justify-between text-sm">
+                <span class="flex items-center gap-2 text-[#51453a]"><i class="pi {{ item.icon }} text-[#795221] text-xs"></i>{{ item.label }}</span>
+                <span class="font-bold text-[#3D2E24]">{{ item.value }} h</span>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+</div>

@@ -34,6 +34,10 @@ import {EducationProgressComponent} from './features/education-progresss/educati
 import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
 import {ChatComponent} from './features/chat/chat.component';
 import {ChatListComponent} from './features/chat-list/chat-list.component';
+import {EventDetailComponent} from './features/event-detail/event-detail.component';
+import {StudentListComponent} from './features/student-list/student-list.component';
+import {TrainingTeamComponent} from './features/training-team/training-team.component';
+import {UserEventDetailComponent} from './features/user-event-detail/user-event-detail.component';
 
 export const routes: Routes = [
   {
@@ -100,6 +104,10 @@ export const routes: Routes = [
         component: UserProfileComponent
       },
       {
+        path: "calendario/evento/:id",
+        component: UserEventDetailComponent
+      },
+      {
         path: "calendario",
         component: UserEventCalendarComponent
       },
@@ -128,6 +136,16 @@ export const routes: Routes = [
         data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
       },
       {
+        path: "alumnado",
+        component: StudentListComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "equipo-formativo",
+        component: TrainingTeamComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
         path: "eventos-formativos",
         component: AdminEventCalendarComponent,
         data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
@@ -138,6 +156,11 @@ export const routes: Routes = [
         data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
       },
       {
+        path: "eventos-formativos/detalle/:id",
+        component: EventDetailComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
         path: "eventos-formativos/editar/:id",
         component: AdminEditCreateEventComponent,
         data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR]}
@@ -145,7 +168,7 @@ export const routes: Routes = [
       {
         path: "eventos-formativos/:eventId/actividades/crear-nueva",
         component: AdminCreateActivityComponent,
-        data: {roles: [Role.EVENT_DIRECTOR, Role.TRAINER]}
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
       },
       {
         path: "oferta-educativa",

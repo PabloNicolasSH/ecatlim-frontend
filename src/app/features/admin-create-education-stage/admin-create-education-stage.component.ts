@@ -9,7 +9,7 @@ import {Select} from 'primeng/select';
 import {EducationStage} from '../../shared/models/education-stage.model';
 import {EducationStageService} from '../../shared/services/education-stage.service';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
-import {RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ModuleService} from '../../shared/services/module.service';
 import {ModuleModel} from '../../shared/models/module.model';
 import {LessonBlockService} from '../../shared/services/lesson-block.service';
@@ -52,6 +52,12 @@ export class AdminCreateEducationStageComponent implements OnInit{
   protected readonly moduleService = inject(ModuleService);
   protected readonly lessonBlockService = inject(LessonBlockService);
   protected readonly messageService = inject(MessageService);
+  protected readonly route = inject(ActivatedRoute);
+
+  activeTab: string = "0";
+  editingStageId: number | null = null;
+  private initialSelectionDone = false;
+  previousStageOptions: EducationStage[] = [];
 
   educationStageForm!: FormGroup;
 
@@ -89,6 +95,7 @@ export class AdminCreateEducationStageComponent implements OnInit{
     this.educationStageService.getEducationStages().pipe(
       switchMap(stages => {
         this.educationStages = stages;
+        this.previousStageOptions = stages.filter(s => s.id !== this.editingStageId);
 
         return this.moduleService.getAll();
       }),
@@ -99,9 +106,43 @@ export class AdminCreateEducationStageComponent implements OnInit{
     ).subscribe({
       next: (groupedList) => {
         this.groupedModulesList = groupedList;
+        this.preselectStageFromQuery();
+        this.refreshSelectedStage();
       }
     });
   }
+
+  private refreshSelectedStage(): void {
+    const control = this.modulesForm.get("selectedEducationStage");
+    const fresh = this.educationStages.find(s => s.id === control?.value?.id);
+    if (fresh && fresh !== control?.value) {
+      control?.setValue(fresh);
+    }
+  }
+
+  private preselectStageFromQuery(): void {
+    if (this.initialSelectionDone) return;
+    this.initialSelectionDone = true;
+
+    const stageId = Number(this.route.snapshot.queryParamMap.get("etapa"));
+    const stage = stageId ? this.educationStages.find(s => s.id === stageId) : null;
+    if (!stage) return;
+
+    this.editingStageId = stage.id!;
+    this.previousStageOptions = this.educationStages.filter(s => s.id !== stage.id);
+    this.educationStageForm.patchValue({
+      name: stage.name,
+      code: stage.code,
+      onlineHours: stage.onlineHours,
+      contactHours: stage.contactHours,
+      practicalHours: stage.practicalHours,
+      previousStageRequired: !!stage.previousStageRequired,
+      preEducationStage: this.educationStages.find(s => s.id === stage.previousStageId) ?? "",
+      description: stage.description
+    });
+    this.modulesForm.get("selectedEducationStage")?.setValue(stage);
+  }
+
 
   private createGroupedModulesList(stages: any[], modules: any[]) {
     return stages.map(stage => {
@@ -139,16 +180,24 @@ export class AdminCreateEducationStageComponent implements OnInit{
       this.loading = true;
       const educationStageForm: EducationStage = {...this.educationStageForm.value};
       educationStageForm.previousStageId = this.educationStageForm.get("preEducationStage")?.value?.id;
-      this.educationStageService.createEducationStage(educationStageForm).subscribe({
+      const request$ = this.editingStageId !== null
+        ? this.educationStageService.updateEducationStage(this.editingStageId, educationStageForm)
+        : this.educationStageService.createEducationStage(educationStageForm);
+      const editing = this.editingStageId !== null;
+      request$.subscribe({
         next: () => {
           this.loading = false;
           this.messageService.add({
             severity: "success",
-            summary: "Creado con éxito",
-            detail: "Se ha creado exitosamente la nueva etapa formativa"
+            summary: editing ? "Actualizada con éxito" : "Creado con éxito",
+            detail: editing
+              ? "Se han guardado los cambios de la etapa formativa"
+              : "Se ha creado exitosamente la nueva etapa formativa"
           });
           this.load();
-          this.initializeEducationStageForm();
+          if (!editing) {
+            this.initializeEducationStageForm();
+          }
         },
         error: error => {
           this.loading = false;

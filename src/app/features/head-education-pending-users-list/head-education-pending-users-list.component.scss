@@ -1,0 +1,51 @@
+// Rows rendered as separate rounded "cards", like a modern list.
+:host ::ng-deep .user-table {
+  .p-datatable-table-container table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  .p-datatable-header {
+    background: transparent;
+    border: none;
+    padding: 0 0 4px;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: transparent;
+    border: none;
+    color: #8c7a6b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.25rem 1.25rem;
+  }
+
+  .p-datatable-tbody > tr {
+    background: transparent;
+
+    > td {
+      background: #fff;
+      border: none;
+      border-top: 1px solid #ebe5dc;
+      border-bottom: 1px solid #ebe5dc;
+      padding: 1rem 1.25rem;
+      vertical-align: middle;
+    }
+
+    > td:first-child {
+      border-left: 1px solid #ebe5dc;
+      border-radius: 14px 0 0 14px;
+    }
+
+    > td:last-child {
+      border-right: 1px solid #ebe5dc;
+      border-radius: 0 14px 14px 0;
+    }
+
+    &:hover > td {
+      background: #faf8f5;
+    }
+  }
+}

@@ -79,6 +79,8 @@ export class UserProfileComponent implements OnInit {
 
     return roles.map(role => {
       switch (role.toUpperCase()) {
+        case 'MANAGER_DIRECTOR':
+          return 'Dirección ECATLIM';
         case 'ADMIN':
           return 'Administración';
         case 'EVENT_DIRECTOR':

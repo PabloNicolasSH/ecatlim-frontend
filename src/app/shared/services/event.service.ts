@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {Event, UserEventCalendar, EventDashboard, EventForm, AdminEventCalendar} from '../models/event.model';
+import {Event, UserEventCalendar, EventDashboard, EventForm, AdminEventCalendar, EventSuggestions, EventDetail} from '../models/event.model';
 import {LessonBlock} from '../models/lesson-block.model';
 
 @Injectable({
@@ -11,6 +11,14 @@ import {LessonBlock} from '../models/lesson-block.model';
 export class EventService {
 
   protected readonly http = inject(HttpClient);
+
+  getEventDetail(id: number): Observable<EventDetail> {
+    return this.http.get<EventDetail>(`${environment.apiUrl}/events/${id}/detail`);
+  }
+
+  getSuggestions(): Observable<EventSuggestions> {
+    return this.http.get<EventSuggestions>(`${environment.apiUrl}/events/suggestions`);
+  }
 
   getEventFormById(id: number): Observable<EventForm> {
     return this.http.get<EventForm>(`${environment.apiUrl}/events/edit/${id}`);

@@ -224,6 +224,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     return this.user.roles.map(role => {
       switch (role.toUpperCase()) {
+        case 'MANAGER_DIRECTOR':
+          return 'Dirección ECATLIM';
         case 'ADMIN':
           return 'Administración';
         case 'EVENT_DIRECTOR':

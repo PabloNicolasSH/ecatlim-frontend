@@ -65,10 +65,10 @@
           placeholder="Selecciona una entidad de procedencia"
         >
           <ng-template let-scoutGroup #selectedItem>
-            <span>{{ scoutGroup.groupNumber }} {{ scoutGroup.name }}</span>
+            <span>{{ scoutGroup.groupNumber ? scoutGroup.groupNumber + " " : "" }}{{ scoutGroup.name }}</span>
           </ng-template>
           <ng-template let-scoutGroup #item>
-            <span>{{ scoutGroup.groupNumber }} {{ scoutGroup.name }}</span>
+            <span>{{ scoutGroup.groupNumber ? scoutGroup.groupNumber + " " : "" }}{{ scoutGroup.name }}</span>
           </ng-template>
         </p-select>
         <div class="mt-2">

@@ -1,5 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {TableModule} from 'primeng/table';
 import {UserService} from '../../shared/services/user.service';
 import {User} from '../../shared/models/user.model';
@@ -12,20 +11,27 @@ import {PendingUser} from '../../shared/models/pending-user.model';
 import {FormsModule} from '@angular/forms';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {EntityService} from '../../shared/services/entity.service';
+import {Select} from 'primeng/select';
+import {InputText} from 'primeng/inputtext';
+import {IconField} from 'primeng/iconfield';
+import {InputIcon} from 'primeng/inputicon';
+import {Role} from '../../shared/models/role.model';
+import {ROLE_CLASSES, ROLE_LABELS} from '../../shared/models/role-labels';
+import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-user-list',
   imports: [
-    TabList,
-    Tabs,
-    Tab,
-    TabPanels,
-    TabPanel,
     TableModule,
     Button,
     UserModalAddEditComponent,
     ConfirmDialog,
-    FormsModule
+    FormsModule,
+    Select,
+    InputText,
+    IconField,
+    InputIcon,
+    UserAvatarComponent
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'
@@ -41,12 +47,68 @@ export class UserListComponent implements OnInit {
   visible: boolean = false;
   dialogMode: string = '';
 
-  users: User[] = [];
+  users = signal<User[]>([]);
   userToEdit!: User;
 
-  inactiveUsers: User[] = [];
+  inactiveUsers = signal<User[]>([]);
   pendingUserRequests: PendingUser[] = [];
-  scoutGroups: ScoutGroup[] = [];
+  scoutGroups = signal<ScoutGroup[]>([]);
+
+  // Filters (shared by the active and inactive tabs)
+  search = signal<string>('');
+  activeTab = signal<string>("0");
+  roleFilter = signal<Role | null>(null);
+  entityFilter = signal<number | null>(null);
+
+  readonly roleLabels: Record<string, string> = ROLE_LABELS;
+  readonly roleClasses: Record<string, string> = ROLE_CLASSES;
+  readonly roleOptions = (Object.keys(ROLE_LABELS) as Role[]).map(role => ({label: ROLE_LABELS[role], value: role}));
+
+  entityOptions = computed(() =>
+    [...this.scoutGroups()]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(group => ({label: group.name, value: group.id!}))
+  );
+
+  hasActiveFilters = computed(() => !!this.search().trim() || this.roleFilter() !== null || this.entityFilter() !== null);
+
+  filteredUsers = computed(() => this.applyFilters(this.users()));
+  filteredInactiveUsers = computed(() => this.applyFilters(this.inactiveUsers()));
+
+  private applyFilters(users: User[]): User[] {
+    const query = this.normalize(this.search());
+    const role = this.roleFilter();
+    const entity = this.entityFilter();
+
+    return users.filter(user => {
+      if (role !== null && !user.roles?.includes(role)) return false;
+      if (entity !== null && user.profile?.scoutGroup?.id !== entity) return false;
+      if (!query) return true;
+      const haystack = this.normalize([
+        user.profile?.name, user.profile?.surname, user.email, user.profile?.scoutGroup?.name
+      ].filter(Boolean).join(' '));
+      return haystack.includes(query);
+    });
+  }
+
+  private normalize(text: string): string {
+    return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  }
+
+  clearFilters() {
+    this.search.set('');
+    this.roleFilter.set(null);
+    this.entityFilter.set(null);
+  }
+
+  initials(user: User): string {
+    const name = user.profile?.name ?? user.email;
+    return name.charAt(0).toUpperCase();
+  }
+
+  fullName(user: User): string {
+    return user.profile ? `${user.profile.surname}, ${user.profile.name}` : 'Administrador';
+  }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -71,20 +133,11 @@ export class UserListComponent implements OnInit {
 
   loadUsers() {
     this.userService.getUsers().subscribe({
-      next: users => {
-        this.users = users;
-      }
+      next: users => this.users.set(users)
     });
 
-    this.users = this.users.map(user => ({
-      ...user,
-      fullName: `${user.profile?.surname}, ${user.profile?.name}`
-    }));
-
     this.userService.getInactiveUsers().subscribe({
-      next: inactiveUsers => {
-        this.inactiveUsers = inactiveUsers;
-      }
+      next: inactiveUsers => this.inactiveUsers.set(inactiveUsers)
     });
   }
 
@@ -259,7 +312,7 @@ export class UserListComponent implements OnInit {
   private loadScoutGroups() {
     this.scoutGroupService.getEntities().subscribe({
       next: value => {
-        this.scoutGroups = value;
+        this.scoutGroups.set(value);
       }
     })
   }

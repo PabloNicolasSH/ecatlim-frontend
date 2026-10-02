@@ -1,32 +1,27 @@
 import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { Dialog } from 'primeng/dialog';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { EventService } from '../../shared/services/event.service';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import { map, tap } from 'rxjs';
 import { Button } from 'primeng/button';
-import { TableModule } from 'primeng/table';
-import { CurrencyPipe, DatePipe, NgClass, UpperCasePipe } from '@angular/common';
+import { DatePipe, UpperCasePipe } from '@angular/common';
 import { Menu } from 'primeng/menu';
 import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {ConfirmDialog} from 'primeng/confirmdialog';
+import { LoggedUserDataService } from '../../core/auth/logged-user-data-service';
+import { Role } from '../../shared/models/role.model';
 
 @Component({
   selector: 'app-admin-event-calendar',
   imports: [
-    Dialog,
     FullCalendarModule,
     Button,
-    TableModule,
     DatePipe,
-    CurrencyPipe,
     UpperCasePipe,
-    NgClass,
     Menu,
-    ConfirmDialog,
-    RouterLink
+    ConfirmDialog
   ],
   templateUrl: './admin-event-calendar.component.html',
   styleUrl: './admin-event-calendar.component.scss'
@@ -41,11 +36,12 @@ export class AdminEventCalendarComponent implements OnInit {
   protected readonly router = inject(Router);
   protected readonly confirmationService = inject(ConfirmationService);
   protected readonly messageService = inject(MessageService);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
+
+  /** Only the school director (Dirección ECATLIM) can publish events. */
+  readonly canPublish = this.loggedUserDataService.hasAnyRole(Role.MANAGER_DIRECTOR);
 
   allEvents = signal<any[]>([]);
-  showModal = signal(false);
-  selectedEvent = signal<any>(null);
-
   menuContextEvent: any = null;
   menuItems: MenuItem[] = [
     {
@@ -64,16 +60,6 @@ export class AdminEventCalendarComponent implements OnInit {
     return [...this.allEvents()]
       .filter(e => e.startDate && new Date(e.startDate) >= new Date())
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  });
-
-  isMultiDay = computed(() => {
-    const event = this.selectedEvent();
-    if (!event || !event.start || !event.end) return false;
-
-    const start = new Date(event.start);
-    const end = new Date(event.end);
-
-    return start.toDateString() !== end.toDateString();
   });
 
   uniqueAttendeesCount = computed(() => {
@@ -142,58 +128,25 @@ export class AdminEventCalendarComponent implements OnInit {
   }
 
   private checkQueryParams() {
-    const openEventId = this.route.snapshot.queryParamMap.get('openEventId');
+    const openEventId = this.route.snapshot.queryParamMap.get("openEventId");
     if (openEventId) {
-      const eventToOpen = this.allEvents().find(e => e.id === openEventId);
-      if (eventToOpen) {
-        this.clearModalData();
-        this.openEventDetails(eventToOpen);
-        this.clearQueryParam();
-      }
+      this.router.navigate(["detalle", openEventId], { relativeTo: this.route, replaceUrl: true });
     }
-  }
-
-  private clearQueryParam() {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { openEventId: null },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  clearModalData() {
-    this.showModal.set(false);
-    this.selectedEvent.set(null);
   }
 
   openEventDetails(event: any) {
-    this.selectedEvent.set({ ...event, start: event.startDate, end: event.endDate });
-    this.showModal.set(true);
-    if (this.calendarComponent) {
-      this.calendarComponent.getApi().gotoDate(event.startDate);
-    }
+    this.router.navigate(["detalle", event.id], { relativeTo: this.route });
   }
 
   handleEventClick(info: any) {
-    const rawEvent = this.allEvents().find(e => e.id === info.event.id);
-    this.clearModalData();
-    this.selectedEvent.set({
-      id: info.event.id,
-      title: info.event.title,
-      start: info.event.start,
-      end: info.event.end,
-      ...rawEvent
-    });
-    this.showModal.set(true);
+    this.router.navigate(["detalle", info.event.id], { relativeTo: this.route });
   }
 
   goToEditEvent(eventId: number) {
-    this.clearModalData();
     this.router.navigate(['editar', eventId], { relativeTo: this.route });
   }
 
   goToCreateEvent() {
-    this.clearModalData();
     this.router.navigate(['crear-evento'], { relativeTo: this.route });
   }
 

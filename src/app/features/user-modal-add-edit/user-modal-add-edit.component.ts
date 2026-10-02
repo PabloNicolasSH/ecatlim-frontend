@@ -13,7 +13,7 @@ import {UserForm} from '../../shared/models/user-form.model';
 import {Role} from '../../shared/models/role.model';
 import {MessageService, PrimeTemplate} from 'primeng/api';
 import {MultiSelect} from 'primeng/multiselect';
-import {finalize, tap} from 'rxjs';
+import {finalize, Observable, tap} from 'rxjs';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -41,6 +41,10 @@ export class UserModalAddEditComponent implements OnInit {
   visible = model<boolean>(false);
   @Input() dialogMode!: string;
   @Input() userToEdit!: User;
+  /** Only lets the user create STUDENT accounts (role selector hidden, student endpoint used). */
+  @Input() studentOnly: boolean = false;
+  /** Creates members of the training team: only TRAINER / EVENT_DIRECTOR roles can be assigned. */
+  @Input() teamMode: boolean = false;
 
   @Output() userUpdated = new EventEmitter();
 
@@ -69,13 +73,17 @@ export class UserModalAddEditComponent implements OnInit {
     const RoleLabels: Record<string, string> = {
       [Role.STUDENT]: "Persona en Formación",
       [Role.TRAINER]: "Persona Formadora",
+      [Role.MANAGER_DIRECTOR]: "Dirección ECATLIM",
       [Role.MANAGEMENT]: "Gestión",
       [Role.EVENT_DIRECTOR]: "Dirección de Eventos",
       [Role.HEAD_OF_EDUCATION]: "Coord. Formación",
       [Role.ADMIN]: "Administración",
     };
 
-    this.roles = [Role.STUDENT, Role.TRAINER, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.HEAD_OF_EDUCATION, Role.ADMIN]
+    const assignableRoles = this.teamMode
+      ? [Role.TRAINER, Role.EVENT_DIRECTOR]
+      : [Role.STUDENT, Role.TRAINER, Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.HEAD_OF_EDUCATION, Role.ADMIN];
+    this.roles = assignableRoles
       .map(role => {
         return {
           label: RoleLabels[role] || role,
@@ -96,7 +104,7 @@ export class UserModalAddEditComponent implements OnInit {
       city: [""],
       country: [""],
       selectedScoutGroup: [],
-      selectedRoles: [[], Validators.required]
+      selectedRoles: [[], this.studentOnly ? [] : Validators.required]
     });
   }
 
@@ -112,7 +120,7 @@ export class UserModalAddEditComponent implements OnInit {
       this.loading = true;
       const userForm: UserForm = {...this.form.value};
       userForm.scoutGroupId = this.form.get('selectedScoutGroup')?.value?.id;
-      userForm.roles = this.form.get('selectedRoles')?.value;
+      userForm.roles = this.studentOnly ? [Role.STUDENT] : this.form.get('selectedRoles')?.value;
       if (this.dialogMode == 'Edit') {
         this.userService.updateUser(this.userToEdit.id!, userForm).pipe(
           finalize(() => this.loading = false),
@@ -128,7 +136,10 @@ export class UserModalAddEditComponent implements OnInit {
           )
         ).subscribe();
       } else {
-        this.userService.addUser(userForm).pipe(
+        const add$: Observable<unknown> = this.studentOnly
+          ? this.userService.addStudent(userForm)
+          : this.teamMode ? this.userService.addTeamMember(userForm) : this.userService.addUser(userForm);
+        add$.pipe(
           finalize(() => this.loading = false),
           tap(() => {
               this.loading = false;

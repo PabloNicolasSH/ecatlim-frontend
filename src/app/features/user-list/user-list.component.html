@@ -1,193 +1,281 @@
-<h1 class="font-bold">Usuarios</h1>
-<p-tabs value="0">
-  <p-tablist>
-    <p-tab value="0">Usuarios Activos</p-tab>
-    <p-tab value="1">Usuarios Inactivos</p-tab>
-    <p-tab value="2">Solicitudes de Alta</p-tab>
-  </p-tablist>
-  <p-tabpanels>
-    <p-tabpanel value="0">
-      <p-table
-        #dt
-        [value]="users"
-        [rows]="25"
-        [paginator]="true"
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h1 class="font-black text-3xl text-[#3D2E24] m-0">Usuarios</h1>
+      <p class="text-sm text-[#8C7A6B] mt-1 mb-0">Gestiona las personas del Aula Virtual, sus roles y su entidad de procedencia.</p>
+    </div>
+    <p-button
+      (onClick)="showDialog()"
+      icon="pi pi-plus"
+      label="Añadir Usuario"
+      styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl font-bold"
+    ></p-button>
+  </div>
+
+  @if (activeTab() !== '2') {
+    <!-- FILTERS -->
+    <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col lg:flex-row lg:items-center gap-3">
+      <p-iconfield class="flex-1">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full !rounded-xl"
+          placeholder="Buscar por nombre, correo o entidad"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </p-iconfield>
+
+      <p-select
+        [options]="roleOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="roleFilter()"
+        (ngModelChange)="roleFilter.set($event)"
+        placeholder="Todos los roles"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full lg:w-56"
+      />
+
+      <p-select
+        [options]="entityOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="entityFilter()"
+        (ngModelChange)="entityFilter.set($event)"
+        placeholder="Todas las entidades"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="label"
+        appendTo="body"
+        styleClass="w-full lg:w-64"
+      />
+
+      @if (hasActiveFilters()) {
+        <p-button
+          label="Limpiar"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          [text]="true"
+          (onClick)="clearFilters()"
+        />
+      }
+    </div>
+  }
+
+  <!-- Hand-made tabs (transparent background, no white panel) -->
+  <div class="flex flex-wrap gap-1 border-b border-[#EBE5DC]" role="tablist">
+    @for (tab of [
+      {value: '0', label: 'Usuarios Activos', count: users().length, badge: 'bg-[#F3E3C3] text-[#795221]'},
+      {value: '1', label: 'Usuarios Inactivos', count: inactiveUsers().length, badge: 'bg-[#EFEAE2] text-[#8C7A6B]'},
+      {value: '2', label: 'Solicitudes de Alta', count: pendingUserRequests.length, badge: 'bg-amber-100 text-amber-800'}
+    ]; track tab.value) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab() === tab.value"
+        (click)="activeTab.set(tab.value)"
+        class="px-4 py-3 -mb-px bg-transparent border-0 border-b-2 cursor-pointer text-sm font-bold flex items-center gap-2 transition-colors"
+        [class]="activeTab() === tab.value
+          ? 'border-[#795221] text-[#633F17]'
+          : 'border-transparent text-[#8C7A6B] hover:text-[#633F17]'"
       >
-        <ng-template #caption>
-          <div class="flex items-center justify-between">
-            <p>Actualmente se cuenta con <span class="font-black">{{ users.length }} </span> @if (users.length == 1) {
-              usuario <span class="text-green-600 font-bold"> activo</span>
-            } @else {
-              usuarios <span class="text-green-600 font-bold"> activos</span>
-            }</p>
-            <p-button
-              (onClick)="showDialog()"
-              icon="pi pi-plus"
-              label="Añadir Usuario"
-            ></p-button>
-          </div>
-        </ng-template>
-        <ng-template #header>
-          <tr>
-            <th>Apellidos, Nombre</th>
-            <th>Correo Electrónico</th>
-            <th>Grupo Scout</th>
-            <th></th>
-          </tr>
-          <tr>
-            <th>
-              <p-columnFilter
-                type="text"
-                field="fullName"
-                placeholder="Buscar por nombre"
-                ariaLabel="Filter Name"
-              ></p-columnFilter>
-            </th>
-            <th></th>
-            <th>
-            </th>
-            <th></th>
-          </tr>
-        </ng-template>
-        <ng-template #body let-user>
-          <tr>
-            <td>{{ user.profile?.surname }}, {{ user.profile?.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>@if (user.profile?.scoutGroup != null) {
-              {{ user.profile?.scoutGroup.name }}
-            }</td>
-            <td class="flex gap-2 justify-end">
-              <p-button
-                icon="pi pi-pen-to-square"
-                label="Editar"
-                [rounded]="true"
-                (onClick)="openEditDialog(user)"
-                severity="info"
-                outlined
-              ></p-button>
-              <p-button
-                icon="pi pi-trash"
-                label="Desactivar"
-                [rounded]="true"
-                (onClick)="confirmDialog($event, 'Deactivate', user)"
-                severity="danger"
-                outlined
-              ></p-button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-tabpanel>
-    <p-tabpanel value="1">
-      <p-table
-        #dt
-        [value]="inactiveUsers"
-        [rows]="25"
-        [paginator]="true"
-      >
-        <ng-template #caption>
-          <div class="flex items-center justify-between">
-            <p>En la base de datos hay <span
-              class="font-black">{{ inactiveUsers.length }}</span> @if (inactiveUsers.length == 1) {
-              usuario <span class="text-red-500 font-bold"> inactivo</span>
-            } @else {
-              usuarios <span class="text-red-500 font-bold"> inactivos</span>
-            }</p>
-          </div>
-        </ng-template>
-        <ng-template #header>
-          <tr>
-            <th>Apellidos, Nombre</th>
-            <th>Correo Electrónico</th>
-            <th>Grupo Scout</th>
-            <th></th>
-          </tr>
-        </ng-template>
-        <ng-template #body let-user>
-          <tr>
-            <td>{{ user.profile?.surname }}, {{ user.profile?.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>@if (user.profile?.scoutGroup != null) {
-              {{ user.profile?.scoutGroup.name }}
-            }</td>
-            <td class="flex gap-2 justify-end">
-              <p-button
-                icon="pi pi-pen-to-square"
-                label="Editar"
-                [rounded]="true"
-                (onClick)="openEditDialog(user)"
-                severity="info"
-                outlined
-              ></p-button>
-              <p-button
-                icon="pi pi-history"
-                label="Reactivar"
-                [rounded]="true"
-                (onClick)="confirmDialog($event, '', user)"
-                severity="success"
-                outlined
-              ></p-button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-tabpanel>
-    <p-tabpanel value="2">
-      <p-table
-        #dt
-        [value]="pendingUserRequests"
-        [rows]="25"
-        [paginator]="true"
-      >
-        <ng-template #caption>
-          <div class="flex items-center justify-between">
-            <p>En la base de datos hay <span
-              class="font-black">{{ pendingUserRequests.length }}</span> @if (pendingUserRequests.length == 1) {
-              solicitud
-            } @else {
-              solicitudes
-            }de alta en el aula virtual</p>
-          </div>
-        </ng-template>
-        <ng-template #header>
-          <tr>
-            <th>Apellidos, Nombre</th>
-            <th>DNI/Documento de identificación</th>
-            <th>Correo Electrónico</th>
-            <th>Grupo Scout de Procedencia</th>
-            <th></th>
-          </tr>
-        </ng-template>
-        <ng-template #body let-pendingUser>
-          <tr>
-            <td>{{ pendingUser.surname }}, {{ pendingUser.name }}</td>
-            <td>{{ pendingUser.nif }}</td>
-            <td>{{ pendingUser.email }}</td>
-            <td>
-                {{ pendingUser.scoutGroup?.name ?? 'Sin especificar' }}
-            </td>
-            <td class="flex gap-2 justify-end">
-              <p-button
-                icon="pi pi-user-plus"
-                (onClick)="confirmDialog($event,'Create User', undefined , pendingUser)"
-                severity="info"
-                rounded
-                outlined
-              ></p-button>
-              <p-button
-                icon="pi pi-trash"
-                (onClick)="confirmDialog($event, 'Delete request', undefined, pendingUser)"
-                severity="danger"
-                rounded
-                outlined
-              ></p-button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-tabpanel>
-  </p-tabpanels>
-</p-tabs>
+        {{ tab.label }}
+        <span class="text-[10px] font-black px-2 py-0.5 rounded-full" [class]="tab.badge">{{ tab.count }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="pt-2">
+      @if (activeTab() === '0') {
+        <p-table
+          [value]="filteredUsers()"
+          [rows]="25"
+          [paginator]="filteredUsers().length > 25"
+          styleClass="user-table"
+        >
+          <ng-template #caption>
+            <p class="m-0 text-sm text-[#51453a]">
+              Mostrando <span class="font-black">{{ filteredUsers().length }}</span> de {{ users().length }}
+              {{ users().length === 1 ? 'usuario' : 'usuarios' }}<span class="text-green-600 font-bold"> {{ users().length === 1 ? 'activo' : 'activos' }}</span>
+            </p>
+          </ng-template>
+          <ng-template #header>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo Electrónico</th>
+              <th>Entidad de procedencia</th>
+              <th>Roles</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-user>
+            <tr>
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-user-avatar [avatarUrl]="user.profile?.avatarUrl" [label]="initials(user)" customSize="2.75rem"></app-user-avatar>
+                  <span class="font-bold text-base text-[#3D2E24]">{{ fullName(user) }}</span>
+                </div>
+              </td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ user.email }}</td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ user.profile?.scoutGroup?.name || '—' }}</td>
+              <td>
+                <div class="flex flex-wrap gap-1">
+                  @for (role of user.roles; track role) {
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full" [class]="roleClasses[role]">{{ roleLabels[role] || role }}</span>
+                  }
+                </div>
+              </td>
+              <td><span class="text-xs font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">Activo</span></td>
+              <td>
+                <div class="flex gap-1 justify-end">
+                  <p-button icon="pi pi-pen-to-square" [rounded]="true" [text]="true" severity="info" (onClick)="openEditDialog(user)" ariaLabel="Editar"></p-button>
+                  <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="confirmDialog($event, 'Deactivate', user)" ariaLabel="Desactivar"></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="6" class="text-center !p-10 text-[#8C7A6B] text-sm">
+                <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+                Ningún usuario coincide con los filtros aplicados.
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+
+      @if (activeTab() === '1') {
+        <p-table
+          [value]="filteredInactiveUsers()"
+          [rows]="25"
+          [paginator]="filteredInactiveUsers().length > 25"
+          styleClass="user-table"
+        >
+          <ng-template #caption>
+            <p class="m-0 text-sm text-[#51453a]">
+              Mostrando <span class="font-black">{{ filteredInactiveUsers().length }}</span> de {{ inactiveUsers().length }}
+              {{ inactiveUsers().length === 1 ? 'usuario' : 'usuarios' }}<span class="text-red-500 font-bold"> {{ inactiveUsers().length === 1 ? 'inactivo' : 'inactivos' }}</span>
+            </p>
+          </ng-template>
+          <ng-template #header>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo Electrónico</th>
+              <th>Entidad de procedencia</th>
+              <th>Roles</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-user>
+            <tr class="opacity-80">
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-user-avatar [avatarUrl]="user.profile?.avatarUrl" [label]="initials(user)" customSize="2.75rem"></app-user-avatar>
+                  <span class="font-bold text-base text-[#3D2E24]">{{ fullName(user) }}</span>
+                </div>
+              </td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ user.email }}</td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ user.profile?.scoutGroup?.name || '—' }}</td>
+              <td>
+                <div class="flex flex-wrap gap-1">
+                  @for (role of user.roles; track role) {
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full" [class]="roleClasses[role]">{{ roleLabels[role] || role }}</span>
+                  }
+                </div>
+              </td>
+              <td><span class="text-xs font-black px-3 py-1 rounded-full bg-stone-200 text-stone-700">Inactivo</span></td>
+              <td>
+                <div class="flex gap-1 justify-end">
+                  <p-button icon="pi pi-pen-to-square" [rounded]="true" [text]="true" severity="info" (onClick)="openEditDialog(user)" ariaLabel="Editar"></p-button>
+                  <p-button icon="pi pi-history" [rounded]="true" [text]="true" severity="success" (onClick)="confirmDialog($event, '', user)" ariaLabel="Reactivar"></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="6" class="text-center !p-10 text-[#8C7A6B] text-sm">
+                <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+                Ningún usuario coincide con los filtros aplicados.
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+
+      @if (activeTab() === '2') {
+        <p-table
+          [value]="pendingUserRequests"
+          [rows]="25"
+          [paginator]="pendingUserRequests.length > 25"
+          styleClass="user-table"
+        >
+          <ng-template #caption>
+            <p class="m-0 text-sm text-[#51453a]">
+              En la base de datos hay <span class="font-black">{{ pendingUserRequests.length }}</span>
+              {{ pendingUserRequests.length === 1 ? 'solicitud' : 'solicitudes' }} de alta en el aula virtual
+            </p>
+          </ng-template>
+          <ng-template #header>
+            <tr>
+              <th>Nombre</th>
+              <th>DNI/Documento de identificación</th>
+              <th>Correo Electrónico</th>
+              <th>Entidad de procedencia</th>
+              <th></th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-pendingUser>
+            <tr>
+              <td>
+                <div class="flex items-center gap-3">
+                  <app-user-avatar [label]="pendingUser.name?.charAt(0)?.toUpperCase()" customSize="2.75rem"></app-user-avatar>
+                  <span class="font-bold text-base text-[#3D2E24]">{{ pendingUser.surname }}, {{ pendingUser.name }}</span>
+                </div>
+              </td>
+              <td class="text-[0.95rem] text-[#51453a] font-mono">{{ pendingUser.nif }}</td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ pendingUser.email }}</td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ pendingUser.scoutGroup?.name ?? 'Sin especificar' }}</td>
+              <td>
+                <div class="flex gap-1 justify-end">
+                  <p-button
+                    icon="pi pi-user-plus"
+                    label="Crear usuario"
+                    size="small"
+                    (onClick)="confirmDialog($event, 'Create User', undefined, pendingUser)"
+                    styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"
+                  ></p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="danger"
+                    (onClick)="confirmDialog($event, 'Delete request', undefined, pendingUser)"
+                    ariaLabel="Eliminar solicitud"
+                  ></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="5" class="text-center !p-10 text-[#8C7A6B] text-sm">
+                <i class="pi pi-inbox text-2xl text-[#C2B7AC] block mb-2"></i>
+                No hay solicitudes de alta pendientes.
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+  </div>
+</div>
 <app-user-modal-add-edit
   (userUpdated)="loadUsers()"
   [(visible)]="visible"
