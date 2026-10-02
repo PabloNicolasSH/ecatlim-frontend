@@ -1,13 +1,13 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {TableModule} from 'primeng/table';
-import {UserService} from '../../shared/services/user-and-entity/user.service';
+import {UserService} from '../../shared/services/user.service';
 import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {ConfirmDialog} from 'primeng/confirmdialog';
 import {ConfirmationService, MessageService} from 'primeng/api';
-import {PendingUserService} from '../../shared/services/user-and-entity/pending-user.service';
+import {PendingUserService} from '../../shared/services/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {FormsModule} from '@angular/forms';
 import {ScoutGroup} from '../../shared/models/scout-group.model';

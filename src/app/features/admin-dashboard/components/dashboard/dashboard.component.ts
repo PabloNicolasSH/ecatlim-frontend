@@ -1,9 +1,9 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {TableModule} from 'primeng/table';
 import {AsyncPipe, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
-import {DashboardService} from '../../dashboard.service';
 import {Observable} from 'rxjs';
 import {DashboardData} from '../../dashboard-data.model';
+import {DashboardService} from '../../dashboard.service';
 import {Button} from 'primeng/button';
 import {RouterLink} from '@angular/router';
 

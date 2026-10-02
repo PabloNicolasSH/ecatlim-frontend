@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import {SimpleUser, User} from '../../shared/models/user.model';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
-import { UserService } from '../../shared/services/user-and-entity/user.service';
+import { UserService } from '../../shared/services/user.service';
 import { ChatService } from '../../shared/services/chat.service';
 import { Avatar } from 'primeng/avatar';
 import { Badge } from 'primeng/badge';
@@ -15,6 +15,7 @@ import {DatePipe, NgClass} from '@angular/common';
 import {MultiSelect} from 'primeng/multiselect';
 import {PrimeTemplate} from 'primeng/api';
 import {SelectButton} from 'primeng/selectbutton';
+import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
 
 @Component({
   selector: 'app-chat-list',
@@ -41,6 +42,7 @@ export class ChatListComponent implements OnInit {
 
   protected readonly userService = inject(UserService);
   protected readonly chatService = inject(ChatService);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService)
 
   selectedChat!: Chat;
   chats: Chat[] = [];
@@ -108,10 +110,10 @@ export class ChatListComponent implements OnInit {
   }
 
   getNameToShow(chatMembers: User[]) {
-    const userMe = JSON.parse(<string>localStorage.getItem('me'));
+    const userMe = this.loggedUserDataService.getLoggedUserData();
     const nameToShow = chatMembers
-      .map(user => user.name)
-      .filter(name => name !== userMe.name);
+      .map(user => user.profile?.name)
+      .filter(name => name !== userMe.profile?.name);
     return nameToShow.join(', ');
   }
 

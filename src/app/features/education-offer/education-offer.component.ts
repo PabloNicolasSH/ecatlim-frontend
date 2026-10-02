@@ -2,7 +2,7 @@ import {Component, inject, OnInit} from '@angular/core';
 import {Card} from 'primeng/card';
 import {Button} from 'primeng/button';
 import {RouterLink} from '@angular/router';
-import {EducationStageService} from '../../shared/services/education/education-stage.service';
+import {EducationStageService} from '../../shared/services/education-stage.service';
 import {EducationStage, EducationStageCard} from '../../shared/models/education-stage.model';
 import {Tag} from 'primeng/tag';
 import {NgClass} from '@angular/common';

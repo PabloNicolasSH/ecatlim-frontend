@@ -28,7 +28,7 @@ export interface UserProfile {
 }
 
 export interface SimpleUser {
-  id: number;
+  id?: number;
   name: string;
   surname: string;
   email: string;

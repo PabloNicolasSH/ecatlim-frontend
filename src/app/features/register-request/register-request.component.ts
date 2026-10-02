@@ -8,7 +8,7 @@ import {Select} from 'primeng/select';
 import {EntityService} from '../../shared/services/entity.service';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {Checkbox} from 'primeng/checkbox';
-import {PendingUserService} from '../../shared/services/user-and-entity/pending-user.service';
+import {PendingUserService} from '../../shared/services/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {MessageService} from 'primeng/api';
 import {FormUtils} from '../../shared/form-utils';

@@ -1,7 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {Button} from 'primeng/button';
 import {User} from '../../../shared/models/user.model';
-import {UserService} from '../../../shared/services/user.service';
 import {FormsModule} from '@angular/forms';
 import {UserModalMeEditComponent} from '../user-modal-me-edit/user-modal-me-edit.component';
 import {RouterLink} from '@angular/router';
@@ -9,6 +8,7 @@ import {UserAvatarModalComponent} from '../user-avatar-modal/user-avatar-modal.c
 import {HttpClient} from '@angular/common/http';
 import {Role} from '../../../shared/models/role.model';
 import {LoggedUserDataService} from '../../../core/auth/logged-user-data-service';
+import {UserService} from '../../../shared/services/user.service';
 
 @Component({
   selector: 'app-user-profile',

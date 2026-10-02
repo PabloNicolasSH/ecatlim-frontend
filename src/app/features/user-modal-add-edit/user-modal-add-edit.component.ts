@@ -8,7 +8,7 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {Select} from 'primeng/select';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {InputText} from 'primeng/inputtext';
-import {UserService} from '../../shared/services/user-and-entity/user.service';
+import {UserService} from '../../shared/services/user.service';
 import {UserForm} from '../../shared/models/user-form.model';
 import {Role} from '../../shared/models/role.model';
 import {MessageService, PrimeTemplate} from 'primeng/api';
