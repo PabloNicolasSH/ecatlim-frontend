@@ -35,6 +35,8 @@ import {Role} from './shared/models/role.model';
 import {baseRedirect} from './core/auth/redirect-function';
 import {EducationProgressComponent} from './features/education-progress/education-progress.component';
 import {DashboardComponent} from './features/admin-dashboard/components/dashboard/dashboard.component';
+import {ChatComponent} from './features/chat/chat.component';
+import {ChatListComponent} from './features/chat-list/chat-list.component';
 
 export const routes: Routes = [
   {
@@ -83,6 +85,14 @@ export const routes: Routes = [
       {
         path: "home",
         component: HomeComponent,
+      },
+      {
+        path: "chat",
+        component: ChatListComponent
+      },
+      {
+        path: "chat/:id",
+        component: ChatComponent
       },
       {
         path: "informacion-general",

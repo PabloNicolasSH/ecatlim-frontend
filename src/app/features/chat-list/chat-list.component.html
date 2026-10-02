@@ -1,0 +1,383 @@
+<div class="flex h-[85vh] gap-3">
+
+  <div
+    class="flex-col w-full md:w-auto md:basis-1/4 h-full rounded-2xl overflow-hidden border bg-(--p-surface-0) shadow-sm"
+    [ngClass]="selectedChat ? 'hidden md:flex' : 'flex'"
+  >
+    <div class="flex items-center justify-between px-3 py-2 border-b bg-(--p-surface-50)">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-comments text-sm text-(--p-primary-500)"></i>
+        <h2 class="text-sm text-(--p-primary-500) font-semibold">Chats</h2>
+      </div>
+
+      <button
+        type="button"
+        class="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs
+               bg-(--p-primary-500) text-white hover:bg-(--p-primary-600) transition-colors"
+        (click)="openNewChatDialog()"
+      >
+        <i class="pi pi-plus"></i>
+        <span>Nuevo</span>
+      </button>
+    </div>
+
+    <div class="mt-2 flex-1 overflow-y-auto px-2 pb-2">
+
+      @if (chats.length === 0) {
+        <div class="h-full flex items-center justify-center text-xs text-(--p-text-color-secondary) text-center px-4">
+          No tienes ningún chat todavía.<br/>
+          Crea uno con el botón "Nuevo".
+        </div>
+      }
+
+      @for (chat of chats; track chat.id) {
+        <div
+          class="flex flex-col rounded-xl px-3 py-2 cursor-pointer transition-all duration-150 mb-1.5
+                 hover:bg-(--p-primary-200)"
+          [ngClass]="{
+            'bg-(--p-primary-50) border-(--p-primary-200) shadow-sm':
+              selectedChat?.id === chat.id
+          }"
+          (click)="selectChat(chat)"
+        >
+          <div class="flex items-center gap-3">
+
+            <app-user-avatar
+              [avatarUrl]="chatAvatarUrl(chat)"
+              [label]="avatarLabel(chat)"
+              [icon]="isGroup(chat) ? 'pi pi-users' : 'pi pi-user'"
+              size="normal"
+            ></app-user-avatar>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-medium text-sm truncate">
+                  {{ chatTitle(chat) }}
+                </span>
+
+                <div class="flex items-center gap-2">
+                  @if (chat.lastMessageAt) {
+                    <span class="text-[0.65rem] text-(--p-text-color-secondary) whitespace-nowrap">
+                      {{ chat.lastMessageAt | date:'HH:mm' }}
+                    </span>
+                  }
+                  <button
+                    type="button"
+                    class="text-(--p-text-color-secondary) hover:text-red-500 cursor-pointer"
+                    [title]="isLastMember(chat) ? 'Eliminar chat' : 'Salir del chat'"
+                    (click)="leaveChat(chat, $event)"
+                  >
+                    <i class="pi text-xs" [ngClass]="isLastMember(chat) ? 'pi-trash' : 'pi-sign-out'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 mt-0.5">
+                <span class="text-[0.72rem] text-(--p-text-color-secondary) truncate">
+                  {{ lastMessageText(chat) }}
+                </span>
+
+                @if (chat.unreadMessagesCount > 0) {
+                  <p-badge
+                    [value]="chat.unreadMessagesCount"
+                    badgeSize="small"
+                    styleClass="bg-[var(--p-primary-500)] text-white text-[0.7rem]"
+                  ></p-badge>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <div class="flex-col w-full md:w-auto md:basis-3/4 min-w-0 h-full" [ngClass]="selectedChat ? 'flex' : 'hidden md:flex'">
+    @if (selectedChat != null) {
+      @let current = openChat!;
+      <div
+        class="items-center gap-3 px-3 py-2 mb-2 rounded-2xl border bg-(--p-surface-0) shadow-sm"
+        [ngClass]="isGroup(current) ? 'flex' : 'flex md:hidden'"
+      >
+        <button
+          type="button"
+          class="md:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-(--p-surface-100) cursor-pointer"
+          title="Volver a los chats"
+          (click)="backToList()"
+        >
+          <i class="pi pi-arrow-left"></i>
+        </button>
+
+        <div
+          class="flex items-center gap-3 flex-1 min-w-0"
+          [ngClass]="{'cursor-pointer': isGroup(current)}"
+          (click)="isGroup(current) && openGroupInfo()"
+        >
+          <app-user-avatar
+            [avatarUrl]="chatAvatarUrl(current)"
+            [label]="avatarLabel(current)"
+            [icon]="isGroup(current) ? 'pi pi-users' : 'pi pi-user'"
+            [size]="isGroup(current) ? 'large' : 'normal'"
+            [customSize]="isGroup(current) ? '3.5rem' : undefined"
+          ></app-user-avatar>
+          <div class="flex flex-col min-w-0">
+            <span class="font-medium text-sm truncate">{{ chatTitle(current) }}</span>
+            @if (isGroup(current)) {
+              <span class="text-xs text-(--p-text-color-secondary) truncate">{{ memberNames(current) }}</span>
+            }
+          </div>
+        </div>
+
+        @if (isGroup(current)) {
+          <button
+            type="button"
+            class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-(--p-surface-100) cursor-pointer"
+            title="Info del grupo"
+            (click)="openGroupInfo()"
+          >
+            <i class="pi pi-info-circle"></i>
+          </button>
+        }
+      </div>
+      <app-chat
+        [selectedChat]="selectedChat"
+        (chatUnavailable)="onChatRemoved($event)"
+        class="block flex-1 min-h-0 w-full"
+      ></app-chat>
+    } @else {
+      <div class="flex flex-1 items-center justify-center text-sm text-(--p-text-color-secondary) border rounded-2xl bg-(--p-surface-0)">
+        Selecciona un chat de la lista para empezar a hablar o crea uno nuevo.
+      </div>
+    }
+  </div>
+
+</div>
+
+<p-confirmDialog></p-confirmDialog>
+
+<p-dialog
+  header="Info del grupo"
+  [(visible)]="groupInfoVisible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  styleClass="w-[28rem] max-w-[95vw]"
+>
+  @if (openChat; as group) {
+    <div class="flex flex-col items-center gap-2 mb-4">
+      <div
+        class="relative cursor-pointer"
+        title="Cambiar la foto del grupo"
+        (click)="togglePictureMenu($event, group, pictureMenu, groupPictureInput)"
+      >
+        <app-user-avatar
+          [avatarUrl]="group.pictureUrl"
+          icon="pi pi-users"
+          [label]="avatarLabel(group)"
+          size="xlarge"
+          customSize="9rem"
+        ></app-user-avatar>
+        <span class="absolute bottom-1 right-1 flex items-center justify-center w-9 h-9 rounded-full bg-(--p-primary-500) text-white shadow">
+          <i class="pi text-sm" [ngClass]="uploadingPicture ? 'pi-spin pi-spinner' : 'pi-camera'"></i>
+        </span>
+      </div>
+      <input #groupPictureInput type="file" accept="image/*" class="hidden"
+             (change)="onExistingGroupPicturePicked($event, group)"/>
+      <p-menu #pictureMenu [popup]="true" [model]="pictureMenuItems" appendTo="body"></p-menu>
+      <h3 class="text-lg font-semibold text-center">{{ group.name }}</h3>
+      @if (group.creationDate) {
+        <span class="text-xs text-(--p-text-color-secondary)">
+          Grupo creado el {{ group.creationDate | date:"d 'de' MMMM 'de' y":undefined:'es' }}
+        </span>
+      }
+    </div>
+
+    <div class="mb-4">
+      <span class="text-xs font-medium text-(--p-text-color-secondary)">Descripción</span>
+      <p class="text-sm mt-1 whitespace-pre-line">{{ group.description || 'Este grupo no tiene descripción.' }}</p>
+    </div>
+
+    <div>
+      <span class="text-xs font-medium text-(--p-text-color-secondary)">
+        {{ group.chatMembers.length }} {{ group.chatMembers.length === 1 ? 'participante' : 'participantes' }}
+      </span>
+      <div class="flex flex-col gap-1 mt-2 max-h-64 overflow-y-auto">
+        @for (member of sortedMembers(group); track member.id) {
+          <div class="flex items-center gap-3 py-1">
+            <app-user-avatar
+              [avatarUrl]="member.avatarUrl"
+              [label]="(member.name || member.email).at(0)?.toUpperCase()"
+              size="normal"
+            ></app-user-avatar>
+            <div class="flex flex-col min-w-0">
+              <span class="text-sm truncate">
+                {{ member.name }} {{ member.surname }}
+                @if (member.id === myIdValue) { <span class="text-(--p-text-color-secondary)">(Tú)</span> }
+              </span>
+              <span class="text-xs text-(--p-text-color-secondary) truncate">{{ member.email }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="flex justify-end mt-4">
+      <p-button
+        [label]="isLastMember(group) ? 'Eliminar grupo' : 'Salir del grupo'"
+        icon="pi pi-sign-out"
+        severity="danger"
+        size="small"
+        [text]="true"
+        (onClick)="groupInfoVisible = false; leaveChat(group, $event)"
+      ></p-button>
+    </div>
+  }
+</p-dialog>
+
+<p-dialog
+  header="Nuevo chat"
+  [(visible)]="newChatVisible"
+  [modal]="true"
+  styleClass="w-[32rem]"
+  [closable]="true"
+  [draggable]="false"
+>
+  <div class="flex flex-col gap-4">
+
+    <div class="flex justify-center mb-3">
+      <p-selectButton
+        [options]="modeOptions"
+        [(ngModel)]="newChatMode"
+        optionLabel="label"
+        optionValue="value"
+      ></p-selectButton>
+    </div>
+
+    @if (newChatMode === 'private') {
+      <div class="flex flex-col gap-3">
+        <span class="text-xs text-(--p-text-color-secondary)">
+          Elige la persona con la que quieres chatear.
+        </span>
+
+        <p-select
+          appendTo="body"
+          [options]="users"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Selecciona un usuario"
+          [(ngModel)]="selectedUserIdForPrivate"
+          class="w-full"
+          [filter]="true"
+          filterPlaceholder="Buscar usuario..."
+        >
+          <ng-template #item let-user>
+            <div class="flex items-center gap-2 text-sm">
+              <p-avatar
+                [label]="user.name?.at(0)"
+                size="normal"
+                shape="circle"
+              ></p-avatar>
+              <span>{{ user.name }} {{ user.surname }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+    }
+
+    @if (newChatMode === 'group') {
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-3">
+          <app-user-avatar
+            [avatarUrl]="null"
+            [localImage]="groupPicturePreview"
+            icon="pi pi-users"
+            size="large"
+          ></app-user-avatar>
+          <input #newGroupPictureInput type="file" accept="image/*" class="hidden"
+                 (change)="onGroupPicturePicked($event)"/>
+          <p-button
+            [label]="groupPicture ? 'Cambiar foto' : 'Añadir foto (opcional)'"
+            icon="pi pi-camera"
+            size="small"
+            severity="secondary"
+            [text]="true"
+            (onClick)="newGroupPictureInput.click()"
+          ></p-button>
+          @if (groupPicture) {
+            <p-button icon="pi pi-times" size="small" severity="secondary" [text]="true" [rounded]="true"
+                      (onClick)="clearGroupPicture()"></p-button>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium">Nombre del grupo</label>
+          <input
+            pInputText
+            type="text"
+            class="w-full text-sm"
+            placeholder="Ej. Equipo de coordinación"
+            [(ngModel)]="groupName"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium">Descripción (opcional)</label>
+          <input
+            pInputText
+            type="text"
+            class="w-full text-xs"
+            placeholder="Propósito del grupo..."
+            [(ngModel)]="groupDescription"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium">Miembros</label>
+          <p-multiSelect
+            appendTo="body"
+            [options]="users"
+            optionLabel="name"
+            optionValue="id"
+            [(ngModel)]="selectedGroupUserIds"
+            [filter]="true"
+            display="chip"
+            class="w-full text-sm"
+            placeholder="Añadir miembros"
+          >
+            <ng-template let-user pTemplate="item">
+              <div class="flex items-center gap-2 text-sm">
+                <p-avatar
+                  [label]="user.name?.at(0)"
+                  size="normal"
+                  shape="circle"
+                ></p-avatar>
+                <span>{{ user.name }}</span>
+              </div>
+            </ng-template>
+
+            <ng-template let-user pTemplate="selectedItem">
+              <span>{{ user.name }}</span>
+            </ng-template>
+          </p-multiSelect>
+        </div>
+      </div>
+    }
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        size="small"
+        (onClick)="closeNewChatDialog()"
+      ></p-button>
+      <p-button
+        label="Crear chat"
+        size="small"
+        [disabled]="!canCreateNewChat()"
+        (onClick)="createNewChat()"
+      ></p-button>
+    </div>
+
+  </div>
+</p-dialog>

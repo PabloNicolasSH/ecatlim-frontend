@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
+import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
@@ -9,10 +9,13 @@ import {Popover} from 'primeng/popover';
 import {Avatar} from 'primeng/avatar';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
+import {LoggedUserDataService} from '../auth/logged-user-data-service';
+import {ChatService} from '../../shared/services/chat.service';
+import {WebsocketService} from '../../shared/services/websocket.service';
+import {Subscription} from 'rxjs';
+import {User} from '../../shared/models/user.model';
 import {Notification} from '../../shared/models/notification.model';
 import {Role} from '../../shared/models/role.model';
-import {User} from '../../shared/models/user.model';
-import {LoggedUserDataService} from '../auth/logged-user-data-service';
 
 @Component({
   selector: 'app-header',
@@ -29,7 +32,11 @@ import {LoggedUserDataService} from '../auth/logged-user-data-service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+
+  protected readonly chatService = inject(ChatService);
+  protected readonly websocketService = inject(WebsocketService);
+  private notificationSub?: Subscription;
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
@@ -41,10 +48,11 @@ export class HeaderComponent implements OnInit {
   sidebarVisible: boolean = false;
 
   windowWidth = signal(window.innerWidth);
-
   messages = signal(["¿Vienes al curso de Agosto?"]);
   notifies: WritableSignal<Notification[]> = signal([]);
+
   sidebarMenu!: MenuItem[];
+  unreadChats: number = 0;
 
   ngOnInit() {
     const savedMe = localStorage.getItem('me');
@@ -53,6 +61,14 @@ export class HeaderComponent implements OnInit {
     }
     this.loggedUserDataService.avatarUrl$.subscribe(url => this.avatarUrl = url);
     this.createSidebarMenu();
+    this.chatService.unreadChats$.subscribe(count => this.unreadChats = count);
+    this.chatService.refreshUnreadChats();
+    this.notificationSub = this.websocketService.getNotifications()
+      .subscribe(notification => this.chatService.markChatUnread(notification.chatId));
+  }
+
+  ngOnDestroy() {
+    this.notificationSub?.unsubscribe();
   }
 
   @HostListener('window:resize', ['$event'])

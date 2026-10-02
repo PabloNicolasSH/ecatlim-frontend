@@ -1,0 +1,123 @@
+<div class="flex flex-col h-full bg-(--p-surface-50) rounded-2xl overflow-hidden border shadow-md relative">
+
+  <div
+    #scrollContainer
+    class="flex-1 overflow-y-auto flex flex-col bg-(--p-surface-50) px-3 md:px-20 pt-4 pb-2"
+    (scroll)="onScroll()"
+  >
+    @if (loadingOlder) {
+      <div class="flex justify-center mb-3">
+        <div class="flex flex-col gap-2 w-full max-w-xl">
+
+          <div class="flex gap-2 justify-start">
+            <p-skeleton shape="circle" size="2rem"></p-skeleton>
+            <p-skeleton width="60%" height="1.2rem" borderRadius="999px"></p-skeleton>
+          </div>
+
+          <div class="flex gap-2 justify-end">
+            <p-skeleton width="55%" height="1.2rem" borderRadius="999px"></p-skeleton>
+          </div>
+
+          <div class="flex gap-2 justify-start">
+            <p-skeleton shape="circle" size="2rem"></p-skeleton>
+            <p-skeleton width="45%" height="1.2rem" borderRadius="999px"></p-skeleton>
+          </div>
+        </div>
+      </div>
+    }
+
+    @for (message of messages; track trackByMessage(message); let i = $index) {
+      @if (isFirstOfDay(i, message)) {
+        <div class="flex justify-center my-3">
+          <div class="px-3 py-1 rounded-full text-xs bg-(--p-surface-200) text-(--p-text-color-secondary)">
+            {{ message.ts | date:"EEEE, d 'de' MMMM":undefined: "es"}}
+          </div>
+        </div>
+      }
+
+      @if (isSystemMessage(message)) {
+        <div class="flex justify-center my-2" [attr.id]="'msg-' + message.localId">
+          <div class="px-3 py-1 rounded-lg text-xs text-center shadow-sm bg-(--p-surface-200) text-(--p-text-color-secondary)">
+            {{ message.message }}
+          </div>
+        </div>
+      } @else {
+      <div
+        class="flex message-row"
+        [ngClass]="{
+          'justify-end': isMine(message),
+          'justify-start': !isMine(message),
+          'mt-3 mb-1': isFirstOfGroup(i, message),
+          'mt-0.5 mb-0.5': !isFirstOfGroup(i, message)
+        }"
+        [attr.id]="'msg-' + message.localId"
+      >
+        <div
+          class="flex items-center gap-2"
+          [ngClass]="{
+            'flex-row-reverse': isMine(message)
+          }"
+        >
+          @if (isFirstOfGroup(i, message)) {
+            <app-user-avatar
+              size="normal"
+              [avatarUrl]="message.from?.avatarUrl"
+              [label]="getUserInitial(message)"
+              class="shrink-0"
+            />
+          } @else {
+            <div class="w-8"></div>
+          }
+
+          <div
+            class="px-4 py-2 text-sm shadow bubble"
+            [ngClass]="{
+              'bubble-mine': isMine(message),
+              'bubble-other': !isMine(message),
+              'bubble-first': isFirstOfGroup(i, message)
+            }"
+          >
+            <div [ngClass]="{'italic': message.pending}">{{message.message}}</div>
+            <div
+              class="flex items-center gap-1 mt-1 text-[0.70rem] opacity-70"
+              [ngClass]="{
+              'justify-end': isMine(message),
+              'justify-start': !isMine(message)
+            }"
+            >
+              @if (message.pending) {
+                <i class="pi pi-clock text-[0.70rem]"></i>
+              } @else {
+                <span>{{ message.ts | date:'HH:mm' }}</span>
+                @if (canDelete(message)) {
+                  <button
+                    type="button"
+                    class="ml-1 hover:text-red-500 cursor-pointer"
+                    title="Eliminar mensaje"
+                    (click)="deleteMessage(message)"
+                  >
+                    <i class="pi pi-trash text-[0.70rem]"></i>
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    }
+    @if (showScrollToBottom) {
+      <button
+        (click)="scrollToBottom()"
+        class="scroll-bottom-btn"
+      >
+        <i class="pi pi-arrow-down text-white text-base"></i>
+      </button>
+    }
+  </div>
+
+  <app-chat-input
+    [disabled]="!selectedChat"
+    (sendMessage)="onMessageSent($event)"
+  ></app-chat-input>
+</div>

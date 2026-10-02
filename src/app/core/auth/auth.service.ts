@@ -5,20 +5,30 @@ import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
 import {AuthLoginResponse, UserToLog} from './auth-models';
 import {LoggedUserDataService} from './logged-user-data-service';
+import {WebsocketService} from '../../shared/services/websocket.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+
+  private readonly websocketService = inject(WebsocketService);
   protected readonly http = inject(HttpClient);
   protected readonly router = inject(Router);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
+
+  constructor() {
+    if (this.isAuthenticated()){
+      this.websocketService.initConnection(this.getToken()!);
+    }
+  }
 
   login(userToLog: UserToLog): Observable<any> {
     return this.http.post<AuthLoginResponse>(`${environment.apiUrl}/auth/login`, userToLog).pipe(
       tap((res) => {
         localStorage.setItem('token', res.token);
         this.loggedUserDataService.setUserData(res.user);
+        this.websocketService.initConnection(res.token);
       })
     );
   }
@@ -27,6 +37,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('me');
     this.router.navigateByUrl('/login');
+    this.websocketService.disconnect();
   }
 
   isAuthenticated(): boolean {

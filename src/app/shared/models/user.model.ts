@@ -8,12 +8,6 @@ export interface User {
   profile?: UserProfile;
 }
 
-export interface SimpleUser {
-  id?: number;
-  name: string;
-  email: string;
-}
-
 export interface UserProfile {
   name: string;
   surname: string;
@@ -24,5 +18,13 @@ export interface UserProfile {
   city: string;
   country: string;
   scoutGroup: ScoutGroup;
+  avatarUrl?: string;
+}
+
+export interface SimpleUser {
+  id?: number;
+  name: string;
+  surname: string;
+  email: string;
   avatarUrl?: string;
 }
