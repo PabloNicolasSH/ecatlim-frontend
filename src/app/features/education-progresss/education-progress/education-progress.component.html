@@ -177,7 +177,13 @@
             }
           </div>
 
-          <app-document-uploader></app-document-uploader>
+          @if (activeEnrollment(); as enrollment) {
+            <app-document-uploader
+              [enrollmentId]="enrollment.id"
+              [documents]="enrollment.documents"
+              (documentsChange)="onDocumentsChange(enrollment.id, $event)"
+            ></app-document-uploader>
+          }
         </div>
 
         <div class="col-span-12 lg:col-span-4 space-y-6">

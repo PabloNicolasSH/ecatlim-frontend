@@ -3,7 +3,7 @@ import {environment} from '../../../environments/environment';
 import {EducationStageCard} from '../models/education-stage.model';
 import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
-import {Enrollment} from '../models/enrollment.model';
+import {Enrollment, EnrollmentDocuments, EnrollmentDocumentType} from '../models/enrollment.model';
 import {Event, EventForm} from '../models/event.model';
 
 @Injectable({
@@ -19,6 +19,17 @@ export class EnrollmentService {
 
   getUserProgress(): Observable<Enrollment[]> {
     return this.http.get<Enrollment[]>(`${environment.apiUrl}/enrollments/stages/my-progress`);
+  }
+
+  uploadDocument(enrollmentId: number, type: EnrollmentDocumentType, file: File): Observable<EnrollmentDocuments> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<EnrollmentDocuments>(
+      `${environment.apiUrl}/enrollments/stages/${enrollmentId}/documents/${type}`, formData);
+  }
+
+  downloadDocument(fileId: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/users/me/files/${fileId}`, {responseType: 'blob'});
   }
 
   enrollInEvent(eventId: number, lessonBlockIds: number[]): Observable<Event> {

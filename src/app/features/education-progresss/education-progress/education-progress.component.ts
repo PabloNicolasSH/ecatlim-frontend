@@ -3,7 +3,7 @@ import {EducationStageService} from '../../../shared/services/education-stage.se
 import {EnrollmentService} from '../../../shared/services/enrollment.service';
 import {MessageService, PrimeTemplate} from 'primeng/api';
 import {EducationStageCard} from '../../../shared/models/education-stage.model';
-import {Enrollment, Module} from '../../../shared/models/enrollment.model';
+import {Enrollment, EnrollmentDocuments, Module} from '../../../shared/models/enrollment.model';
 import {forkJoin} from 'rxjs';
 import {Carousel} from 'primeng/carousel';
 import {NgClass} from '@angular/common';
@@ -111,6 +111,10 @@ export class EducationProgressComponent implements OnInit {
         }
       });
     }
+  }
+
+  onDocumentsChange(enrollmentId: number, documents: EnrollmentDocuments): void {
+    this.enrollments.update(list => list.map(e => e.id === enrollmentId ? {...e, documents} : e));
   }
 
   toggleModule(code: string): void {
