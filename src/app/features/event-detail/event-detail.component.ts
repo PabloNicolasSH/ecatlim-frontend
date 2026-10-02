@@ -134,7 +134,6 @@ export class EventDetailComponent implements OnInit {
     return this.activityTypes[activity.activityType] ?? {label: activity.activityType, icon: 'pi-file'};
   }
 
-  /** "Previa" if the activity closes before or during the event, "Post" if it closes after it ends. */
   phase(activity: EventDetailActivity): "PREVIA" | "POST" {
     const eventEnd = new Date(this.event()!.endDate).getTime();
     return new Date(activity.dueDate).getTime() <= eventEnd ? "PREVIA" : "POST";

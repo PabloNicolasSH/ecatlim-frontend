@@ -64,7 +64,6 @@ export class DocumentUploaderComponent {
     return 'text-[#795221]';
   }
 
-  // Browsers can only render PDFs inline; Word files would just trigger a download, same as "Descargar".
   canView(doc: EnrollmentDocument): boolean {
     return doc.mimeType === 'application/pdf';
   }

@@ -14,7 +14,6 @@ import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-e
 import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
 import {Role} from '../../shared/models/role.model';
 
-/** Value of the stage filter for students that are not enrolled in any stage right now. */
 const NO_STAGE = 0;
 
 @Component({
@@ -39,7 +38,6 @@ export class StudentListComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly loggedUserDataService = inject(LoggedUserDataService);
 
-  /** Only MANAGEMENT and MANAGER_DIRECTOR can add students from this page. */
   readonly canAddStudents = this.loggedUserDataService.hasAnyRole(Role.MANAGEMENT, Role.MANAGER_DIRECTOR);
   modalVisible = false;
 
@@ -106,7 +104,6 @@ export class StudentListComponent implements OnInit {
     });
   }
 
-  /** Clicking a KPI card filters the list by that stage (click again to remove the filter). */
   toggleStageFilter(stageId: number) {
     this.stageFilter.update(current => current === stageId ? null : stageId);
   }

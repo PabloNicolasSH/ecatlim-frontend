@@ -54,7 +54,6 @@ export class UserListComponent implements OnInit {
   pendingUserRequests: PendingUser[] = [];
   scoutGroups = signal<ScoutGroup[]>([]);
 
-  // Filters (shared by the active and inactive tabs)
   search = signal<string>('');
   activeTab = signal<string>("0");
   roleFilter = signal<Role | null>(null);

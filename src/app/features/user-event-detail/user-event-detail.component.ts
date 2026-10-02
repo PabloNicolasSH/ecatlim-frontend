@@ -74,7 +74,6 @@ export class UserEventDetailComponent implements OnInit {
     return !!event && new Date(event.endDate).getTime() < Date.now();
   });
 
-  /** Activities still open that the current user has not answered yet (drives the button badge). */
   pendingActivities = computed(() =>
     this.activities().filter(a => a.progressStatus !== 'COMPLETED' && new Date(a.dueDate).getTime() >= Date.now()).length
   );
@@ -119,7 +118,6 @@ export class UserEventDetailComponent implements OnInit {
     this.failed.set(found === null);
   }
 
-  /** "Previa" if the activity closes before or during the event, "Post" if it closes after it ends. */
   phase(activity: EventDetailActivity): 'PREVIA' | 'POST' {
     const eventEnd = new Date(this.event()!.endDate).getTime();
     return new Date(activity.dueDate).getTime() <= eventEnd ? 'PREVIA' : 'POST';

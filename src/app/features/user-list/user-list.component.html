@@ -14,7 +14,6 @@
   </div>
 
   @if (activeTab() !== '2') {
-    <!-- FILTERS -->
     <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col lg:flex-row lg:items-center gap-3">
       <p-iconfield class="flex-1">
         <p-inputicon class="pi pi-search" />
@@ -66,7 +65,6 @@
     </div>
   }
 
-  <!-- Hand-made tabs (transparent background, no white panel) -->
   <div class="flex flex-wrap gap-1 border-b border-[#EBE5DC]" role="tablist">
     @for (tab of [
       {value: '0', label: 'Usuarios Activos', count: users().length, badge: 'bg-[#F3E3C3] text-[#795221]'},

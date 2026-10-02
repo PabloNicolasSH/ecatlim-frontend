@@ -41,9 +41,7 @@ export class UserModalAddEditComponent implements OnInit {
   visible = model<boolean>(false);
   @Input() dialogMode!: string;
   @Input() userToEdit!: User;
-  /** Only lets the user create STUDENT accounts (role selector hidden, student endpoint used). */
   @Input() studentOnly: boolean = false;
-  /** Creates members of the training team: only TRAINER / EVENT_DIRECTOR roles can be assigned. */
   @Input() teamMode: boolean = false;
 
   @Output() userUpdated = new EventEmitter();

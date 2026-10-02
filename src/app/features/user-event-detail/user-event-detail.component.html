@@ -77,7 +77,6 @@
           </div>
         </div>
 
-        <!-- ACTIONS -->
         <div class="flex flex-wrap items-center gap-2 pt-1">
           @if (canEnroll()) {
             @if (orderedBlocks().length > 1) {
@@ -151,7 +150,6 @@
 
     <div class="grid grid-cols-12 gap-6">
 
-      <!-- MAIN COLUMN -->
       <div class="col-span-12 lg:col-span-8 space-y-6">
 
         @if (ev.isCurrentUserAttending) {
@@ -274,7 +272,6 @@
         </section>
       </div>
 
-      <!-- SIDE COLUMN -->
       <div class="col-span-12 lg:col-span-4 space-y-6">
         <section class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5 space-y-4">
           <div class="flex items-center gap-2 text-[#3D2E24]">
@@ -329,7 +326,6 @@
       </div>
     </div>
 
-    <!-- PARTIAL REGISTER / UNREGISTER POPOVERS -->
     <p-popover #opRegister [style]="{ width: '350px' }" styleClass="shadow-2xl border border-gray-100 rounded-2xl p-2">
       <div class="flex flex-col gap-3">
         <div class="border-b border-gray-100 pb-2">

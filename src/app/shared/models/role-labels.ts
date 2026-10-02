@@ -10,7 +10,6 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.STUDENT]: 'Persona en Formación'
 };
 
-/** Tailwind classes for the role chips, in the brown/amber tones of the app. */
 export const ROLE_CLASSES: Record<Role, string> = {
   [Role.ADMIN]: 'bg-[#3D2E24] text-white',
   [Role.MANAGER_DIRECTOR]: 'bg-[#633F17] text-white',

@@ -16,7 +16,6 @@ import {UserAvatarComponent} from '../../../shared/components/user-avatar/user-a
 
 const MIN_QUERY_LENGTH = 2;
 
-/** Search for existing students and give them a team role (e.g. a student becoming a trainer). */
 @Component({
   selector: 'app-team-candidate-dialog',
   imports: [
@@ -36,7 +35,6 @@ export class TeamCandidateDialogComponent {
   private readonly messageService = inject(MessageService);
 
   visible = model<boolean>(false);
-  /** Emits after a role has been granted so the team list can reload. */
   memberUpdated = output<void>();
 
   readonly roleLabels: Record<string, string> = ROLE_LABELS;
@@ -64,7 +62,6 @@ export class TeamCandidateDialogComponent {
       tap(() => this.searching.set(false))
     ).subscribe(candidates => this.candidates.set(candidates));
 
-    // Start every time from an empty search.
     effect(() => {
       if (!this.visible()) {
         this.query.set('');

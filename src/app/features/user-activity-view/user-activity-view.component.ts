@@ -54,10 +54,6 @@ export class UserActivityViewComponent implements OnInit {
     FILE_UPLOAD: {label: 'Entrega de archivo', icon: 'pi-upload'}
   };
 
-  /**
-   * Open activities first, the ones closing soonest at the top. Already closed activities go after them,
-   * the most recently closed first.
-   */
   sortedActivities = computed(() => {
     const now = Date.now();
     const due = (a: any) => new Date(a.dueDate).getTime();
@@ -72,7 +68,6 @@ export class UserActivityViewComponent implements OnInit {
 
   nextClosing = computed(() => this.sortedActivities().find(a => new Date(a.dueDate).getTime() >= Date.now()) ?? null);
 
-  /** "Previa" if the activity closes before or during the event, "Post" if it closes after it ends. */
   phase(activity: any): 'PREVIA' | 'POST' | null {
     const event = this.event();
     if (!event) return null;
@@ -83,7 +78,6 @@ export class UserActivityViewComponent implements OnInit {
     return new Date(activity.dueDate).getTime() < Date.now();
   }
 
-  /** Human readable "closes in 3 days" / "closed 2 days ago" with an urgency tone for the colour. */
   closingInfo(activity: any): { text: string; tone: 'closed' | 'urgent' | 'soon' | 'ok' } {
     const diff = new Date(activity.dueDate).getTime() - Date.now();
     const abs = Math.abs(diff);

@@ -64,7 +64,6 @@ export class UserEventCalendarComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    // Old links (e.g. the home widget) still use ?openEvent=<id>: send them to the event page.
     const openEvent = this.route.snapshot.queryParamMap.get('openEvent');
     if (openEvent) {
       this.router.navigate(['evento', openEvent], { relativeTo: this.route, replaceUrl: true });

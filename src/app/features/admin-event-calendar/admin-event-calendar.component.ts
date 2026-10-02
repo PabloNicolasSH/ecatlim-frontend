@@ -38,7 +38,6 @@ export class AdminEventCalendarComponent implements OnInit {
   protected readonly messageService = inject(MessageService);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
-  /** Only the school director (Dirección ECATLIM) can publish events. */
   readonly canPublish = this.loggedUserDataService.hasAnyRole(Role.MANAGER_DIRECTOR);
 
   allEvents = signal<any[]>([]);

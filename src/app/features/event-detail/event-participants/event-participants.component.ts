@@ -5,7 +5,6 @@ import {Tooltip} from 'primeng/tooltip';
 import {EventDetailParticipant} from '../../../shared/models/event.model';
 import {UserAvatarComponent} from '../../../shared/components/user-avatar/user-avatar.component';
 
-/** People enrolled in an event: full table (5 per page) or just avatar and name. */
 @Component({
   selector: 'app-event-participants',
   imports: [
@@ -22,7 +21,6 @@ export class EventParticipantsComponent {
   readonly pageSize = 5;
 
   participants = input.required<EventDetailParticipant[]>();
-  /** Attendance is only meaningful once the event has finished. */
   isPast = input<boolean>(false);
 
   showFullData = signal<boolean>(true);

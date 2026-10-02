@@ -51,7 +51,6 @@ export class EntityListComponent implements OnInit{
     {label: 'Provincia', value: 'province'}
   ];
 
-  /** Only the provinces that actually have an entity, so the filter never returns an empty list. */
   provinceOptions = computed(() => {
     const used = new Set(this.entities().map(entity => entity.provinceId));
     return [...used]

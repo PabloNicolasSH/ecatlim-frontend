@@ -17,9 +17,7 @@ import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avat
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {TeamCandidateDialogComponent} from './team-candidate-dialog/team-candidate-dialog.component';
 
-/** Roles that make someone part of the training team, in the order they are shown. */
 const TEAM_ROLES = [Role.TRAINER, Role.EVENT_DIRECTOR, Role.MANAGEMENT];
-/** Roles that can be removed from a person on this page. */
 const REMOVABLE_ROLES: string[] = [Role.TRAINER, Role.EVENT_DIRECTOR];
 
 @Component({
@@ -52,7 +50,6 @@ export class TrainingTeamComponent implements OnInit {
   readonly roleClasses: Record<string, string> = ROLE_CLASSES;
   readonly teamRoles = TEAM_ROLES;
 
-  /** Only MANAGEMENT and MANAGER_DIRECTOR can add people or remove roles. */
   readonly canManage = this.loggedUserDataService.hasAnyRole(Role.MANAGEMENT, Role.MANAGER_DIRECTOR);
 
   members = signal<TeamMember[]>([]);
