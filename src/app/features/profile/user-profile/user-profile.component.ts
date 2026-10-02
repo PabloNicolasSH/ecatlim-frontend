@@ -1,15 +1,14 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {Button} from 'primeng/button';
 import {User} from '../../../shared/models/user.model';
-import {UserService} from '../../../shared/services/user.service';
 import {FormsModule} from '@angular/forms';
 import {UserModalMeEditComponent} from '../user-modal-me-edit/user-modal-me-edit.component';
 import {RouterLink} from '@angular/router';
 import {UserAvatarModalComponent} from '../user-avatar-modal/user-avatar-modal.component';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {HttpClient} from '@angular/common/http';
-import {FileService} from '../../../shared/services/file.service';
 import {Role} from '../../../shared/models/role.model';
+import {LoggedUserDataService} from '../../../core/auth/logged-user-data-service';
+import {UserService} from '../../../shared/services/user.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -24,21 +23,18 @@ import {Role} from '../../../shared/models/role.model';
   styleUrl: './user-profile.component.scss'
 })
 export class UserProfileComponent implements OnInit {
-
   protected readonly userService = inject(UserService);
   protected readonly http = inject(HttpClient);
-  protected readonly sanitizer = inject(DomSanitizer);
-  protected readonly fileService = inject(FileService)
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   user!: User;
   secureAvatarUrl: any = null;
 
   visibleEditProfile: boolean = false;
   visibleEditAvatar: boolean = false;
-  changePassword: boolean = false;
 
   ngOnInit(): void {
-    this.fileService.avatarUrl$.subscribe(url => this.secureAvatarUrl = url);
+    this.loggedUserDataService.avatarUrl$.subscribe(url => this.secureAvatarUrl = url);
     this.updateUser();
   }
 
@@ -46,9 +42,7 @@ export class UserProfileComponent implements OnInit {
     this.userService.getMyInfo().subscribe({
       next: user => {
         this.user = user;
-        if (this.user?.profile?.avatarUrl) {
-          this.fileService.loadAvatar(this.user.profile?.avatarUrl);
-        }
+        this.loggedUserDataService.setUserData(user);
       }
     });
   }

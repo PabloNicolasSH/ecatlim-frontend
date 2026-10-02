@@ -1,7 +1,7 @@
-import Lara from "@primeng/themes/lara";
+import Aura from "@primeng/themes/aura";
 import { definePreset } from "@primeng/themes";
 
-export const MyPreset = definePreset(Lara, {
+export const MyPreset = definePreset(Aura, {
     primitive: {
         borderRadius: {
             none: "0",
@@ -343,7 +343,7 @@ export const MyPreset = definePreset(Lara, {
                 offset: "{focus.ring.offset}",
                 shadow: "{focus.ring.shadow}"
             },
-            transitionDuration: "{transition.duration}"
+            transitionDuration: "{transition.duration}",
         },
         list: {
             padding: "0.5rem 0",
@@ -4739,14 +4739,14 @@ export const MyPreset = definePreset(Lara, {
                 padding: "0.625rem 1rem",
                 borderRadius: "{content.border.radius}",
                 gap: "0.5rem",
-                fontWeight: "500",
-                background: "{form.field.background}",
-                borderColor: "{form.field.border.color}",
-                color: "{form.field.color}",
-                hoverColor: "{form.field.color}",
-                checkedBackground: "{highlight.background}",
-                checkedColor: "{highlight.color}",
-                checkedBorderColor: "{form.field.border.color}",
+                fontWeight: "600",
+                background: "{primary.200} !important",
+                borderColor: "{primary.200} !important",
+                color: "{primary.700} !important",
+                hoverColor: "{primary.50} !important",
+                checkedBackground: "{primary.200} !important",
+                checkedColor: "{primary.900} !important",
+                checkedBorderColor: "{primary.200} !important",
                 disabledBackground: "{form.field.disabled.background}",
                 disabledBorderColor: "{form.field.disabled.background}",
                 disabledColor: "{form.field.disabled.color}",
@@ -4783,7 +4783,7 @@ export const MyPreset = definePreset(Lara, {
             colorScheme: {
                 light: {
                     root: {
-                        hoverBackground: "{surface.100}"
+                        hoverBackground: "{primary.200} !important"
                     }
                 },
                 dark: {

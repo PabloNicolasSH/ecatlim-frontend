@@ -1,6 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {Toast} from 'primeng/toast';
+import {LoggedUserDataService} from './core/auth/logged-user-data-service';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +9,10 @@ import {Toast} from 'primeng/toast';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  private readonly loggedUserDataService = inject(LoggedUserDataService);
+
+  ngOnInit(): void {
+    this.loggedUserDataService.loadAvatar();
+  }
 }

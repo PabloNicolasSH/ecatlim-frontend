@@ -1,6 +1,5 @@
-import {Component, HostListener, inject, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
-import {SplitButton} from 'primeng/splitbutton';
-import {MenuItem, MenuItemCommandEvent} from 'primeng/api';
+import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
+import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
 import {OverlayBadge} from 'primeng/overlaybadge';
@@ -8,11 +7,14 @@ import {Router, RouterLink} from '@angular/router';
 import {Drawer} from 'primeng/drawer';
 import {Popover} from 'primeng/popover';
 import {Avatar} from 'primeng/avatar';
-import {Profile} from '../../shared/models/profile.model';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
+import {LoggedUserDataService} from '../auth/logged-user-data-service';
+import {ChatService} from '../../shared/services/chat.service';
+import {WebsocketService} from '../../shared/services/websocket.service';
+import {Subscription} from 'rxjs';
+import {User} from '../../shared/models/user.model';
 import {Notification} from '../../shared/models/notification.model';
-import {FileService} from '../../shared/services/file.service';
 import {Role} from '../../shared/models/role.model';
 
 @Component({
@@ -30,31 +32,43 @@ import {Role} from '../../shared/models/role.model';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 
+  protected readonly chatService = inject(ChatService);
+  protected readonly websocketService = inject(WebsocketService);
+  private notificationSub?: Subscription;
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
-  protected readonly fileService = inject(FileService);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   @ViewChild('op') op!: Popover;
 
-  user!: Profile;
+  user!: User;
   avatarUrl: any = null;
   sidebarVisible: boolean = false;
 
   windowWidth = signal(window.innerWidth);
-
   messages = signal(["¿Vienes al curso de Agosto?"]);
   notifies: WritableSignal<Notification[]> = signal([]);
+
   sidebarMenu!: MenuItem[];
+  unreadChats: number = 0;
 
   ngOnInit() {
     const savedMe = localStorage.getItem('me');
     if (savedMe) {
       this.user = JSON.parse(savedMe);
     }
-    this.fileService.avatarUrl$.subscribe(url => this.avatarUrl = url);
+    this.loggedUserDataService.avatarUrl$.subscribe(url => this.avatarUrl = url);
     this.createSidebarMenu();
+    this.chatService.unreadChats$.subscribe(count => this.unreadChats = count);
+    this.chatService.refreshUnreadChats();
+    this.notificationSub = this.websocketService.getNotifications()
+      .subscribe(notification => this.chatService.markChatUnread(notification.chatId));
+  }
+
+  ngOnDestroy() {
+    this.notificationSub?.unsubscribe();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -83,7 +97,8 @@ export class HeaderComponent implements OnInit {
   }
 
   userFirstLetter() {
-    return this.user.name.at(0);
+    const name = this.user.profile?.name || this.user.email;
+    return name.at(0);
   }
 
   private createSidebarMenu() {
@@ -167,15 +182,20 @@ export class HeaderComponent implements OnInit {
     this.sidebarMenu.push({
       label: 'Administración',
       items: [
-        {label: 'Usuarios', icon: "pi pi-users", command: () => {
+        {
+          label: 'Usuarios', icon: "pi pi-users", command: () => {
             this.router.navigateByUrl('/app/admin/usuarios');
             this.sidebarVisible = false;
-          }},
-        {label: 'Entidades', icon: "pi pi-building-columns", command: () => {
+          }
+        },
+        {
+          label: 'Entidades', icon: "pi pi-building-columns", command: () => {
             this.router.navigateByUrl('/app/admin/entidades');
             this.sidebarVisible = false;
-          }},
-        {label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
+          }
+        },
+        {
+          label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
             this.router.navigateByUrl('/app/admin/formacion');
             this.sidebarVisible = false;
         }}
@@ -189,7 +209,7 @@ export class HeaderComponent implements OnInit {
 
   protected getUserRolesTag() {
     if (!this.user.roles || this.user.roles.length === 0) {
-      return [{ label: 'Sin Rol', severity: 'secondary' }];
+      return [{label: 'Sin Rol', severity: 'secondary'}];
     }
 
     return this.user.roles.map(role => {

@@ -42,3 +42,10 @@ p-floatlabel:has(p-multi-select[required]) {
 .p-card-body, .p-card-content{
   height: 100%;
 }
+.p-dialog-header{
+  color: var(--p-primary-600);
+}
+
+.p-avatar img {
+  object-fit: cover;
+}

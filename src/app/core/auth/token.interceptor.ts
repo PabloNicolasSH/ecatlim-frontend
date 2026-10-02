@@ -22,20 +22,21 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
     catchError(err => {
       if (err.status === 401) {
         authService.logout();
-        messageService.add({
-          severity: 'warn',
-          summary: 'Aviso',
-          detail: "Vuelva a iniciar sesión"
-        });
-      } else {
-        messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err?.error?.ecatlimMessage ?? "Ha ocurrido un error inesperado"
-        });
+        if (!err?.error?.ecatlimMessage) {
+          messageService.add({
+            severity: 'warn',
+            summary: 'Aviso',
+            detail: "Vuelva a iniciar sesión"
+          });
+          throw err;
+        }
       }
+      messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: err?.error?.ecatlimMessage ?? "Ha ocurrido un error inesperado"
+      });
       throw err;
     })
   );
 };
-

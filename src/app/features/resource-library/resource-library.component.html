@@ -4,13 +4,15 @@
       <h1 class="text-4xl font-bold text-orange-900 mb-2">Biblioteca de Recursos</h1>
       <p class="text-gray-600">Descubre, descarga y comparte materiales educativos diseñados para inspirar la curiosidad y el aprendizaje en el aula.</p>
     </div>
-    <p-button
-      label="Nuevo Recurso"
-      icon="pi pi-plus"
-      severity="warn"
-      (onClick)="openAddModal()"
-      styleClass="shadow-sm font-semibold">
-    </p-button>
+    @if (canAddResources()) {
+      <p-button
+        label="Nuevo Recurso"
+        icon="pi pi-plus"
+        severity="warn"
+        (onClick)="openAddModal()"
+        styleClass="shadow-sm font-semibold">
+      </p-button>
+    }
   </div>
 
   <div class="flex flex-wrap gap-2 mb-8">
