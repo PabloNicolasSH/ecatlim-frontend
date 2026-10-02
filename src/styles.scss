@@ -45,3 +45,7 @@ p-floatlabel:has(p-multi-select[required]) {
 .p-dialog-header{
   color: var(--p-primary-600);
 }
+
+.p-avatar img {
+  object-fit: cover;
+}

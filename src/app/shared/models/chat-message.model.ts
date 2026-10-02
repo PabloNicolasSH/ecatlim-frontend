@@ -7,4 +7,6 @@ export interface ChatMessage {
   message: string;
   timestamp: string;
   isRead?: boolean;
+  clientId?: string;
+  type?: 'TEXT' | 'USER_LEFT';
 }

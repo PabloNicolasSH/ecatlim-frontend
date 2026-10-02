@@ -2,18 +2,22 @@ import {
   AfterViewChecked,
   Component,
   ElementRef,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
+  OnDestroy,
+  Output,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
+import {ConfirmationService, MessageService} from 'primeng/api';
+import {filter} from 'rxjs/operators';
 import {DatePipe, NgClass} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {Avatar} from 'primeng/avatar';
-import {Button} from 'primeng/button';
+import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avatar.component';
 import {Chat} from '../../shared/models/chat.model';
-import {WebsocketService} from '../../shared/services/websocket.service';
+import {ChatError, WebsocketService} from '../../shared/services/websocket.service';
 import {ChatService} from '../../shared/services/chat.service';
 import {User} from '../../shared/models/user.model';
 import {Subscription} from 'rxjs';
@@ -21,12 +25,14 @@ import {ChatMessage} from '../../shared/models/chat-message.model';
 import {Skeleton} from 'primeng/skeleton';
 import {ChatInputComponent} from '../chat-input/chat-input.component';
 
+const MESSAGE_DELETION_WINDOW_MS = 15 * 60 * 1000;
+
 @Component({
   selector: 'app-chat',
   imports: [
     NgClass,
     FormsModule,
-    Avatar,
+    UserAvatarComponent,
     Skeleton,
     DatePipe,
     ChatInputComponent
@@ -35,16 +41,21 @@ import {ChatInputComponent} from '../chat-input/chat-input.component';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent implements OnChanges, AfterViewChecked {
+export class ChatComponent implements OnChanges, AfterViewChecked, OnDestroy {
   @Input() selectedChat!: Chat;
-  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
+  @Output() chatUnavailable = new EventEmitter<number>();  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
   private websocketService = inject(WebsocketService);
   private chatService = inject(ChatService);
 
   userMe: User = JSON.parse(localStorage.getItem('me')!);
 
+  private confirmationService = inject(ConfirmationService);
+  private messageService = inject(MessageService);
+
   private wsSub?: Subscription;
+  private deletedSub?: Subscription;
+  private errorSub?: Subscription;
 
   private shouldAutoScroll = true;
   showScrollToBottom = false;
@@ -64,6 +75,15 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
       this.loadInitialHistory();
       this.startListeningWs();
     }
+  }
+
+  private readonly expiryTick = setInterval(() => {}, 30_000);
+
+  ngOnDestroy(): void {
+    clearInterval(this.expiryTick);
+    this.wsSub?.unsubscribe();
+    this.deletedSub?.unsubscribe();
+    this.errorSub?.unsubscribe();
   }
 
   ngAfterViewChecked(): void {
@@ -106,12 +126,17 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
           return;
         }
 
+        const el = this.scrollContainer.nativeElement;
+        const previousHeight = el.scrollHeight;
+
         this.messages = [
           ...msgs
             .map(m => this.decorateMessage(m))
             .sort((a, b) => a.ts.getTime() - b.ts.getTime()),
           ...this.messages
         ];
+
+        setTimeout(() => el.scrollTop = el.scrollHeight - previousHeight);
 
         this.currentPage++;
 
@@ -125,21 +150,79 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
 
   startListeningWs(): void {
-    if (this.wsSub) {this.wsSub.unsubscribe();}
+    this.wsSub?.unsubscribe();
+    this.deletedSub?.unsubscribe();
+    this.errorSub?.unsubscribe();
 
     if (!this.selectedChat.id) return;
 
+    const chatId = this.selectedChat.id;
+
     this.wsSub = this.websocketService
-      .getMessagesForChat(this.selectedChat.id)
+      .getMessagesForChat(chatId)
       .subscribe((raw: ChatMessage) => {
         const msg = this.decorateMessage(raw);
-        this.messages.push(msg);
+
+        const pendingIdx = raw.clientId
+          ? this.messages.findIndex(m => m.pending && m.clientId === raw.clientId)
+          : -1;
+
+        if (pendingIdx >= 0) {
+          this.messages[pendingIdx] = msg;
+        } else {
+          this.messages.push(msg);
+        }
 
         const mine = this.isMine(msg);
         if (mine || this.shouldAutoScroll) {
           this.pendingScrollToBottom = true;
         }
       });
+
+    this.errorSub = this.websocketService
+      .getErrors()
+      .pipe(filter(error => error.chatId == null || error.chatId === chatId))
+      .subscribe((error: ChatError) => this.handleSendError(error));
+
+    this.deletedSub = this.websocketService
+      .getDeletedMessagesForChat(chatId)
+      .subscribe((messageId: number) => {
+        this.messages = this.messages.filter(m => m.id !== messageId);
+      });
+  }
+
+  private handleSendError(error: ChatError): void {
+    this.messages = this.messages.filter(m => !m.pending);
+
+    this.messageService.add({
+      severity: 'error',
+      summary: error.code === 'UNKNOWN' ? 'Mensaje no enviado' : 'Chat no disponible',
+      detail: error.message
+    });
+
+    if (error.code !== 'UNKNOWN' && error.chatId != null) {
+      this.chatUnavailable.emit(error.chatId);
+    }
+  }
+
+  deleteMessage(message: any): void {
+    if (!message.id || !this.selectedChat.id) return;
+    const chatId = this.selectedChat.id;
+
+    this.confirmationService.confirm({
+      message: '¿Seguro que quieres eliminar este mensaje? Esta acción no se puede deshacer.',
+      header: 'Eliminar mensaje',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger text-sm',
+      rejectButtonStyleClass: 'p-button-text text-sm',
+      accept: () => {
+        this.chatService.deleteMessage(chatId, message.id).subscribe({
+          next: () => this.messages = this.messages.filter(m => m.id !== message.id)
+        });
+      }
+    });
   }
 
   decorateMessage(msg: ChatMessage): any {
@@ -161,7 +244,7 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
       ts,
       isMine: this.isMine(msg),
       dayKey: ts.toISOString().substring(0, 10),
-      localId: msg.id ?? crypto.randomUUID(),
+      localId: msg.clientId ?? msg.id ?? crypto.randomUUID(),
       fromId: fromUser.id,
       fromName: fromUser.name || fromUser.email,
     };
@@ -209,10 +292,21 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
     return message.fromId === this.userMe.id;
   }
 
+  canDelete(message: any): boolean {
+    return this.isMine(message)
+      && !message.pending
+      && !this.isSystemMessage(message)
+      && Date.now() - message.ts.getTime() <= MESSAGE_DELETION_WINDOW_MS;
+  }
+
+  isSystemMessage(message: any): boolean {
+    return message.type === 'USER_LEFT';
+  }
+
   isFirstOfGroup(index: number, message: any): boolean {
     if (index === 0) return true;
     const prev = this.messages[index - 1];
-    return prev.fromId !== message.fromId;
+    return prev.fromId !== message.fromId || this.isSystemMessage(prev);
   }
 
   isFirstOfDay(index: number, message: any): boolean {
@@ -223,6 +317,21 @@ export class ChatComponent implements OnChanges, AfterViewChecked {
 
   onMessageSent(text: string) {
     if (!text || !this.selectedChat.id) return;
-    this.websocketService.sendMessage(this.selectedChat.id, text);
+
+    const clientId = crypto.randomUUID();
+    const pending = {
+      ...this.decorateMessage({
+        from: {id: this.userMe.id, name: this.userMe.profile?.name, email: this.userMe.email,
+          avatarUrl: this.userMe.profile?.avatarUrl} as any,
+        message: text,
+        timestamp: new Date().toISOString(),
+        clientId
+      } as ChatMessage),
+      pending: true
+    };
+    this.messages.push(pending);
+    this.pendingScrollToBottom = true;
+
+    this.websocketService.sendMessage(this.selectedChat.id, text, clientId);
   }
 }

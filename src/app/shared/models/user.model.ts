@@ -8,12 +8,6 @@ export interface User {
   profile?: UserProfile;
 }
 
-export interface SimpleUser {
-  id?: number;
-  name: string;
-  email: string;
-}
-
 export interface UserProfile {
   name: string;
   surname: string;
@@ -32,4 +26,5 @@ export interface SimpleUser {
   name: string;
   surname: string;
   email: string;
+  avatarUrl?: string;
 }
