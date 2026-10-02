@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {RouterOutlet} from '@angular/router';
 import {Toast} from 'primeng/toast';
-import {UserService} from './shared/services/user-and-entity/user.service';
+import {LoggedUserDataService} from './core/auth/logged-user-data-service';
 
 @Component({
   selector: 'app-root',
@@ -10,12 +10,9 @@ import {UserService} from './shared/services/user-and-entity/user.service';
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-
-  protected readonly userService = inject(UserService);
-
-  title = 'ecatlim-frontend';
+  private readonly loggedUserDataService = inject(LoggedUserDataService);
 
   ngOnInit(): void {
-    this.userService.getMyInfo().subscribe({})
+    this.loggedUserDataService.loadAvatar();
   }
 }

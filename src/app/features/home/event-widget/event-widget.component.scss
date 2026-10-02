@@ -1,0 +1,40 @@
+@reference "../../../../styles/tailwind.css";
+
+.time-block {
+  @apply flex flex-col items-center min-w-[60px] md:min-w-[80px];
+}
+
+.time-value {
+  @apply text-3xl md:text-5xl font-light tracking-tighter text-gray-900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.time-label {
+  @apply text-[9px] md:text-[10px] uppercase font-bold text-gray-400 tracking-[0.15em] mt-2;
+}
+
+.time-separator {
+  @apply text-xl md:text-3xl font-extralight text-gray-200 mb-5;
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full;
+    &:hover {
+      @apply bg-gray-300;
+    }
+  }
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

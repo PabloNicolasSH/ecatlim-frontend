@@ -6,13 +6,12 @@ import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {ConfirmDialog} from 'primeng/confirmdialog';
-import {ConfirmationService, FilterService, MessageService} from 'primeng/api';
+import {ConfirmationService, MessageService} from 'primeng/api';
 import {PendingUserService} from '../../shared/services/user-and-entity/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {FormsModule} from '@angular/forms';
-import {MultiSelect} from 'primeng/multiselect';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
-import {ScoutGroupService} from '../../shared/services/user-and-entity/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 
 @Component({
   selector: 'app-user-list',
@@ -35,10 +34,9 @@ export class UserListComponent implements OnInit {
 
   protected readonly userService = inject(UserService);
   protected readonly pendingUserService = inject(PendingUserService);
-  protected readonly scoutGroupService = inject(ScoutGroupService);
+  protected readonly scoutGroupService = inject(EntityService);
   protected readonly confirmationService = inject(ConfirmationService);
   protected readonly messageService = inject(MessageService);
-  protected readonly filterService = inject(FilterService);
 
   visible: boolean = false;
   dialogMode: string = '';
@@ -80,7 +78,7 @@ export class UserListComponent implements OnInit {
 
     this.users = this.users.map(user => ({
       ...user,
-      fullName: `${user.surname}, ${user.name}`
+      fullName: `${user.profile?.surname}, ${user.profile?.name}`
     }));
 
     this.userService.getInactiveUsers().subscribe({
@@ -107,7 +105,7 @@ export class UserListComponent implements OnInit {
   confirmDialog(event: Event, mode: string, user?: User, pendingUser?: PendingUser) {
     if (mode == 'Deactivate' && user) {
       const confirmationMessage = {
-        message: '¿Está seguro de que desea desactivar a ' + user.name + "?",
+        message: '¿Está seguro de que desea desactivar a ' + user.profile?.name + "?",
         header: 'Confirmación de desactivación de usuario',
         icon: 'pi pi-exclamation-triangle',
         rejectLabel: 'Cancelar la desactivación',
@@ -144,7 +142,7 @@ export class UserListComponent implements OnInit {
       this.generateConfirmation(confirmationMessage);
     } else if (user){
       const confirmationMessage = {
-        message: '¿Está seguro de que desea reactivar a ' + user.name + "?",
+        message: '¿Está seguro de que desea reactivar a ' + user.profile?.name + "?",
         header: 'Confirmación de reactivación de usuario',
         icon: 'pi pi-history',
         rejectLabel: 'Cancelar la activación',
@@ -209,7 +207,7 @@ export class UserListComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Confirmado',
-        detail: 'Se ha desactivado a ' + user.name
+        detail: 'Se ha desactivado a ' + user.profile?.name
       });
       this.deactivateUser(user);
     } else if (mode == 'Create User' && pendingUser) {
@@ -220,7 +218,7 @@ export class UserListComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Confirmado',
-        detail: 'Se ha activado a ' + user.name
+        detail: 'Se ha activado a ' + user.profile?.name
       });
       this.activateUser(user);
     }
@@ -259,7 +257,7 @@ export class UserListComponent implements OnInit {
   }
 
   private loadScoutGroups() {
-    this.scoutGroupService.getScoutGroups().subscribe({
+    this.scoutGroupService.getEntities().subscribe({
       next: value => {
         this.scoutGroups = value;
       }

@@ -5,12 +5,13 @@ import {Button} from 'primeng/button';
 import {FloatLabel} from 'primeng/floatlabel';
 import {InputText} from 'primeng/inputtext';
 import {Select} from 'primeng/select';
-import {ScoutGroupService} from '../../shared/services/user-and-entity/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
 import {Checkbox} from 'primeng/checkbox';
 import {PendingUserService} from '../../shared/services/user-and-entity/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {MessageService} from 'primeng/api';
+import {FormUtils} from '../../shared/form-utils';
 
 @Component({
   selector: 'app-register-request',
@@ -27,10 +28,10 @@ import {MessageService} from 'primeng/api';
   templateUrl: './register-request.component.html',
   styleUrl: './register-request.component.scss'
 })
-export class RegisterRequestComponent implements OnInit{
+export class RegisterRequestComponent implements OnInit {
 
   private readonly formBuilder = inject(FormBuilder);
-  private readonly scoutGroupService = inject(ScoutGroupService);
+  private readonly scoutGroupService = inject(EntityService);
   private readonly pendingUserService = inject(PendingUserService);
   private readonly messageService = inject(MessageService);
 
@@ -45,18 +46,18 @@ export class RegisterRequestComponent implements OnInit{
       surname: ["", [Validators.required]],
       email: ["", [Validators.required, Validators.email]],
       nif: ["", [Validators.required]],
-      selectedScoutGroup: [Validators.required],
+      selectedScoutGroup: [""],
       checkbox: [false, [Validators.requiredTrue]]
-    })
+    });
 
-    this.scoutGroupService.getScoutGroups().subscribe({
-      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
-    })
+    this.scoutGroupService.getEntities().subscribe({
+      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a, b) => a.name.localeCompare(b.name))
+    });
   }
 
   register() {
-    this.registerForm.markAllAsTouched();
-    if (this.registerForm.valid && !this.loading){
+    FormUtils.markAllAsDirtyAndTouched(this.registerForm);
+    if (this.registerForm.valid && !this.loading) {
       this.loading = true;
       const pendingUser: PendingUser = {...this.registerForm.value};
       pendingUser.scoutGroupId = this.registerForm.get('selectedScoutGroup')?.value?.id;
@@ -65,7 +66,8 @@ export class RegisterRequestComponent implements OnInit{
           this.loading = false;
           this.messageService.add({
             severity: "success",
-            detail: "Se ha recibido correctamente su solicitud, deberá llegarle un correo de confirmación"
+            detail: "Se ha recibido correctamente su solicitud, deberá llegarle un correo de confirmación",
+            life: 10000
           });
           this.registerForm.reset();
         },

@@ -1,63 +1,47 @@
-<header class="flex items-center justify-between border-b border-gray-300 px-6 py-4">
-  <div class="flex items-center space-x-4">
+<header class="flex items-center justify-between border-b border-gray-300 px-4 py-4 md:px-6">
+  <div class="flex items-center space-x-2 md:space-x-4">
     <p-button
       (onClick)="onMenuClick()"
       icon="pi pi-bars"
-      label="Menú"
+      [label]="windowWidth() > 768 ? 'Menú' : ''"
       severity="secondary"
       variant="text"
     >
     </p-button>
-    <h1 class="text-xl font-semibold"><a routerLink="/home">ECATLIM</a></h1>
+    <h1 class="text-lg font-semibold md:text-xl">
+      <div class="flex flex-row gap-2 items-center">
+        <a class="hidden md:block" routerLink="/home">ECATLIM</a>
+        <a routerLink="/home">
+          <img
+            class="max-w-10"
+            src="assets/Insignia%20de%20Madera.png"
+            alt="Insignia de Madera"
+          >
+        </a>
+      </div>
+    </h1>
   </div>
+
   <div class="flex items-center space-x-3">
-    @if (unreadMessages > 0) {
-      <p-overlay-badge [value]="unreadMessages" severity="info">
-        <p-button
-          icon="pi pi-comments"
-          severity="secondary"
-          routerLink="/app/chat"
-          rounded
-        ></p-button>
+    @if (notifies().length > 0) {
+      <p-overlay-badge [value]="notifies().length" severity="danger">
+        <p-button (onClick)="toggleNotifications($event)" icon="pi pi-bell" severity="secondary" rounded></p-button>
       </p-overlay-badge>
     } @else {
-      <p-button
-        icon="pi pi-comments"
+      <p-button (onClick)="toggleNotifications($event)" icon="pi pi-bell"
         severity="secondary"
         routerLink="/app/chat"
         rounded
       ></p-button>
     }
-    @if (notifies.length > 0) {
-      <p-overlay-badge [value]="notifies?.length" severity="danger">
-        <p-button
-          (onClick)="toggle($event)"
-          icon="pi pi-bell"
-          severity="secondary"
-          rounded
-        ></p-button>
+    @if (messages().length > 0) {
+      <p-overlay-badge [value]="messages().length" severity="info">
+        <p-button (onClick)="openMessages()" icon="pi pi-comments" severity="secondary" rounded></p-button>
       </p-overlay-badge>
     } @else {
-      <p-button
-        (onClick)="toggle($event)"
-        icon="pi pi-bell"
-        severity="secondary"
-        rounded
-      ></p-button>
+      <p-button (onClick)="openMessages()" icon="pi pi-comments" severity="secondary" rounded></p-button>
     }
-    <p-splitbutton
-      (onClick)="router.navigateByUrl('/app/perfil')"
-      [model]="userOptions"
-      severity="secondary"
-      text
-    >
-      <ng-template #content>
-        <span class="flex items-center font-bold">
-          <p-avatar [label]="userFirstLetter()" size="normal" shape="circle"/>
-          <span style="margin-left: 0.75rem">{{ user.name }} {{ user.surname }}</span>
-        </span>
-      </ng-template>
-    </p-splitbutton>
+
   </div>
 </header>
 
@@ -68,44 +52,110 @@
 >
   <ng-template #header>
     <div class="flex flex-row items-center justify-between shrink-0 w-full">
-      <span class="inline-flex items-center gap-2">
-          <svg width="31" height="33" viewBox="0 0 31 33" fill="none" xmlns="http://www.w3.org/2000/svg"
-               class="block mx-auto">
-              <path d="..."/>
-          </svg>
-          <span class="font-semibold text-2xl text-primary">ECATLIM</span>
-      </span>
+      <div class="">
+        <div class="font-semibold text-2xl text-primary">ECATLIM</div>
+      </div>
       <span>
-          <p-button
-            type="button"
-            (onClick)="sidebarVisible = false"
-            icon="pi pi-times"
-            rounded="true"
-            outlined="true"
-            severity="secondary">
-          </p-button>
+        <p-button
+          type="button"
+          (onClick)="sidebarVisible = false"
+          icon="pi pi-times"
+          rounded="true"
+          outlined="true"
+          severity="secondary">
+        </p-button>
       </span>
     </div>
   </ng-template>
   <p-panelMenu [model]="sidebarMenu"></p-panelMenu>
   <ng-template #footer>
-    <div class="text-center">
-      <p-divider></p-divider>
-      <div class="flex flex-col">
-        <p-button routerLink="/politica-privacidad" label="Política de Privacidad" severity="secondary" text></p-button>
-        <a class="font-bold" href="mailto:ecatlim@scoutsdecanarias.org">ecatlim&#64;scoutsdecanarias.org</a>
-        <a class="flex font-bold items-center justify-center gap-1" href="https://www.instagram.com/ecatlim/" target="_blank"><i class="pi pi-instagram"></i> &#64;ecatlim</a>
+    <div class="w-full flex flex-col gap-4 box-border">
+      <p-divider class="m-0 w-full"></p-divider>
+
+      <div class="flex items-center space-x-3 px-2 cursor-pointer w-full"
+           (click)="router.navigateByUrl('/app/perfil'); sidebarVisible = false">
+
+        <p-avatar
+          [image]="avatarUrl ?? undefined"
+          [label]="!avatarUrl ? userFirstLetter() : undefined"
+          size="large"
+          shape="circle"
+          class="border border-orange-200 bg-gray-100 text-gray-700 font-semibold shrink-0 overflow-hidden">
+        </p-avatar>
+
+        <div class="flex flex-col min-w-0 flex-1">
+          <span class="font-semibold text-gray-800 truncate text-sm sm:text-base w-full">
+            {{ user.profile?.name ?? 'Administrador' }} {{ user.profile?.surname ?? 'Global' }}
+          </span>
+          <span class="text-xs sm:text-sm text-gray-600 font-medium truncate w-full">
+            {{ getUserRolesTag() }}
+          </span>
+          <span class="text-xs text-gray-400 truncate w-full">
+            {{ user.email }}
+          </span>
+        </div>
       </div>
+      <button
+        (click)="logout()"
+        class="text-center space-x-3 w-full px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 font-medium"
+      >
+        <i class="pi pi-sign-out text-lg"></i>
+        <span class="text-sm sm:text-base">Cerrar sesión</span>
+      </button>
     </div>
   </ng-template>
 </p-drawer>
 
 <p-popover #op>
-  @if (notifies.length > 0) {
-    @for (notify of notifies; track $index) {
+  <div class="flex flex-col w-72 sm:w-80 max-h-96">
+    <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-2 px-2">
+      <span class="font-bold text-gray-700">Notificaciones</span>
+      @if (notifies().length > 0) {
+        <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-medium">
+          {{ notifies().length }} nuevas
+        </span>
+      }
+    </div>
+    <div class="overflow-y-auto custom-scrollbar">
+      @if (notifies().length > 0) {
+        @for (notify of notifies(); track notify.id) {
+          <div
+            class="flex items-start p-3 hover:bg-gray-50 cursor-pointer rounded-lg transition-colors border-b border-gray-50 last:border-0"
+            (click)="handleNotifyClick(notify)"
+          >
+            <div class="mr-3 mt-1">
+              <i [class]="notify.icon || 'pi pi-info-circle'"
+                 [style.color]="notify.color || '#3B82F6'"
+                 class="text-lg"></i>
+            </div>
 
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold text-gray-800">{{ notify.title }}</span>
+              <p class="text-xs text-gray-500 leading-tight mt-1">
+                {{ notify.description }}
+              </p>
+              <span class="text-[10px] text-gray-400 mt-2 italic">
+                {{ notify.date }}
+              </span>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+          <i class="pi pi-bell-slash text-3xl text-gray-300 mb-3"></i>
+          <p class="text-sm text-gray-500 font-medium">No tienes notificaciones nuevas</p>
+          <p class="text-xs text-gray-400 mt-1">¡Todo al día!</p>
+        </div>
+      }
+    </div>
+
+    @if (notifies().length > 0) {
+      <button
+        class="w-full mt-2 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-b-lg transition-colors border-t border-gray-100"
+        (click)="markAllAsRead()"
+      >
+        Marcar todas como leídas
+      </button>
     }
-  } @else {
-    <p>No tiene notificaciones nuevas</p>
-  }
+  </div>
 </p-popover>

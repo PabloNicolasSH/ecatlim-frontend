@@ -1,10 +1,10 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {UserToLog} from './user-to-log.model';
 import {Observable, tap} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {Router} from '@angular/router';
-import {User} from '../../shared/models/user.model';
+import {AuthLoginResponse, UserToLog} from './auth-models';
+import {LoggedUserDataService} from './logged-user-data-service';
 import {WebsocketService} from '../../shared/services/websocket.service';
 
 @Injectable({
@@ -14,7 +14,8 @@ export class AuthService {
 
   private readonly websocketService = inject(WebsocketService);
   protected readonly http = inject(HttpClient);
-  protected readonly router = inject(Router)
+  protected readonly router = inject(Router);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   constructor() {
     if (this.isAuthenticated()){
@@ -22,20 +23,14 @@ export class AuthService {
     }
   }
 
-  login(userToLog: UserToLog): Observable<any>{
-    return this.http.post(`${environment.apiUrl}/auth/login`, userToLog).pipe(
-      tap((res:any) => {
+  login(userToLog: UserToLog): Observable<any> {
+    return this.http.post<AuthLoginResponse>(`${environment.apiUrl}/auth/login`, userToLog).pipe(
+      tap((res) => {
         localStorage.setItem('token', res.token);
-        localStorage.setItem('me', JSON.stringify({
-          name: res.name,
-          surname: res.surname,
-          email: res.email,
-          role: res.role,
-          id: res.id
-        }));
+        this.loggedUserDataService.setUserData(res.user);
         this.websocketService.initConnection(res.token);
       })
-    )
+    );
   }
 
   logout() {
@@ -51,10 +46,5 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('token');
-  }
-
-  getProfile(): User {
-    const profile = localStorage.getItem('me');
-    return profile ? JSON.parse(profile) : null;
   }
 }

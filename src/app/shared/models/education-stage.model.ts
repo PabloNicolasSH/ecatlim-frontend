@@ -15,3 +15,13 @@ export interface EducationStage {
   allocatedPracticalHours?: number;
   modules?: ModuleModel[];
 }
+
+export interface EducationStageCard {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  status: 'LOCKED' | 'ENROLLED' | 'IN_PROGRESS' | 'COMPLETED' | 'AVAILABLE';
+  isEnabled: boolean;
+  progress?: number;
+}

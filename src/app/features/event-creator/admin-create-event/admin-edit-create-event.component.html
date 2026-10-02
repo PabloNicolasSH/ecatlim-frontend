@@ -1,0 +1,232 @@
+<div class="w-full flex flex-col gap-4 px-2">
+  <div class="w-full flex justify-start">
+    <p-button
+      (onClick)="history.back()"
+      icon="pi pi-arrow-left"
+      label="Volver a la agenda de eventos"
+      [rounded]="true"
+      [outlined]="true"
+      styleClass="text-xs font-semibold text-amber-800 border-amber-200 bg-white hover:bg-amber-50/50 px-4 py-2"
+    ></p-button>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto">
+  <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-4">
+    <h1 class="text-3xl md:text-4xl font-black text-amber-800 tracking-tight min-w-max">
+      {{ isEdit ? 'Editar' : 'Crear' }} Evento
+    </h1>
+    <div class="flex items-center justify-between gap-2 md:gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100 w-full lg:max-w-3xl">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+              [ngClass]="step === 1 ? 'bg-cyan-950 text-white' : 'bg-cyan-100 text-cyan-900'">1</span>
+        <span class="text-xs md:text-sm font-bold tracking-tight hidden sm:inline" [ngClass]="step === 1 ? 'text-cyan-950' : 'text-gray-400'">Información general</span>
+      </div>
+      <div class="h-px bg-gray-200 flex-1 mx-1"></div>
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+              [ngClass]="step === 2 ? 'bg-cyan-950 text-white' : 'bg-cyan-100 text-cyan-900'">2</span>
+        <span class="text-xs md:text-sm font-bold tracking-tight hidden sm:inline" [ngClass]="step === 2 ? 'text-cyan-950' : 'text-gray-400'">Inscripción y pago</span>
+      </div>
+      <div class="h-px bg-gray-200 flex-1 mx-1"></div>
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+              [ngClass]="step === 3 ? 'bg-cyan-950 text-white' : 'bg-cyan-100 text-cyan-900'">3</span>
+        <span class="text-xs md:text-sm font-bold tracking-tight hidden sm:inline" [ngClass]="step === 3 ? 'text-cyan-950' : 'text-gray-400'">Cronograma</span>
+      </div>
+    </div>
+  </div>
+  @if (step === 1) {
+    <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-4 md:p-8 border border-gray-100">
+      <h3 class="text-xl md:text-2xl font-extrabold text-cyan-900 mb-6 flex items-center gap-2">
+        Paso 1: Información General del Evento
+      </h3>
+
+      <form [formGroup]="eventForm" class="flex flex-col gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p-floatlabel variant="on" class="md:col-span-2">
+            <input id="title" pInputText formControlName="title" type="text" class="w-full" required/>
+            <label for="title">Título del Evento</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <input id="shortname" pInputText formControlName="shortname" type="text" class="w-full" required/>
+            <label for="shortname">Nombre Corto (Alias)</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p-floatlabel variant="on">
+            <p-date-picker
+              id="startDate"
+              formControlName="startDate"
+              appendTo="body"
+              styleClass="w-full"
+              required
+              [showIcon]="true"
+              [showTime]="true"
+              [defaultDate]="defaultStartDate"
+              [stepMinute]="5"
+              [hideOnDateTimeSelect]="false"/>
+            <label for="startDate">Fecha Inicio del Evento</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-date-picker id="endDate" formControlName="endDate" appendTo="body" styleClass="w-full" [minDate]="eventForm.value.startDate" required [showIcon]="true" [showTime]="true" [defaultDate]="defaultEndDate" [stepMinute]="5" [hideOnDateTimeSelect]="false"/>
+            <label for="endDate">Fecha Fin del Evento</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <p class="text-cyan-900 font-bold">Responsables y Organización</p>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+            <p-floatlabel variant="on">
+              <input id="organizer" pInputText formControlName="organizer" type="text" class="w-full" required/>
+              <label for="organizer">Entidad Organizadora</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <p-select id="director" [options]="directors" optionLabel="name" formControlName="selectedDirector" appendTo="body" styleClass="w-full" required/>
+              <label for="director">Dirección del Evento</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <p-select id="educationStage" [options]="availableEducationStages" optionLabel="name" formControlName="selectedEducationStage" appendTo="body" styleClass="w-full" required/>
+              <label for="educationStage">Etapa Formativa</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <input id="location" pInputText formControlName="location" type="text" class="w-full" required/>
+              <label for="location">Lugar de realización</label>
+            </p-floatlabel>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <p class="text-cyan-900 font-bold">Diseño Pedagógico</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <p-floatlabel variant="on">
+              <p-multi-select id="blocks" [options]="availableBlocks" formControlName="selectedBlocks" display="chip" [group]="true" [filter]="true" filterBy="label" appendTo="body" styleClass="w-full" scrollHeight="200px" (onChange)="onBlockSelectionChange($event)" required>
+                <ng-template let-group pTemplate="group">
+                  <div class="flex font-bold py-1"><span>{{ group.label }}</span></div>
+                </ng-template>
+                <ng-template let-block pTemplate="item">
+                  <div class="flex items-center">
+                    <span class="mr-2 text-primary font-semibold">{{ block.value.code }}</span>
+                    <span>{{ block.value.name }}</span>
+                  </div>
+                </ng-template>
+              </p-multi-select>
+              <label for="blocks">Bloques del plan de formación</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <p-multi-select id="facilitators" [options]="facilitators" optionLabel="name" formControlName="selectedFacilitators" display="chip" [filter]="true" filterBy="name" appendTo="body" styleClass="w-full" scrollHeight="200px" required>
+                <ng-template let-user pTemplate="item">
+                  <div class="flex items-center gap-2">
+                    <span>{{ user.name }}</span>
+                  </div>
+                </ng-template>
+              </p-multi-select>
+              <label for="facilitators">Equipo de Formación</label>
+            </p-floatlabel>
+
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p-floatlabel variant="on">
+              <textarea id="description" pTextarea formControlName="description" rows="3" class="w-full min-h-25"></textarea>
+              <label for="description">Información general del evento (Logística)</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on">
+              <textarea id="contents" pTextarea formControlName="contents" rows="3" class="w-full min-h-25" required></textarea>
+              <label for="contents">Contenidos / Temario</label>
+            </p-floatlabel>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4">
+          <p-button label="Limpiar" [outlined]="true" severity="secondary" (onClick)="eventForm.reset()" />
+          <p-button label="Continuar" [disabled]="!isStepValid(1)" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (step === 2) {
+    <div class="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-4 md:p-8 border border-gray-100">
+      <h3 class="text-xl md:text-2xl font-extrabold text-cyan-900 mb-6 flex items-center gap-2">
+        Paso 2: Parámetros de Inscripción y Pago
+      </h3>
+
+      <form [formGroup]="eventForm" class="flex flex-col gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p-floatlabel variant="on">
+            <p-date-picker id="dateOpenInscription" formControlName="dateOpenInscription" appendTo="body" styleClass="w-full" [showIcon]="true" [showTime]="true" required/>
+            <label for="dateOpenInscription">Apertura de Inscripciones</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-date-picker id="dateCloseInscription" formControlName="dateCloseInscription" appendTo="body" styleClass="w-full" [minDate]="eventForm.value.dateOpenInscription" [showIcon]="true" [showTime]="true" required/>
+            <label for="dateCloseInscription">Cierre de Inscripciones</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p-floatlabel variant="on">
+            <p-input-number id="cost" formControlName="cost" mode="currency" currency="EUR" locale="es-ES" class="w-full" required/>
+            <label for="cost">Coste de la Actividad</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <input id="transferBankNumber" pInputText formControlName="transferBankNumber" type="text" class="w-full font-mono" required/>
+            <label for="transferBankNumber">Nº Cuenta Bancaria (IBAN)</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <input id="transferCode" pInputText formControlName="transferCode" type="text" class="w-full" required/>
+            <label for="transferCode">Código de Transferencia Requerido</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p-floatlabel variant="on">
+            <p-input-number id="minParticipants" formControlName="minParticipants" [min]="1" class="w-full" required/>
+            <label for="minParticipants">Mínimo de Participantes</label>
+          </p-floatlabel>
+
+          <p-floatlabel variant="on" class="w-full md:col-span-2">
+            <p-multi-select
+              id="notificationTarget"
+              [options]="notificationTargets"
+              optionLabel="label"
+              optionValue="value"
+              formControlName="notificationTarget"
+              display="chip"
+              appendTo="body"
+              styleClass="w-full"
+              required
+            />
+            <label for="notificationTarget">A quién Notificar</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row justify-between gap-4">
+          <p-button label="Atrás" icon="pi pi-arrow-left" [outlined]="true" severity="secondary" (onClick)="prevStep()" class="w-full sm:w-auto" />
+
+          <div class="flex gap-4 w-full sm:w-auto justify-end">
+            <p-button label="Guardar como Borrador" [disabled]="!eventForm.valid" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-pencil" (onClick)="saveDraftEvent()" class="w-full sm:w-auto" />
+            <p-button label="Guardar" [disabled]="!eventForm.valid" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-save" (onClick)="saveEvent()" class="w-full sm:w-auto" />
+            <p-button label="Configurar Horarios" [disabled]="!isStepValid(2)" icon="pi pi-calendar" iconPos="right" (onClick)="nextStep()" class="w-full sm:w-auto" />
+          </div>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (step === 3) {
+    <app-event-scheduler
+      [basicInfo]="eventForm.value"
+      [pendingBlocks]="pendingBlocks"
+      [initialTimeline]="savedTimeline"
+      (onBack)="handleBackFromScheduler($event)"
+      (onSave)="onFinishScheduler($event)">
+    </app-event-scheduler>
+  }
+</div>

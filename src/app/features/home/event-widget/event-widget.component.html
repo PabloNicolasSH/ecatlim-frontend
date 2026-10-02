@@ -1,0 +1,148 @@
+<div class="flex flex-col md:flex-row h-full">
+  <div class="flex-1 p-8 flex flex-col justify-center items-center border-e border-(--p-surface-100) relative">
+    @if (nextEvent(); as event) {
+      @if (event.isCurrentUserAttending) {
+        <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-green-500/10 text-green-600 px-3 py-1 rounded-full border border-green-200 shadow-sm animate-fadein">
+          <i class="pi pi-check-circle text-xs"></i>
+          <span class="text-[10px] font-bold uppercase tracking-wider">Estás inscrito</span>
+        </div>
+      }
+
+      <span class="text-[10px] font-bold text-(--p-surface-400) uppercase tracking-widest mb-2">Siguiente evento</span>
+
+      <div class="flex flex-col items-center max-w-[80%]">
+        <h3 class="text-2xl font-black text-(--p-surface-900) text-center mb-8 leading-tight">
+          {{ event.title }}
+        </h3>
+      </div>
+
+      <div class="flex items-center gap-4 md:gap-6">
+        @let t = formattedTime();
+
+        <div class="time-block">
+          <span class="time-value">{{ t.days }}</span>
+          <span class="time-label">Días</span>
+        </div>
+
+        <div class="time-separator">:</div>
+
+        <div class="time-block">
+          <span class="time-value">{{ t.hours }}</span>
+          <span class="time-label">Horas</span>
+        </div>
+
+        <div class="time-separator">:</div>
+
+        <div class="time-block">
+          <span class="time-value">{{ t.minutes }}</span>
+          <span class="time-label">Minutos</span>
+        </div>
+
+        <div class="time-separator">:</div>
+
+        <div class="time-block">
+          <span class="time-value font-mono">{{ t.seconds }}</span>
+          <span class="time-label">Segundos</span>
+        </div>
+      </div>
+      @if (event.isCurrentUserAttending) {
+        <p class="mt-8 text-[12px] bg-green-50 text-green-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 border border-green-100 shadow-sm">
+          <i class="pi pi-sparkles"></i>
+          Tu próximo paso hacia la Insignia de Madera se acerca
+        </p>
+      } @else {
+        <div class="flex flex-col items-center mt-8">
+          <p-button
+            label="¡QUIERO PARTICIPAR!"
+            icon="pi pi-bolt"
+            severity="primary"
+            styleClass="p-button-raised p-button-rounded font-black text-sm px-6"
+            [routerLink]="['/app/calendario']"
+            [queryParams]="{ openEvent: event.id }"
+          ></p-button>
+        </div>
+      }
+    } @else {
+      <div class="absolute inset-0 w-full h-full animate-fadein">
+        <img
+          src="assets/no_events_near.jpg"
+          alt="Campamento dormido"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-black/30">
+          <h2 class="text-white text-4xl font-black mb-2 drop-shadow-lg tracking-tight">
+            No tienes eventos próximamente
+          </h2>
+          <p class="text-white/90 text-xl font-medium italic drop-shadow-md">
+            El campamento está dormido <br>
+            <span class="text-sm opacity-80 not-italic font-bold tracking-widest mt-2 block">
+              *CRICRI CRICRI*
+            </span>
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="w-full md:w-[320px] bg-(--p-surface-50)/50 p-4 flex flex-col h-full">
+    <div class="px-2 mb-4 flex items-center justify-between">
+      <h4 class="text-xs font-bold text-(--p-surface-500) uppercase tracking-wider">Otros eventos</h4>
+      <i class="pi pi-calendar text-(--p-surface-300)"></i>
+    </div>
+
+    <div class="overflow-y-auto pe-2 flex-1 flex flex-col custom-scrollbar" style="max-height: 400px;">
+      @for (event of upcomingEvents(); track event.id) {
+        <div class="group p-3 mb-3 rounded-xl bg-white border border-gray-100 transition-all duration-200 relative overflow-hidden shadow-sm hover:shadow-md">
+          <div class="absolute left-0 top-0 bottom-0 w-1" [style.background-color]="getColor(event.educationStageCode)"></div>
+
+          <div class="flex flex-col gap-1">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                {{ event.startDate | date:'dd MMM' }}
+              </span>
+              @if (event.isCurrentUserAttending) {
+                <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-green-100">
+                  <i class="pi pi-check text-[8px]"></i>
+                  INSCRITO
+                </span>
+              }
+            </div>
+
+            <h3 class="font-bold text-gray-800 text-sm line-clamp-2 leading-tight">
+              {{ event.title }}
+            </h3>
+
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 mt-1">
+              <i class="pi pi-clock text-[9px]"></i>
+              {{ event.startDate | date:'HH:mm' }}h
+              <span class="text-gray-300">|</span>
+              <i class="pi pi-map-marker text-[9px]"></i>
+              <span class="truncate">{{ event.location }}</span>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="flex-1 flex flex-col items-center justify-center text-center">
+          <div class="bg-white p-6 rounded-2xl border border-dashed border-gray-200 shadow-sm">
+            <i class="pi pi-calendar-minus text-gray-200 text-5xl mb-3"></i>
+            <p class="text-gray-400 text-[14px] font-medium">No hay otros eventos en los que te puedas formar</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="flex justify-center gap-2 mt-2 pt-2 border-t border-gray-100">
+      <div>
+        <p-button
+          label="Ver Calendario Completo"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          severity="secondary"
+          styleClass="w-full"
+          routerLink="/app/calendario"
+          [text]="true"
+        ></p-button>
+      </div>
+    </div>
+  </div>
+</div>

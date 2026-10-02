@@ -1,0 +1,55 @@
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.active-tab {
+  color: white !important;
+  background-color: #4A90E2 !important;
+  border-top-left-radius: 1rem !important;
+  border-top-right-radius: 1rem !important;
+}
+
+.inactive-tab {
+  background-color: transparent !important;
+  color: #475569 !important;
+}
+
+.shadow-progress {
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+}
+
+.expanded-bg {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bounce {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-4px);}
+  60% {transform: translateY(-2px);}
+}

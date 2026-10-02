@@ -11,5 +11,5 @@ export interface UserForm {
   city: string;
   country: string;
   scoutGroupId: number;
-  role: Role;
+  roles: Role[];
 }

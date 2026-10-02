@@ -1,5 +1,4 @@
-import {Component, inject, ViewChild} from '@angular/core';
-import {SplitButton} from 'primeng/splitbutton';
+import {Component, HostListener, inject, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
@@ -8,15 +7,17 @@ import {Router, RouterLink} from '@angular/router';
 import {Drawer} from 'primeng/drawer';
 import {Popover} from 'primeng/popover';
 import {Avatar} from 'primeng/avatar';
-import {Profile} from '../../shared/models/profile.model';
 import {PanelMenu} from 'primeng/panelmenu';
 import {Divider} from 'primeng/divider';
+import {LoggedUserDataService} from '../auth/logged-user-data-service';
 import {ChatService} from '../../shared/services/chat.service';
+import {User} from '../../shared/models/user.model';
+import {Notification} from '../../shared/models/notification.model';
+import {Role} from '../../shared/models/role.model';
 
 @Component({
   selector: 'app-header',
   imports: [
-    SplitButton,
     Button,
     OverlayBadge,
     RouterLink,
@@ -29,52 +30,66 @@ import {ChatService} from '../../shared/services/chat.service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit{
 
   protected readonly chatService = inject(ChatService);
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
+  protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   @ViewChild('op') op!: Popover;
 
-  userOptions!: MenuItem[];
-  user!: Profile;
+  user!: User;
+  avatarUrl: any = null;
   sidebarVisible: boolean = false;
 
-  notifies: string[] = [];
+  windowWidth = signal(window.innerWidth);
+  messages = signal(["¿Vienes al curso de Agosto?"]);
+  notifies: WritableSignal<Notification[]> = signal([]);
+
   sidebarMenu!: MenuItem[];
   unreadMessages: number = 0;
 
-  constructor() {
-    this.createUserOptions();
+  ngOnInit() {
+    const savedMe = localStorage.getItem('me');
+    if (savedMe) {
+      this.user = JSON.parse(savedMe);
+    }
+    this.loggedUserDataService.avatarUrl$.subscribe(url => this.avatarUrl = url);
     this.createSidebarMenu();
     this.chatService.getUnreadMessagesCount().subscribe((count: Object) => {
       this.unreadMessages = Object.values(count).reduce((sum, currentValue) => sum + currentValue, 0);
     })
   }
 
-  toggle(event: any){
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.windowWidth.set(window.innerWidth);
+  }
+
+  openMessages() {
+    console.log('Abriendo chat...');
+  }
+
+  toggleNotifications(event?: any) {
     this.op.toggle(event)
+  }
+
+  handleNotifyClick(notify: Notification) {
+
+  }
+
+  markAllAsRead() {
+    this.notifies.set([]);
   }
 
   onMenuClick() {
     this.sidebarVisible = !this.sidebarVisible;
   }
 
-  private createUserOptions() {
-    this.user = this.authService.getProfile();
-    this.userOptions = [
-      {
-        label: 'Mi Perfil',
-        command: () => {this.router.navigateByUrl('/app/perfil')}
-      },
-      {separator: true},
-      {
-        label: 'Cerrar Sesión',
-        icon: 'pi pi-fw pi-power-off',
-        command: () => {this.authService.logout()}
-      }
-    ];
+  userFirstLetter() {
+    const name = this.user.profile?.name || this.user.email;
+    return name.at(0);
   }
 
   private createSidebarMenu() {
@@ -97,11 +112,19 @@ export class HeaderComponent {
       },
       {
         label: 'Calendario de la Escuela',
-        icon: "pi pi-calendar"
+        icon: "pi pi-calendar",
+        command: () => {
+          this.router.navigateByUrl('/app/calendario');
+          this.sidebarVisible = false;
+        }
       },
       {
         label: 'La Biblioteca',
-        icon: "pi pi-bookmark"
+        icon: "pi pi-bookmark",
+        command: () => {
+          this.router.navigateByUrl('/app/biblioteca');
+          this.sidebarVisible = false;
+        }
       },
       {
         label: 'Mi formación',
@@ -113,41 +136,92 @@ export class HeaderComponent {
             }
           },
           {
-            label: 'Mis Etapas y Cursos', icon: 'pi pi-book', command: () => {
-              this.router.navigateByUrl('');
+            label: 'Mi Progreso', icon: 'pi pi-book', command: () => {
+              this.router.navigateByUrl('/app/mi-progreso');
               this.sidebarVisible = false;
             }
           }
         ]
       }
     ];
-    if (this.user.role == "ADMIN"){
+
+    if (this.user?.roles.includes(Role.HEAD_OF_EDUCATION)) {
+      this.addHeadEducationOptions();
+    }
+
+    if (this.user?.roles.includes(Role.ADMIN)) {
       this.addAdminOptions();
     }
   }
 
-  userFirstLetter() {
-    return this.user.name.at(0);
+  private addHeadEducationOptions() {
+    this.sidebarMenu.push({
+      label: 'Responsable de Formación',
+      items: [
+        {
+          label: 'Solicitudes de Alta', icon: 'pi pi-user-plus', command: () => {
+            this.router.navigateByUrl('/app/responsable-formacion/solicitudes-alta');
+            this.sidebarVisible = false;
+          }
+        }
+      ]
+    });
   }
 
   private addAdminOptions() {
     this.sidebarMenu.push({
       label: 'Administración',
       items: [
-        {label: 'Usuarios', icon: "pi pi-users", command: () => {
+        {
+          label: 'Usuarios', icon: "pi pi-users", command: () => {
             this.router.navigateByUrl('/app/admin/usuarios');
             this.sidebarVisible = false;
-          }},
-        {label: 'Entidades', icon: "pi pi-building-columns", command: () => {
+          }
+        },
+        {
+          label: 'Entidades', icon: "pi pi-building-columns", command: () => {
             this.router.navigateByUrl('/app/admin/entidades');
             this.sidebarVisible = false;
-          }},
-        {label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
+          }
+        },
+        {
+          label: 'Formación', icon: "pi pi-graduation-cap", command: () => {
             this.router.navigateByUrl('/app/admin/formacion');
             this.sidebarVisible = false;
-          }},
-        {label: 'Eventos Formativos', icon: "pi pi-calendar"}
+          }
+        },
+        {
+          label: 'Eventos Formativos', icon: "pi pi-calendar", command: () => {
+            this.router.navigateByUrl('/app/admin/eventos-formativos');
+            this.sidebarVisible = false;
+          }
+        }
       ]
     });
+  }
+
+  protected logout() {
+    this.authService.logout()
+  }
+
+  protected getUserRolesTag() {
+    if (!this.user.roles || this.user.roles.length === 0) {
+      return [{label: 'Sin Rol', severity: 'secondary'}];
+    }
+
+    return this.user.roles.map(role => {
+      switch (role.toUpperCase()) {
+        case 'ADMIN':
+          return 'Administración';
+        case 'EVENT_DIRECTOR':
+          return 'Dirección de Eventos';
+        case 'HEAD_OF_EDUCATION':
+          return 'Coord. Formación';
+        case 'STUDENT':
+          return 'Persona en Formación';
+        default:
+          return role;
+      }
+    }).join(", ");
   }
 }

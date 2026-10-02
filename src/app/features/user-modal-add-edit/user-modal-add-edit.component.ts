@@ -3,7 +3,7 @@ import {Dialog} from 'primeng/dialog';
 import {User} from '../../shared/models/user.model';
 import {Button} from 'primeng/button';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ScoutGroupService} from '../../shared/services/user-and-entity/scout-group.service';
+import {EntityService} from '../../shared/services/entity.service';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Select} from 'primeng/select';
 import {ScoutGroup} from '../../shared/models/scout-group.model';
@@ -11,7 +11,9 @@ import {InputText} from 'primeng/inputtext';
 import {UserService} from '../../shared/services/user-and-entity/user.service';
 import {UserForm} from '../../shared/models/user-form.model';
 import {Role} from '../../shared/models/role.model';
-import {MessageService} from 'primeng/api';
+import {MessageService, PrimeTemplate} from 'primeng/api';
+import {MultiSelect} from 'primeng/multiselect';
+import {finalize, tap} from 'rxjs';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -22,15 +24,17 @@ import {MessageService} from 'primeng/api';
     FloatLabel,
     Select,
     FormsModule,
-    InputText
+    InputText,
+    PrimeTemplate,
+    MultiSelect
   ],
   templateUrl: './user-modal-add-edit.component.html',
   styleUrl: './user-modal-add-edit.component.scss'
 })
-export class UserModalAddEditComponent implements OnInit{
+export class UserModalAddEditComponent implements OnInit {
 
   protected readonly formBuilder = inject(FormBuilder);
-  protected readonly scoutGroupService = inject(ScoutGroupService);
+  protected readonly scoutGroupService = inject(EntityService);
   protected readonly userService = inject(UserService);
   protected readonly messageService = inject(MessageService);
 
@@ -44,14 +48,14 @@ export class UserModalAddEditComponent implements OnInit{
   protected loading: boolean = false;
 
   scoutGroups: ScoutGroup[] = [];
-  roles: Role[] = [];
+  roles: { label: string; value: Role }[] = [];
 
   constructor() {
     effect(() => {
-      if (this.dialogMode == 'Edit'){
+      if (this.dialogMode == 'Edit') {
         this.initializeEditForm();
       }
-      if (!this.visible()){
+      if (!this.visible()) {
         this.form.reset();
         this.loading = false;
       }
@@ -61,7 +65,23 @@ export class UserModalAddEditComponent implements OnInit{
   ngOnInit(): void {
     this.initializeForm();
     this.getScoutGroups();
-    this.roles = ["ADMIN", "MANAGEMENT" , "EVENT_DIRECTOR" , "TRAINER" , "STUDENT"]
+
+    const RoleLabels: Record<string, string> = {
+      [Role.STUDENT]: "Persona en Formación",
+      [Role.TRAINER]: "Persona Formadora",
+      [Role.MANAGEMENT]: "Gestión",
+      [Role.EVENT_DIRECTOR]: "Dirección de Eventos",
+      [Role.HEAD_OF_EDUCATION]: "Coord. Formación",
+      [Role.ADMIN]: "Administración",
+    };
+
+    this.roles = [Role.STUDENT, Role.TRAINER, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.HEAD_OF_EDUCATION, Role.ADMIN]
+      .map(role => {
+        return {
+          label: RoleLabels[role] || role,
+          value: role
+        };
+      });
   }
 
   private initializeForm() {
@@ -76,82 +96,68 @@ export class UserModalAddEditComponent implements OnInit{
       city: [""],
       country: [""],
       selectedScoutGroup: [],
-      selectedRole: [null, Validators.required]
+      selectedRoles: [[], Validators.required]
     });
   }
 
   private getScoutGroups() {
-    this.scoutGroupService.getScoutGroups().subscribe({
-      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a,b) => a.name.localeCompare(b.name))
-    })
+    this.scoutGroupService.getEntities().subscribe({
+      next: scoutGroups => this.scoutGroups = scoutGroups.sort((a, b) => a.name.localeCompare(b.name))
+    });
   }
 
   onSubmit() {
     this.form.markAsDirty();
-    if (this.form.valid && !this.loading){
+    if (this.form.valid && !this.loading) {
       this.loading = true;
       const userForm: UserForm = {...this.form.value};
       userForm.scoutGroupId = this.form.get('selectedScoutGroup')?.value?.id;
-      userForm.role = this.form.get('selectedRole')?.value;
-      if (this.dialogMode == 'Edit'){
-        this.userService.updateUser(this.userToEdit.id!, userForm).subscribe({
-          next: () => {
-            this.loading = false;
-            this.visible.set(false);
-            this.userUpdated.emit();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Confirmado',
-              detail: 'Se ha actualizado correctamente el usuario'
-            })
-          },
-          error: err => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: err.message
-            })
-          }
-        })
+      userForm.roles = this.form.get('selectedRoles')?.value;
+      if (this.dialogMode == 'Edit') {
+        this.userService.updateUser(this.userToEdit.id!, userForm).pipe(
+          finalize(() => this.loading = false),
+          tap(() => {
+              this.visible.set(false);
+              this.userUpdated.emit();
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Confirmado',
+                detail: 'Se ha actualizado correctamente el usuario'
+              });
+            }
+          )
+        ).subscribe();
       } else {
-        this.userService.addUser(userForm).subscribe({
-          next: () => {
-            this.loading = false;
-            this.visible.set(false);
-            this.userUpdated.emit();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Confirmado',
-              detail: 'Se ha añadido el usuario al Aula Virtual'
-            })
-          },
-          error: err => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: err.message
-            })
-            this.visible.set(false);
-            this.loading = false;
-          }
-        })
+        this.userService.addUser(userForm).pipe(
+          finalize(() => this.loading = false),
+          tap(() => {
+              this.loading = false;
+              this.visible.set(false);
+              this.userUpdated.emit();
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Confirmado',
+                detail: 'Se ha añadido el usuario al Aula Virtual'
+              });
+            }
+          )).subscribe();
       }
     }
   }
 
   private initializeEditForm() {
     this.form = this.formBuilder.group({
-      name: [this.userToEdit.name, Validators.required],
-      surname: [this.userToEdit.surname, Validators.required],
+      name: [this.userToEdit.profile?.name, Validators.required],
+      surname: [this.userToEdit.profile?.surname, Validators.required],
       email: [this.userToEdit.email, [Validators.required, Validators.email]],
-      phone: [this.userToEdit.phone],
-      census: [this.userToEdit.census],
-      nif: [this.userToEdit.nif],
-      address: [this.userToEdit.address],
-      city: [this.userToEdit.city],
-      country: [this.userToEdit.country],
-      selectedScoutGroup: [this.userToEdit.scoutGroup],
-      selectedRole: [this.userToEdit.role, Validators.required]
+      phone: [this.userToEdit.profile?.phone],
+      census: [this.userToEdit.profile?.census],
+      nif: [this.userToEdit.profile?.nif],
+      address: [this.userToEdit.profile?.address],
+      city: [this.userToEdit.profile?.city],
+      country: [this.userToEdit.profile?.country],
+      selectedScoutGroup: [this.userToEdit.profile?.scoutGroup],
+      selectedRoles: [this.userToEdit.roles, Validators.required]
     });
   }
 }

@@ -7,6 +7,7 @@ import {UserForm} from '../../models/user-form.model';
 import {ResetPassword} from '../../../features/reset-password/models/reset-password.model';
 import {UserMeForm} from '../../models/user-me-form.model';
 import {ChangePassword} from '../../../features/reset-password/models/change-password.model';
+import {Role} from '../models/role.model';
 
 @Injectable({
   providedIn: 'root'
@@ -61,5 +62,17 @@ export class UserService {
 
   getMyInfo(): Observable<User> {
     return this.http.get<User>(`${environment.apiUrl}/user/me`);
+  }
+
+  getUsersByRole(role: Role) {
+    return this.http.get<User[]>(`${environment.apiUrl}/user/admin/all/${role}`);
+  }
+
+  uploadAvatar(formData: FormData): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/users/me/files/avatar`, formData);
+  }
+
+  downloadSecureFile(fileUrl: string): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}${fileUrl}`, { responseType: 'blob' });
   }
 }

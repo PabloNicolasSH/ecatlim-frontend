@@ -3,12 +3,22 @@ import {Role} from './role.model';
 
 export interface User {
   id?: number;
+  email: string;
+  roles: Role[];
+  profile?: UserProfile;
+}
+
+export interface SimpleUser {
+  id?: number;
+  name: string;
+  email: string;
+}
+
+export interface UserProfile {
   name: string;
   surname: string;
-  email: string;
   phone: string;
   census: number;
-  role: Role;
   nif: string;
   address: string;
   city: string;
