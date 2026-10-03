@@ -10,6 +10,9 @@ import {UserService} from '../../shared/services/user.service';
 import {FormUtils} from '../../shared/form-utils';
 import {UserToLog} from '../../core/auth/auth-models';
 import {finalize, tap} from 'rxjs';
+import {MessageService} from 'primeng/api';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {MAX_TEXT} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +23,8 @@ import {finalize, tap} from 'rxjs';
     Button,
     ReactiveFormsModule,
     Password,
-    RouterLink
+    RouterLink,
+    FieldErrorComponent
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -29,10 +33,11 @@ export class LoginComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly messageService = inject(MessageService);
   private readonly router = inject(Router);
 
   protected loginForm!: FormGroup;
-  protected forgotUsername!: string;
+  protected recoverForm!: FormGroup;
 
   protected loading: boolean = false;
   protected recoverPassword: boolean = false;
@@ -40,10 +45,13 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group(
       {
-        username: ["", [Validators.required, Validators.email]],
-        password: ["", Validators.required]
+        username: ["", [Validators.required, Validators.email, Validators.maxLength(MAX_TEXT)]],
+        password: ["", [Validators.required, Validators.maxLength(256)]]
       }
     );
+    this.recoverForm = this.formBuilder.group({
+      email: ["", [Validators.required, Validators.email, Validators.maxLength(MAX_TEXT)]]
+    });
   }
 
   login() {
@@ -59,12 +67,19 @@ export class LoginComponent implements OnInit {
   }
 
   sendRecoverEmail() {
-    if (this.forgotUsername && !this.loading) {
+    FormUtils.markAllAsDirtyAndTouched(this.recoverForm);
+    if (this.recoverForm.valid && !this.loading) {
       this.loading = true;
-      this.userService.forgotPassword(this.forgotUsername).subscribe({
+      this.userService.forgotPassword(this.recoverForm.value.email.trim()).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: () => {
-          this.loading = false;
-          this.forgotUsername = "";
+          this.recoverForm.reset();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Solicitud enviada',
+            detail: 'Si el email corresponde a una cuenta activa, recibirás un correo con las instrucciones en unos minutos.'
+          });
         }
       });
     }

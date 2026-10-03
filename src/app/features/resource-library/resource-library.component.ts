@@ -4,7 +4,7 @@ import {ResourceService} from '../../shared/services/resource.service';
 import {DataView} from 'primeng/dataview';
 import {Tag} from 'primeng/tag';
 import {Button} from 'primeng/button';
-import {PrimeTemplate} from 'primeng/api';
+import {MessageService, PrimeTemplate} from 'primeng/api';
 import {Card} from 'primeng/card';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {FileUpload} from 'primeng/fileupload';
@@ -16,6 +16,9 @@ import {TagService} from '../../shared/services/tag.service';
 import {MultiSelect} from 'primeng/multiselect';
 import {Role} from '../../shared/models/role.model';
 import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {MAX_TEXT, MAX_UPLOAD_MB, notBlankValidator, urlValidator} from '../../shared/validation/validation-patterns';
+import {FormUtils} from '../../shared/form-utils';
 
 const ROLES_ALLOWED_TO_ADD_RESOURCES: Role[] = [
   Role.MANAGEMENT,
@@ -38,7 +41,8 @@ const ROLES_ALLOWED_TO_ADD_RESOURCES: Role[] = [
     Textarea,
     InputText,
     Dialog,
-    MultiSelect
+    MultiSelect,
+    FieldErrorComponent
   ],
   templateUrl: './resource-library.component.html',
   styleUrl: './resource-library.component.scss'
@@ -51,6 +55,7 @@ export class ResourceLibraryComponent implements OnInit {
   protected readonly tagService = inject(TagService);
   protected readonly fb = inject(FormBuilder);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
+  protected readonly messageService = inject(MessageService);
 
   categories = ['Todos', 'PDFs', 'Imágenes', 'Plantillas', 'Vídeos', 'Enlaces'];
 
@@ -103,14 +108,26 @@ export class ResourceLibraryComponent implements OnInit {
     this.initForm();
   }
 
+  protected readonly maxUploadBytes = MAX_UPLOAD_MB * 1024 * 1024;
+
   initForm() {
     this.resourceForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.maxLength(500)]],
+      name: ['', [Validators.required, notBlankValidator, Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(MAX_TEXT)]],
       type: ['PDF', Validators.required],
       tagNames: [[]],
       blobPath: ['']
     });
+
+    this.resourceForm.get('type')?.valueChanges.subscribe(type => {
+      const blobPath = this.resourceForm.get('blobPath')!;
+      blobPath.setValidators(this.isLinkType(type) ? [Validators.required, urlValidator, Validators.maxLength(MAX_TEXT)] : []);
+      blobPath.updateValueAndValidity();
+    });
+  }
+
+  private isLinkType(type: string): boolean {
+    return type === 'LINK' || type === 'VIDEO_LINK';
   }
 
   onTagFilter(event: any) {
@@ -121,6 +138,14 @@ export class ResourceLibraryComponent implements OnInit {
     this.tagSelect.hide();
     const newName = prompt('Introduce el nombre de la nueva etiqueta:');
 
+    if (newName && newName.trim().length > MAX_TEXT) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Etiqueta no válida',
+        detail: `El nombre de la etiqueta no puede superar los ${MAX_TEXT} caracteres`
+      });
+      return;
+    }
     if (newName && newName.trim() !== '') {
       this.createInlineTag(newName.trim());
     }
@@ -142,11 +167,7 @@ export class ResourceLibraryComponent implements OnInit {
         this.currentSearch.set('');
         this.tagSelect.resetFilter();
       },
-      error: (err) => {
-        console.error('Error creando etiqueta', err);
-        alert('Hubo un error al crear la etiqueta. Asegúrate de que no exista ya.');
-        this.isCreatingTag.set(false);
-      }
+      error: () => this.isCreatingTag.set(false)
     });
   }
 
@@ -213,7 +234,17 @@ export class ResourceLibraryComponent implements OnInit {
   }
 
   onSubmit() {
+    FormUtils.markAllAsDirtyAndTouched(this.resourceForm);
     if (this.resourceForm.invalid) return;
+
+    if (!this.isLinkType(this.resourceForm.value.type) && !this.selectedFile) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Falta el archivo',
+        detail: 'Selecciona el archivo que quieres subir para este tipo de recurso'
+      });
+      return;
+    }
 
     this.isSubmitting.set(true);
 

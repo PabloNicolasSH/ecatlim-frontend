@@ -96,11 +96,13 @@
     <div class="flex flex-col gap-1">
       <label for="name" class="font-semibold text-gray-700">Nombre del recurso <span class="text-red-500">*</span></label>
       <input pInputText id="name" formControlName="name" placeholder="Ej: Guía de nudos nivel 1" class="w-full" />
+      <app-field-error [control]="resourceForm.get('name')" />
     </div>
 
     <div class="flex flex-col gap-1">
       <label for="description" class="font-semibold text-gray-700">Descripción</label>
       <textarea pTextarea id="description" formControlName="description" rows="3" placeholder="Breve resumen del contenido..." class="w-full"></textarea>
+      <app-field-error [control]="resourceForm.get('description')" />
     </div>
 
     <div class="grid grid-cols-2 gap-4">
@@ -174,7 +176,7 @@
           chooseIcon="pi pi-upload"
           [auto]="false"
           (onSelect)="onFileSelect($event)"
-          [maxFileSize]="10000000"
+          [maxFileSize]="maxUploadBytes"
           styleClass="w-full">
         </p-fileupload>
         @if (selectedFile) {
@@ -185,11 +187,12 @@
       <div class="flex flex-col gap-1 mt-2">
         <label class="font-semibold text-gray-700">URL del Enlace <span class="text-red-500">*</span></label>
         <input pInputText formControlName="blobPath" placeholder="https://..." class="w-full" />
+        <app-field-error [control]="resourceForm.get('blobPath')" />
       </div>
     }
 
     <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
-      <p-button label="Guardar Recurso" icon="pi pi-save" type="submit" [loading]="isSubmitting()" [disabled]="resourceForm.invalid"></p-button>
+      <p-button label="Guardar Recurso" icon="pi pi-save" type="submit" [loading]="isSubmitting()"></p-button>
     </div>
   </form>
 </p-dialog>

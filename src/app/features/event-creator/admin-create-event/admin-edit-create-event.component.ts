@@ -25,6 +25,8 @@ import {EducationStageService} from '../../../shared/services/education-stage.se
 import {EducationStage} from '../../../shared/models/education-stage.model';
 import {forkJoin} from 'rxjs';
 import {EventForm, EventSuggestions} from '../../../shared/models/event.model';
+import {FieldErrorComponent} from '../../../shared/components/field-error/field-error.component';
+import {dateOrderValidator, MAX_RICH_TEXT, MAX_TEXT, notBlankValidator} from '../../../shared/validation/validation-patterns';
 
 type StaffOption = SimpleUser & { fullName: string };
 
@@ -48,7 +50,8 @@ const toStaffOption = (user: SimpleUser): StaffOption => ({
     PrimeTemplate,
     InputNumber,
     AutoComplete,
-    NgClass
+    NgClass,
+    FieldErrorComponent
   ],
   templateUrl: './admin-edit-create-event.component.html',
   styleUrl: './admin-edit-create-event.component.scss'
@@ -128,14 +131,14 @@ export class AdminEditCreateEventComponent implements OnInit {
 
   private initializeForm() {
     this.eventForm = this.formBuilder.group({
-      title: ['', Validators.required],
-      shortname: ['', Validators.required],
-      description: [''],
-      contents: ['', Validators.required],
+      title: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      shortname: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      description: ['', Validators.maxLength(MAX_RICH_TEXT)],
+      contents: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_RICH_TEXT)]],
       startDate: [null, Validators.required],
       endDate: [null, Validators.required],
-      location: ['', Validators.required],
-      organizer: ['ECATLIM', Validators.required],
+      location: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      organizer: ['ECATLIM', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
       selectedDirector: [null, Validators.required],
       selectedFacilitators: [[], [Validators.required, Validators.minLength(1)]],
       selectedEducationStage: [null, Validators.required],
@@ -145,9 +148,14 @@ export class AdminEditCreateEventComponent implements OnInit {
       dateOpenInscription: [null, Validators.required],
       dateCloseInscription: [null, Validators.required],
       cost: [0, [Validators.required, Validators.min(0)]],
-      transferBankNumber: ['', Validators.required],
-      transferCode: ['', Validators.required],
+      transferBankNumber: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      transferCode: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
       notificationTarget: [[], Validators.required]
+    }, {
+      validators: [
+        dateOrderValidator('startDate', 'endDate'),
+        dateOrderValidator('dateOpenInscription', 'dateCloseInscription')
+      ]
     });
   }
 
@@ -339,7 +347,6 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]);
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
         this.loading = false;
         this.eventForm.patchValue({ status: 'PENDING' });
       }
@@ -364,7 +371,6 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]);
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
         this.loading = false;
         this.eventForm.patchValue({ status: 'PENDING' });
       }
@@ -387,10 +393,7 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Evento y cronograma guardados' });
         this.router.navigate(['/app/eventos-formativos/detalle', finalId]);
       },
-      error: () => {
-        this.loading = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al finalizar' });
-      }
+      error: () => this.loading = false
     });
   }
 
@@ -425,7 +428,8 @@ export class AdminEditCreateEventComponent implements OnInit {
 
   isStepValid(currentStep: number): boolean {
     const fieldsByStep: { [key: number]: string[] } = {
-      1: ['title', 'shortname', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector', 'selectedBlocks', 'status'],
+      1: ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
+        'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status'],
       2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
     };
 
@@ -441,7 +445,25 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.prepareBlocksForScheduler();
       }
       this.step++;
+    } else {
+      this.showStepErrors(this.step);
     }
+  }
+
+  private showStepErrors(currentStep: number) {
+    const fields = currentStep === 1
+      ? ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
+        'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status']
+      : ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget'];
+    fields.forEach(field => {
+      this.eventForm.get(field)?.markAsTouched();
+      this.eventForm.get(field)?.markAsDirty();
+    });
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Revisa el formulario',
+      detail: 'Hay campos obligatorios vacíos o con un formato no válido'
+    });
   }
 
   prevStep() {

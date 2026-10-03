@@ -317,8 +317,10 @@
             type="text"
             class="w-full text-sm"
             placeholder="Ej. Equipo de coordinación"
+            maxlength="255"
             [(ngModel)]="groupName"
           />
+          <small class="text-[11px] text-gray-400 self-end">{{ groupName.length }}/255</small>
         </div>
 
         <div class="flex flex-col gap-1">
@@ -328,8 +330,10 @@
             type="text"
             class="w-full text-xs"
             placeholder="Propósito del grupo..."
+            maxlength="255"
             [(ngModel)]="groupDescription"
           />
+          <small class="text-[11px] text-gray-400 self-end">{{ groupDescription.length }}/255</small>
         </div>
 
         <div class="flex flex-col gap-1">

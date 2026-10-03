@@ -14,6 +14,8 @@ import {Role} from '../../shared/models/role.model';
 import {MessageService, PrimeTemplate} from 'primeng/api';
 import {MultiSelect} from 'primeng/multiselect';
 import {finalize, Observable, tap} from 'rxjs';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {MAX_TEXT, idDocumentValidator, notBlankValidator, phoneValidator} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-user-modal-add-edit',
@@ -26,7 +28,8 @@ import {finalize, Observable, tap} from 'rxjs';
     FormsModule,
     InputText,
     PrimeTemplate,
-    MultiSelect
+    MultiSelect,
+    FieldErrorComponent
   ],
   templateUrl: './user-modal-add-edit.component.html',
   styleUrl: './user-modal-add-edit.component.scss'
@@ -92,15 +95,15 @@ export class UserModalAddEditComponent implements OnInit {
 
   private initializeForm() {
     this.form = this.formBuilder.group({
-      name: ["", Validators.required],
-      surname: ["", Validators.required],
-      email: ["", [Validators.required, Validators.email]],
-      phone: [""],
-      census: [""],
-      nif: [""],
-      address: [""],
-      city: [""],
-      country: [""],
+      name: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      surname: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      email: ["", [Validators.required, Validators.email, Validators.maxLength(MAX_TEXT)]],
+      phone: ["", phoneValidator],
+      census: ["", [Validators.min(0), Validators.max(999999999)]],
+      nif: ["", idDocumentValidator],
+      address: ["", Validators.maxLength(MAX_TEXT)],
+      city: ["", Validators.maxLength(MAX_TEXT)],
+      country: ["", Validators.maxLength(MAX_TEXT)],
       selectedScoutGroup: [],
       selectedRoles: [[], this.studentOnly ? [] : Validators.required]
     });
@@ -156,15 +159,15 @@ export class UserModalAddEditComponent implements OnInit {
 
   private initializeEditForm() {
     this.form = this.formBuilder.group({
-      name: [this.userToEdit.profile?.name, Validators.required],
-      surname: [this.userToEdit.profile?.surname, Validators.required],
-      email: [this.userToEdit.email, [Validators.required, Validators.email]],
-      phone: [this.userToEdit.profile?.phone],
-      census: [this.userToEdit.profile?.census],
-      nif: [this.userToEdit.profile?.nif],
-      address: [this.userToEdit.profile?.address],
-      city: [this.userToEdit.profile?.city],
-      country: [this.userToEdit.profile?.country],
+      name: [this.userToEdit.profile?.name, [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      surname: [this.userToEdit.profile?.surname, [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      email: [this.userToEdit.email, [Validators.required, Validators.email, Validators.maxLength(MAX_TEXT)]],
+      phone: [this.userToEdit.profile?.phone, phoneValidator],
+      census: [this.userToEdit.profile?.census, [Validators.min(0), Validators.max(999999999)]],
+      nif: [this.userToEdit.profile?.nif, idDocumentValidator],
+      address: [this.userToEdit.profile?.address, Validators.maxLength(MAX_TEXT)],
+      city: [this.userToEdit.profile?.city, Validators.maxLength(MAX_TEXT)],
+      country: [this.userToEdit.profile?.country, Validators.maxLength(MAX_TEXT)],
       selectedScoutGroup: [this.userToEdit.profile?.scoutGroup],
       selectedRoles: [this.userToEdit.roles, Validators.required]
     });

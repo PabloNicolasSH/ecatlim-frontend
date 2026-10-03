@@ -25,10 +25,13 @@
       <div class="flex flex-col gap-3">
         <p class="text-cyan-900 font-bold border-b border-gray-200">Credenciales del Sistema</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <p-floatlabel variant="on">
-            <input id="email" pInputText formControlName="email" class="w-full" required/>
-            <label for="email">Correo Electrónico</label>
-          </p-floatlabel>
+          <div>
+            <p-floatlabel variant="on">
+              <input id="email" pInputText formControlName="email" class="w-full" required/>
+              <label for="email">Correo Electrónico</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('email')" />
+          </div>
           @if (!studentOnly) {
             <p-floatlabel variant="on">
               <p-multiSelect
@@ -51,57 +54,81 @@
         <div class="flex flex-col gap-3 animate-fade-in mt-2">
           <p class="text-cyan-900 font-bold border-b border-gray-200">Datos Personales (Perfil)</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-            <p-floatlabel variant="on">
-              <input id="name" pInputText formControlName="name" class="w-full" required/>
-              <label for="name">Nombre</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on">
-              <input id="surname" pInputText formControlName="surname" class="w-full" required/>
-              <label for="surname">Apellidos</label>
-            </p-floatlabel>
+            <div>
+              <p-floatlabel variant="on">
+                <input id="name" pInputText formControlName="name" class="w-full" required/>
+                <label for="name">Nombre</label>
+              </p-floatlabel>
+              <app-field-error [control]="form.get('name')" />
+            </div>
+            <div>
+              <p-floatlabel variant="on">
+                <input id="surname" pInputText formControlName="surname" class="w-full" required/>
+                <label for="surname">Apellidos</label>
+              </p-floatlabel>
+              <app-field-error [control]="form.get('surname')" />
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-3 animate-fade-in">
           <p class="text-cyan-900 font-bold border-b border-gray-200">Detalles de la Ficha Scout</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
-            <p-floatlabel variant="on">
-              <input id="census" pInputText formControlName="census" type="number" class="w-full" />
-              <label for="census">Censo</label>
-            </p-floatlabel>
+            <div>
+              <p-floatlabel variant="on">
+                <input id="census" pInputText formControlName="census" type="number" class="w-full" />
+                <label for="census">Censo</label>
+              </p-floatlabel>
+              <app-field-error [control]="form.get('census')" />
+            </div>
 
             <p-floatlabel variant="on">
               <p-select id="scoutGroup" [options]="scoutGroups" optionLabel="name" formControlName="selectedScoutGroup" appendTo="body" class="w-full" />
               <label for="scoutGroup">Entidad de procedencia</label>
             </p-floatlabel>
 
-            <p-floatlabel variant="on">
-              <input id="nif" pInputText formControlName="nif" class="w-full" />
-              <label for="nif">DNI/NIE</label>
-            </p-floatlabel>
+            <div>
+              <p-floatlabel variant="on">
+                <input id="nif" pInputText formControlName="nif" class="w-full" />
+                <label for="nif">DNI/NIE/Pasaporte</label>
+              </p-floatlabel>
+              <app-field-error [control]="form.get('nif')" />
+            </div>
 
-            <p-floatlabel variant="on">
-              <input id="phone" pInputText formControlName="phone" class="w-full" />
-              <label for="phone">Teléfono</label>
-            </p-floatlabel>
+            <div>
+              <p-floatlabel variant="on">
+                <input id="phone" pInputText formControlName="phone" class="w-full" />
+                <label for="phone">Teléfono</label>
+              </p-floatlabel>
+              <app-field-error [control]="form.get('phone')" />
+            </div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-1.5 animate-fade-in">
-          <p-floatlabel variant="on" class="md:col-span-2">
-            <input id="address" pInputText formControlName="address" class="w-full" />
-            <label for="address">Dirección Postal</label>
-          </p-floatlabel>
+          <div class="md:col-span-2">
+            <p-floatlabel variant="on">
+              <input id="address" pInputText formControlName="address" class="w-full" />
+              <label for="address">Dirección Postal</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('address')" />
+          </div>
 
-          <p-floatlabel variant="on" class="md:col-span-1">
-            <input id="city" pInputText formControlName="city" class="w-full" />
-            <label for="city">Municipio</label>
-          </p-floatlabel>
+          <div class="md:col-span-1">
+            <p-floatlabel variant="on">
+              <input id="city" pInputText formControlName="city" class="w-full" />
+              <label for="city">Municipio</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('city')" />
+          </div>
 
-          <p-floatlabel variant="on" class="md:col-span-1">
-            <input id="country" pInputText formControlName="country" class="w-full" />
-            <label for="country">País</label>
-          </p-floatlabel>
+          <div class="md:col-span-1">
+            <p-floatlabel variant="on">
+              <input id="country" pInputText formControlName="country" class="w-full" />
+              <label for="country">País</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('country')" />
+          </div>
         </div>
       }
 

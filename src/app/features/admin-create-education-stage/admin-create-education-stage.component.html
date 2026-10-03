@@ -41,6 +41,7 @@
                     />
                     <label for="name" class="required">Nombre de la etapa</label>
                   </p-floatlabel>
+                  <app-field-error [control]="educationStageForm.get('name')" />
                 </div>
                 <div class="basis-1/5">
                   <p-floatlabel variant="on">
@@ -53,6 +54,7 @@
                     />
                     <label for="code" class="required">Código de distinción</label>
                   </p-floatlabel>
+                  <app-field-error [control]="educationStageForm.get('code')" />
                 </div>
                 <div class="basis-1/5">
                   <p-floatlabel variant="on">
@@ -65,6 +67,7 @@
                     />
                     <label for="stageOnlineHours" class="required">Número de horas en formato online</label>
                   </p-floatlabel>
+                  <app-field-error [control]="educationStageForm.get('onlineHours')" />
                 </div>
                 <div class="basis-1/5">
                   <p-floatlabel variant="on">
@@ -77,6 +80,7 @@
                     />
                     <label for="stageContactHours" class="required">Número de horas en formato presencial</label>
                   </p-floatlabel>
+                  <app-field-error [control]="educationStageForm.get('contactHours')" />
                 </div>
                 <div class="basis-1/5">
                   <p-floatlabel variant="on">
@@ -89,6 +93,7 @@
                     />
                     <label for="stagePracticalHours" class="required">Número de horas de prácticas</label>
                   </p-floatlabel>
+                  <app-field-error [control]="educationStageForm.get('practicalHours')" />
                 </div>
               </div>
               <div class="mt-4">
@@ -101,6 +106,7 @@
                       type="text" class="w-full"></textarea>
                   <label for="description" class="required">Descripción de la Etapa</label>
                 </p-floatlabel>
+                <app-field-error [control]="educationStageForm.get('description')" />
               </div>
               <div class="flex flex-row items-center mt-2">
                 <div class="me-2">
@@ -181,6 +187,7 @@
                                           />
                                           <label for="moduleName" class="required">Nombre del módulo</label>
                                       </p-floatlabel>
+                                      <app-field-error [control]="module.get('name')" />
                                   </div>
                                   <div class="basis-1/5">
                                     <p-floatlabel variant="on">
@@ -193,6 +200,7 @@
                                       />
                                       <label for="moduleNumber" class="required">Número del módulo</label>
                                     </p-floatlabel>
+                                    <app-field-error [control]="module.get('number')" />
                                   </div>
                                   <div class="basis-1/5">
                                       <p-floatlabel variant="on">
@@ -205,6 +213,7 @@
                                           />
                                           <label for="moduleOnlineHours" class="required">Número de horas en formato online</label>
                                       </p-floatlabel>
+                                      <app-field-error [control]="module.get('onlineHours')" />
                                   </div>
                                   <div class="basis-1/5">
                                       <p-floatlabel variant="on">
@@ -217,6 +226,7 @@
                                           />
                                           <label for="moduleContactHours" class="required">Número de horas en formato presencial</label>
                                       </p-floatlabel>
+                                      <app-field-error [control]="module.get('contactHours')" />
                                   </div>
                                   <div class="basis-1/5">
                                       <p-select
@@ -227,6 +237,7 @@
                                               class="w-full"
                                               appendTo="body"
                                       ></p-select>
+                                      <app-field-error [control]="module.get('type')" />
                                   </div>
                               </div>
                               <div class="mt-4">
@@ -239,6 +250,7 @@
                             type="text" class="w-full"></textarea>
                                       <label for="moduleDescription" class="required">Descripción del Módulo</label>
                                   </p-floatlabel>
+                                  <app-field-error [control]="module.get('description')" />
                               </div>
                           </div>
                       }
@@ -302,6 +314,7 @@
                             />
                             <label for="lessonBlockName" class="required">Nombre del bloque</label>
                           </p-floatlabel>
+                          <app-field-error [control]="lb.get('name')" />
                         </div>
                         <div class="basis-1/4">
                           <p-floatlabel variant="on">
@@ -314,6 +327,7 @@
                             />
                             <label for="lessonBlockId" class="required">Número de bloque</label>
                           </p-floatlabel>
+                          <app-field-error [control]="lb.get('lessonBlockId')" />
                         </div>
                         <div class="basis-1/4">
                           <p-floatlabel variant="on">
@@ -326,6 +340,7 @@
                             />
                             <label for="lessonBlockOnlineHours" class="required">Número de horas en formato online</label>
                           </p-floatlabel>
+                          <app-field-error [control]="lb.get('onlineHours')" />
                         </div>
                         <div class="basis-1/4">
                           <p-floatlabel variant="on">
@@ -339,6 +354,7 @@
                             <label for="lessonBlockContactHours" class="required">Número de horas en formato
                               presencial</label>
                           </p-floatlabel>
+                          <app-field-error [control]="lb.get('contactHours')" />
                         </div>
                       </div>
                       <div class="mt-4">
@@ -351,6 +367,7 @@
                           type="text" class="w-full"></textarea>
                           <label for="lessonBlockDescription" class="required">Descripción del Bloque Formativo</label>
                         </p-floatlabel>
+                        <app-field-error [control]="lb.get('description')" />
                       </div>
                       <div class="flex flex-row items-center">
                         <p class="me-3">¿El bloque es convalidable?</p>

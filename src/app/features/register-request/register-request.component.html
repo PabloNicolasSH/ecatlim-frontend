@@ -12,50 +12,62 @@
       >Inicia sesión</a></p>
     <form (ngSubmit)="register()" [formGroup]="registerForm">
       <div class="flex flex-col items-center mt-5">
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="name"
-            pInputText
-            formControlName="name"
-            type="text"
-            class="w-full"
-            required
-          />
-          <label for="name">Nombre</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="w-full mt-4">
-          <input
-            id="surname"
-            pInputText
-            formControlName="surname"
-            type="text"
-            class="w-full"
-            required
-          />
-          <label for="surname">Apellidos</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="w-full mt-4">
-          <input
-            id="nif"
-            pInputText
-            formControlName="nif"
-            type="text"
-            class="w-full"
-            required
-          />
-          <label for="nif">DNI/Documento de identificación</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="w-full mt-4">
-          <input
-            id="email"
-            pInputText
-            formControlName="email"
-            type="text"
-            class="w-full"
-            required
-          />
-          <label for="email">Correo electrónico</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="name"
+              pInputText
+              formControlName="name"
+              type="text"
+              class="w-full"
+              required
+            />
+            <label for="name">Nombre</label>
+          </p-floatlabel>
+          <app-field-error [control]="registerForm.get('name')" />
+        </div>
+        <div class="w-full mt-4">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="surname"
+              pInputText
+              formControlName="surname"
+              type="text"
+              class="w-full"
+              required
+            />
+            <label for="surname">Apellidos</label>
+          </p-floatlabel>
+          <app-field-error [control]="registerForm.get('surname')" />
+        </div>
+        <div class="w-full mt-4">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="nif"
+              pInputText
+              formControlName="nif"
+              type="text"
+              class="w-full"
+              required
+            />
+            <label for="nif">DNI/NIE/Pasaporte</label>
+          </p-floatlabel>
+          <app-field-error [control]="registerForm.get('nif')" />
+        </div>
+        <div class="w-full mt-4">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="email"
+              pInputText
+              formControlName="email"
+              type="text"
+              class="w-full"
+              required
+            />
+            <label for="email">Correo electrónico</label>
+          </p-floatlabel>
+          <app-field-error [control]="registerForm.get('email')" />
+        </div>
         <p-select
           class="mt-4 w-full"
           [options]="scoutGroups"
@@ -83,6 +95,8 @@
               style="font-style: inherit;
                 text-decoration-line: underline;">política de privacidad</a>
           </label>
+          <app-field-error [control]="registerForm.get('checkbox')"
+                           [messages]="{requiredTrue: 'Debes aceptar la política de privacidad'}" />
         </div>
 
         <p-button

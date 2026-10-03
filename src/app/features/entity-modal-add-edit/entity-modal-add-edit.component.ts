@@ -9,6 +9,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {PrimeTemplate} from 'primeng/api';
 import {EntityService} from '../../shared/services/entity.service';
 import {UserService} from '../../shared/services/user.service';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {MAX_TEXT, notBlankValidator} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-entity-modal-add-edit',
@@ -20,7 +22,8 @@ import {UserService} from '../../shared/services/user.service';
     InputText,
     Select,
     ReactiveFormsModule,
-    PrimeTemplate
+    PrimeTemplate,
+    FieldErrorComponent
   ],
   templateUrl: './entity-modal-add-edit.component.html',
   styleUrl: './entity-modal-add-edit.component.scss'
@@ -51,10 +54,10 @@ export class EntityModalAddEditComponent implements OnInit, OnChanges {
   constructor() {
     this.form = this.fb.group({
       id: [null],
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      groupNumber: [null],
+      name: ['', [Validators.required, notBlankValidator, Validators.minLength(3), Validators.maxLength(MAX_TEXT)]],
+      groupNumber: [null, [Validators.min(0), Validators.max(9999)]],
       provinceId: [null, [Validators.required]],
-      email: ['', [Validators.required, Validators.email]]
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(MAX_TEXT)]]
     });
   }
 
@@ -92,7 +95,8 @@ export class EntityModalAddEditComponent implements OnInit, OnChanges {
             this.loading = false;
             this.visible.set(false);
             this.entityUpdated.emit(payload);
-          }
+          },
+          error: () => this.loading = false
         });
 
     } else if (this.form.valid && this.dialogMode === 'Edit' && !this.loading) {
@@ -110,7 +114,8 @@ export class EntityModalAddEditComponent implements OnInit, OnChanges {
             this.loading = false;
             this.visible.set(false);
             this.entityUpdated.emit(payload);
-          }
+          },
+          error: () => this.loading = false
         });
     } else {
       this.form.markAllAsTouched();

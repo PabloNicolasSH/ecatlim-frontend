@@ -11,6 +11,9 @@ import {ActivityService} from '../../shared/services/activity.service';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Textarea} from 'primeng/textarea';
 import {InputText} from 'primeng/inputtext';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {MAX_RICH_TEXT, MAX_TEXT, MAX_UPLOAD_MB, notBlankValidator} from '../../shared/validation/validation-patterns';
+import {MessageService} from 'primeng/api';
 
 @Component({
   selector: 'app-user-activity-view',
@@ -24,7 +27,8 @@ import {InputText} from 'primeng/inputtext';
     DatePipe,
     NgClass,
     Tooltip,
-    UserAvatarComponent
+    UserAvatarComponent,
+    FieldErrorComponent
   ],
   templateUrl: './user-activity-view.component.html',
   styleUrl: './user-activity-view.component.scss'
@@ -34,14 +38,15 @@ export class UserActivityViewComponent implements OnInit {
   private readonly activityService = inject(ActivityService);
   private readonly fb = inject(FormBuilder);
   private readonly eventService = inject(EventService);
+  private readonly messageService = inject(MessageService);
+
+  protected readonly maxUploadMb = MAX_UPLOAD_MB;
 
   eventId = signal<number>(0);
   activities = signal<any[]>([]);
   event = signal<UserEventCalendar | null>(null);
   selectedActivity = signal<any | null>(null);
   forumPublications = signal<any[]>([]);
-
-  currentStudentId = signal<number>(1);
 
   forumForm!: FormGroup;
   surveyForm!: FormGroup;
@@ -111,8 +116,8 @@ export class UserActivityViewComponent implements OnInit {
 
   initForms(): void {
     this.forumForm = this.fb.group({
-      title: ['', Validators.required],
-      body: ['', Validators.required]
+      title: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      body: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_RICH_TEXT)]]
     });
     this.surveyForm = this.fb.group({
       answers: this.fb.array([])
@@ -148,11 +153,12 @@ export class UserActivityViewComponent implements OnInit {
     this.answers.clear();
     if (questions) {
       questions.forEach(q => {
+        const numeric = q.responseType === 'VALUE';
         this.answers.push(this.fb.group({
           questionId: [q.id],
           responseType: [q.responseType],
-          textValue: [''],
-          numValue: [null]
+          textValue: ['', numeric ? [] : [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+          numValue: [null, numeric ? [Validators.required] : []]
         }));
       });
     }
@@ -169,12 +175,7 @@ export class UserActivityViewComponent implements OnInit {
   onForumSubmit(): void {
     if (this.forumForm.invalid) return;
 
-    const requestBody = {
-      ...this.forumForm.value,
-      studentId: this.currentStudentId()
-    };
-
-    this.activityService.publishInForum(this.selectedActivity().id, requestBody).subscribe({
+    this.activityService.publishInForum(this.selectedActivity().id, this.forumForm.value).subscribe({
       next: () => {
         this.loadForumPublications(this.selectedActivity().id);
         this.forumForm.reset();
@@ -185,7 +186,18 @@ export class UserActivityViewComponent implements OnInit {
 
   onFileSelected(event: any): void {
     if (event.target.files && event.target.files.length > 0) {
-      this.selectedFile = event.target.files[0];
+      const file: File = event.target.files[0];
+      if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+        this.selectedFile = null;
+        event.target.value = '';
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Archivo demasiado grande',
+          detail: `El tamaño máximo permitido es de ${MAX_UPLOAD_MB} MB`
+        });
+        return;
+      }
+      this.selectedFile = file;
     }
   }
 
@@ -195,7 +207,7 @@ export class UserActivityViewComponent implements OnInit {
     formData.append('file', this.selectedFile);
     formData.append('comment', 'Entrega realizada por el alumno');
 
-    this.activityService.uploadSubmissionFile(this.selectedActivity().id, this.currentStudentId(), formData).subscribe({
+    this.activityService.uploadSubmissionFile(this.selectedActivity().id, formData).subscribe({
       next: () => {
         this.selectedFile = null;
         this.loadActivities();
@@ -207,8 +219,20 @@ export class UserActivityViewComponent implements OnInit {
   }
 
   onSurveySubmit(): void {
-    const rawAnswers = this.surveyForm.value.answers;
-    this.activityService.submitSurvey(this.selectedActivity().id, this.currentStudentId(), rawAnswers).subscribe({
+    if (this.surveyForm.invalid) {
+      this.surveyForm.markAllAsTouched();
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Encuesta incompleta',
+        detail: 'Responde a todas las preguntas antes de enviar'
+      });
+      return;
+    }
+    const answers = this.surveyForm.value.answers.map((answer: any) => ({
+      id: answer.questionId,
+      responseValue: answer.textValue || (answer.numValue != null ? String(answer.numValue) : '')
+    }));
+    this.activityService.submitSurvey(this.selectedActivity().id, answers).subscribe({
       next: () => {
         this.loadActivities();
         this.selectedActivity.set(null);

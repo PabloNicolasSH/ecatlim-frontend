@@ -12,6 +12,8 @@ import {PendingUserService} from '../../shared/services/pending-user.service';
 import {PendingUser} from '../../shared/models/pending-user.model';
 import {MessageService} from 'primeng/api';
 import {FormUtils} from '../../shared/form-utils';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {MAX_TEXT, idDocumentValidator, notBlankValidator} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-register-request',
@@ -23,7 +25,8 @@ import {FormUtils} from '../../shared/form-utils';
     InputText,
     Select,
     FormsModule,
-    Checkbox
+    Checkbox,
+    FieldErrorComponent
   ],
   templateUrl: './register-request.component.html',
   styleUrl: './register-request.component.scss'
@@ -42,10 +45,10 @@ export class RegisterRequestComponent implements OnInit {
 
   ngOnInit(): void {
     this.registerForm = this.formBuilder.group({
-      name: ["", [Validators.required]],
-      surname: ["", [Validators.required]],
-      email: ["", [Validators.required, Validators.email]],
-      nif: ["", [Validators.required]],
+      name: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      surname: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      email: ["", [Validators.required, Validators.email, Validators.maxLength(MAX_TEXT)]],
+      nif: ["", [Validators.required, idDocumentValidator]],
       selectedScoutGroup: [""],
       checkbox: [false, [Validators.requiredTrue]]
     });
@@ -71,13 +74,7 @@ export class RegisterRequestComponent implements OnInit {
           });
           this.registerForm.reset();
         },
-        error: err => {
-          this.loading = false;
-          this.messageService.add({
-            severity: "error",
-            detail: "No se ha podido procesar su solicitud"
-          });
-        }
+        error: () => this.loading = false
       });
     }
   }

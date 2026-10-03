@@ -12,27 +12,33 @@
   @if (!recoverPassword) {
     <form (ngSubmit)="login()" [formGroup]="loginForm">
       <div class="flex flex-col items-center mt-6 w-80 max-w-[90vw]">
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="username"
-            pInputText
-            formControlName="username"
-            type="text"
-            class="w-full"
-          />
-          <label for="username">Correo Electrónico</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on" class="mt-5 w-full">
-          <p-password
-            id="password"
-            formControlName="password"
-            [toggleMask]="true"
-            [feedback]="false"
-            styleClass="w-full"
-            inputStyleClass="w-full"
-          ></p-password>
-          <label for="password">Contraseña</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="username"
+              pInputText
+              formControlName="username"
+              type="text"
+              class="w-full"
+            />
+            <label for="username">Correo Electrónico</label>
+          </p-floatlabel>
+          <app-field-error [control]="loginForm.get('username')" />
+        </div>
+        <div class="mt-5 w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <p-password
+              id="password"
+              formControlName="password"
+              [toggleMask]="true"
+              [feedback]="false"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            ></p-password>
+            <label for="password">Contraseña</label>
+          </p-floatlabel>
+          <app-field-error [control]="loginForm.get('password')" />
+        </div>
         <div class="w-full flex justify-end">
           <a class="text-blue-500 text-sm mt-3" style="cursor:pointer" (click)="recoverPassword = true">
             He olvidado mi contraseña
@@ -49,19 +55,22 @@
       </div>
     </form>
   } @else {
-    <div class="flex flex-col items-center mt-3">
+    <form (ngSubmit)="sendRecoverEmail()" [formGroup]="recoverForm" class="flex flex-col items-center mt-3">
       <p>Introduce a continuación tu correo de acceso</p>
       <p>para enviarte una nueva contraseña.</p>
-      <p-floatlabel variant="on" class="w-full mt-6">
-        <input
-          id="recover"
-          pInputText
-          type="text"
-          class="w-full"
-          [(ngModel)]="forgotUsername"
-        />
-        <label for="recover">Correo Electrónico</label>
-      </p-floatlabel>
+      <div class="w-full mt-6">
+        <p-floatlabel variant="on" class="w-full">
+          <input
+            id="recover"
+            pInputText
+            type="text"
+            class="w-full"
+            formControlName="email"
+          />
+          <label for="recover">Correo Electrónico</label>
+        </p-floatlabel>
+        <app-field-error [control]="recoverForm.get('email')" />
+      </div>
       <div class="w-full flex justify-end">
         <a class="text-blue-500 text-sm mt-3" style="cursor:pointer" (click)="recoverPassword = false">
           Volver a inicio de sesión
@@ -73,10 +82,8 @@
         label="Enviar correo"
         icon="pi pi-send"
         [loading]="loading"
-        [disabled]="!forgotUsername"
-        (onClick)="sendRecoverEmail()"
+        type="submit"
       ></p-button>
-    </div>
+    </form>
   }
 </div>
-
