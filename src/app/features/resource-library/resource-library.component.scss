@@ -1,7 +1,3 @@
-::ng-deep .p-dataview-content {
-  background: transparent !important;
-}
-
-::ng-deep .p-paginator {
-  background: transparent !important;
+:host ::ng-deep .p-paginator {
+  background: transparent;
 }

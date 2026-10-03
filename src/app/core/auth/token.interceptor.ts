@@ -1,8 +1,10 @@
-import {HttpInterceptorFn} from '@angular/common/http';
+import {HttpContextToken, HttpInterceptorFn} from '@angular/common/http';
 import {inject} from '@angular/core';
 import {AuthService} from './auth.service';
 import {catchError} from 'rxjs';
 import {MessageService} from 'primeng/api';
+
+export const SILENT_ERRORS = new HttpContextToken<boolean>(() => false);
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -30,6 +32,9 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
           });
           throw err;
         }
+      }
+      if (req.context.get(SILENT_ERRORS)) {
+        throw err;
       }
       messageService.add({
         severity: 'error',
