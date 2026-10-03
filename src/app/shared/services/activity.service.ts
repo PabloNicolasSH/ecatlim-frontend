@@ -26,15 +26,11 @@ export class ActivityService {
     return this.http.post(`${environment.apiUrl}/activity/${activityId}/forum-publications`, body);
   }
 
-  submitSurvey(activityId: number, studentId: number, responses: any[]): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/activity/${activityId}/survey-responses?studentId=${studentId}`, responses);
+  submitSurvey(activityId: number, responses: any[]): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/activity/${activityId}/survey-responses`, responses);
   }
 
-  uploadSubmissionFile(activityId: number, studentId: number, formData: FormData, comment?: string): Observable<any> {
-    let url = `${environment.apiUrl}/activity/${activityId}/file-submissions?studentId=${studentId}`;
-    if (comment) {
-      url += `&comment=${encodeURIComponent(comment)}`;
-    }
-    return this.http.post(url, formData);
+  uploadSubmissionFile(activityId: number, formData: FormData): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/activity/${activityId}/file-submissions`, formData);
   }
 }

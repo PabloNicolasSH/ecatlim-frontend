@@ -156,8 +156,8 @@
         </div>
 
         <div class="flex justify-end gap-4">
-          <p-button label="Limpiar" [outlined]="true" severity="secondary" (onClick)="eventForm.reset()" />
-          <p-button label="Continuar" [disabled]="!isStepValid(1)" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
+          <p-button label="Limpiar" [outlined]="true" severity="secondary" (onClick)="resetForm()" />
+          <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
         </div>
       </form>
     </div>
@@ -244,9 +244,9 @@
           <p-button label="Atrás" icon="pi pi-arrow-left" [outlined]="true" severity="secondary" (onClick)="prevStep()" class="w-full sm:w-auto" />
 
           <div class="flex gap-4 w-full sm:w-auto justify-end">
-            <p-button label="Guardar como Borrador" [disabled]="!eventForm.valid" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-pencil" (onClick)="saveDraftEvent()" class="w-full sm:w-auto" />
-            <p-button label="Guardar" [disabled]="!eventForm.valid" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-save" (onClick)="saveEvent()" class="w-full sm:w-auto" />
-            <p-button label="Configurar Horarios" [disabled]="!isStepValid(2)" icon="pi pi-calendar" iconPos="right" (onClick)="nextStep()" class="w-full sm:w-auto" />
+            <p-button label="Guardar como Borrador" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-pencil" (onClick)="saveDraftEvent()" class="w-full sm:w-auto" />
+            <p-button label="Guardar" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-save" (onClick)="saveEvent()" class="w-full sm:w-auto" />
+            <p-button label="Configurar Horarios" icon="pi pi-calendar" iconPos="right" (onClick)="nextStep()" class="w-full sm:w-auto" />
           </div>
         </div>
       </form>

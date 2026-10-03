@@ -15,6 +15,8 @@ import {ToggleButton} from 'primeng/togglebutton';
 import {MessageService} from 'primeng/api';
 import {EventService} from '../../shared/services/event.service';
 import {SimpleUser} from '../../shared/models/user.model';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {dateOrderValidator, MAX_TEXT, notBlankValidator} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-admin-create-activity',
@@ -29,7 +31,8 @@ import {SimpleUser} from '../../shared/models/user.model';
     Checkbox,
     FloatLabel,
     Tooltip,
-    ToggleButton
+    ToggleButton,
+    FieldErrorComponent
   ],
   templateUrl: './admin-create-activity.component.html',
   styleUrl: './admin-create-activity.component.scss'
@@ -85,12 +88,20 @@ export class AdminCreateActivityComponent implements OnInit {
         this.activityForm.get('isGradable')?.setValue(false);
       }
     });
+
+    this.activityForm.get('isGradable')?.valueChanges.subscribe(gradable => {
+      for (const key of ['maxAttempts', 'passingScore']) {
+        const control = this.activityForm.get(key)!;
+        gradable ? control.addValidators(Validators.required) : control.removeValidators(Validators.required);
+        control.updateValueAndValidity();
+      }
+    });
   }
 
   initForm(): void {
     this.activityForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(5)]],
-      description: ['', Validators.required],
+      title: ['', [Validators.required, notBlankValidator, Validators.minLength(5), Validators.maxLength(MAX_TEXT)]],
+      description: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
       activityType: ['FORUM', Validators.required],
       evaluationMethod: ['AUTOMATIC', Validators.required],
       availableAt: ['', Validators.required],
@@ -99,10 +110,10 @@ export class AdminCreateActivityComponent implements OnInit {
       responsibleId: [null, Validators.required],
       isOptional: [false],
       isGradable: [false],
-      maxAttempts: [null],
-      passingScore: [null],
+      maxAttempts: [null, [Validators.min(1), Validators.max(100)]],
+      passingScore: [null, [Validators.min(0), Validators.max(10)]],
       questions: this.fb.array([])
-    });
+    }, {validators: dateOrderValidator('availableAt', 'dueDate')});
   }
 
   get questions(): FormArray {
@@ -115,7 +126,7 @@ export class AdminCreateActivityComponent implements OnInit {
 
   addQuestion(): void {
     const questionForm = this.fb.group({
-      questionText: ['', Validators.required],
+      questionText: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
       responseType: ['SELECTION', Validators.required],
       options: this.fb.array([])
     });
@@ -132,7 +143,7 @@ export class AdminCreateActivityComponent implements OnInit {
 
   addOption(questionIndex: number): void {
     const optionForm = this.fb.group({
-      optionText: ['', Validators.required],
+      optionText: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
       isCorrect: [false]
     });
     this.getOptions(questionIndex).push(optionForm);
@@ -145,6 +156,11 @@ export class AdminCreateActivityComponent implements OnInit {
   onSubmit(): void {
     if (this.activityForm.invalid) {
       this.activityForm.markAllAsTouched();
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Revisa el formulario',
+        detail: 'Hay campos obligatorios vacíos o con un formato no válido'
+      });
       return;
     }
 

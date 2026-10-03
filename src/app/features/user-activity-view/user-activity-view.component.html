@@ -152,7 +152,7 @@
                   <div class="bg-stone-50 p-4 rounded-xl border border-stone-200/60">
                     <div class="flex items-center justify-between mb-2">
                       <span class="font-semibold text-sm text-stone-800">{{ pub.title }}</span>
-                      <span class="text-[11px] text-stone-400">{{ pub.availableAt }}</span>
+                      <span class="text-[11px] text-stone-400">{{ pub.author ? fullName(pub.author) + ' · ' : '' }}{{ pub.publishedAt | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                     <p class="text-xs text-stone-600 leading-relaxed">{{ pub.body }}</p>
                   </div>
@@ -167,10 +167,12 @@
                   <input id="title" pInputText formControlName="title" type="text" class="w-full"/>
                   <label for="title">Título de tu aportación</label>
                 </p-float-label>
+                <app-field-error [control]="forumForm.get('title')" />
                 <p-float-label variant="on">
                   <textarea id="body" pTextarea formControlName="body" rows="3" class="w-full min-h-25"></textarea>
                   <label for="body">Cuerpo de la aportación</label>
                 </p-float-label>
+                <app-field-error [control]="forumForm.get('body')" />
                 <div class="flex justify-end">
                   <p-button label="Publicar" type="submit" [disabled]="forumForm.invalid" styleClass="p-button-sm bg-amber-700 border-amber-700 text-white hover:bg-amber-800"></p-button>
                 </div>
@@ -187,7 +189,7 @@
               } @else {
                 <i class="pi pi-cloud-upload text-stone-400 text-4xl mb-2"></i>
                 <h3 class="font-semibold text-stone-700 text-sm">Selecciona tu documento de entrega</h3>
-                <p class="text-xs text-stone-400 mb-4">Formatos admitidos: PDF, Word, Imágenes (Máx. 10MB)</p>
+                <p class="text-xs text-stone-400 mb-4">Formatos admitidos: PDF, Word, Imágenes (Máx. {{ maxUploadMb }} MB)</p>
 
                 <input type="file" (change)="onFileSelected($event)" id="activityFile" class="hidden" />
                 <label for="activityFile" class="cursor-pointer px-4 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold rounded-lg transition-all border border-stone-300 shadow-sm">
@@ -232,7 +234,7 @@
                           rows="2"
                           placeholder="Escribe tu respuesta abierta aquí..."
                           class="w-full p-2.5 text-xs rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 resize-none mt-2"></textarea>
-                      } @else if (question.responseType === 'VALOR') {
+                      } @else if (question.responseType === 'VALUE') {
                         <div class="flex gap-2 mt-2">
                           @for (num of [1,2,3,4,5]; track num) {
                             <label class="flex-1 text-center border border-stone-200 rounded-lg p-2 bg-white hover:bg-stone-50 cursor-pointer transition-all text-xs">
@@ -244,8 +246,12 @@
                           }
                         </div>
                       }
+                      <app-field-error [control]="answers.at(idx).get(question.responseType === 'VALUE' ? 'numValue' : 'textValue')"
+                                       [messages]="{required: 'Responde a esta pregunta'}" />
                     </div>
                   </div>
+                } @empty {
+                  <p class="text-xs text-stone-400 italic">Esta encuesta todavía no tiene preguntas.</p>
                 }
               </div>
 

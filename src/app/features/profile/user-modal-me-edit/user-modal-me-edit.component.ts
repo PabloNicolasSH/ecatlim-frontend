@@ -8,6 +8,8 @@ import {UserService} from '../../../shared/services/user.service';
 import {MessageService} from 'primeng/api';
 import {User} from '../../../shared/models/user.model';
 import {UserMeForm} from '../../../shared/models/user-me-form.model';
+import {FieldErrorComponent} from '../../../shared/components/field-error/field-error.component';
+import {MAX_TEXT, idDocumentValidator, notBlankValidator, phoneValidator} from '../../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-user-modal-me-edit',
@@ -17,7 +19,8 @@ import {UserMeForm} from '../../../shared/models/user-me-form.model';
     FloatLabel,
     FormsModule,
     InputText,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FieldErrorComponent
   ],
   templateUrl: './user-modal-me-edit.component.html',
   styleUrl: './user-modal-me-edit.component.scss'
@@ -84,29 +87,22 @@ export class UserModalMeEditComponent {
             detail: 'Se ha actualizado correctamente tu información de usuario'
           });
         },
-        error: err => {
-          this.loading = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: err.message
-          });
-        }
+        error: () => this.loading = false
       });
     }
   }
 
   private initializeEditForm() {
     this.form = this.formBuilder.group({
-      name: [this.userToEdit.profile?.name || '', Validators.required],
-      surname: [this.userToEdit.profile?.surname || '', Validators.required],
+      name: [this.userToEdit.profile?.name || '', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      surname: [this.userToEdit.profile?.surname || '', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
       email: [this.userToEdit.email],
-      phone: [this.userToEdit.profile?.phone || ''],
-      census: [this.userToEdit.profile?.census || null],
-      nif: [this.userToEdit.profile?.nif || ''],
-      address: [this.userToEdit.profile?.address || ''],
-      city: [this.userToEdit.profile?.city || ''],
-      country: [this.userToEdit.profile?.country || '']
+      phone: [this.userToEdit.profile?.phone || '', phoneValidator],
+      census: [this.userToEdit.profile?.census || null, [Validators.min(0), Validators.max(999999999)]],
+      nif: [this.userToEdit.profile?.nif || '', idDocumentValidator],
+      address: [this.userToEdit.profile?.address || '', Validators.maxLength(MAX_TEXT)],
+      city: [this.userToEdit.profile?.city || '', Validators.maxLength(MAX_TEXT)],
+      country: [this.userToEdit.profile?.country || '', Validators.maxLength(MAX_TEXT)]
     });
     this.form.get('email')!.disable();
   }

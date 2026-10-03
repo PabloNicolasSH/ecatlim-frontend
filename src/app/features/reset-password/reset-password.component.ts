@@ -8,6 +8,8 @@ import {Password} from 'primeng/password';
 import {ResetPassword} from './models/reset-password.model';
 import {MessageService} from 'primeng/api';
 import {ChangePassword} from './models/change-password.model';
+import {finalize} from 'rxjs';
+import {PASSWORD_SPECIAL_CHARS} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-reset-password',
@@ -36,16 +38,13 @@ export class ResetPasswordComponent implements OnInit{
   changePassword: boolean = false;
   actualPassword: string = '';
 
-  protected passwordRegex: RegExp = /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?`~\-])(?!.*\s).{8,}$/;
-
-
   protected passwordValidationRules = [
-    { key: 'len', regex: /.{8,}/, text: 'Al menos 8 caracteres. ' },
+    { key: 'len', regex: /^.{8,256}$/, text: 'Entre 8 y 256 caracteres. ' },
     { key: 'space', regex: /^\S*$/, text: 'Ningún espacio. <br>' },
-    { key: 'may', regex: /.*[A-ZÑ].*/, text: 'Al menos 1 mayúscula. ' },
-    { key: 'min', regex: /.*[a-zñ].*/, text: 'Al menos 1 minúscula. ' },
-    { key: 'dig', regex: /.*\d.*/, text: 'Al menos 1 número. <br>' },
-    { key: 'special', regex: /[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?`~\-]/, text: 'Al menos 1 carácter especial (!@#?%_.:)'}
+    { key: 'may', regex: /[A-Z]/, text: 'Al menos 1 mayúscula (A-Z). ' },
+    { key: 'min', regex: /[a-z]/, text: 'Al menos 1 minúscula (a-z). ' },
+    { key: 'dig', regex: /\d/, text: 'Al menos 1 número. <br>' },
+    { key: 'special', regex: PASSWORD_SPECIAL_CHARS, text: 'Al menos 1 carácter especial (!@#?%_.:)'}
   ];
 
   constructor() {
@@ -63,7 +62,11 @@ export class ResetPasswordComponent implements OnInit{
   }
 
   protected get passwordValid(): boolean {
-    return this.passwordRegex.test(this.newPassword);
+    return this.passwordValidationRules.every(rule => rule.regex.test(this.newPassword));
+  }
+
+  protected get canSubmit(): boolean {
+    return this.passwordValid && this.passwordsMatch && (!this.changePassword || this.actualPassword.length > 0);
   }
 
   protected get passwordsMatch(): boolean {
@@ -80,9 +83,8 @@ export class ResetPasswordComponent implements OnInit{
     } else {
       this.loading = true;
       const forgotPassword: ResetPassword = {token: this.token, newPassword: this.newPassword, newPasswordRepeat: this.repeatedPassword};
-      this.userService.resetPassword(forgotPassword).subscribe({
+      this.userService.resetPassword(forgotPassword).pipe(finalize(() => this.loading = false)).subscribe({
         next: () => {
-          this.loading = false;
           this.messageService.add({
             severity: "success",
             detail: "Se ha cambiado correctamente tu contraseña"
@@ -97,9 +99,8 @@ export class ResetPasswordComponent implements OnInit{
   private changeUserPassword() {
     this.loading = true;
     const changePassword: ChangePassword = {currentPassword: this.actualPassword, newPassword: this.newPassword, newPasswordRepeat: this.repeatedPassword};
-    this.userService.changePassword(changePassword).subscribe({
+    this.userService.changePassword(changePassword).pipe(finalize(() => this.loading = false)).subscribe({
       next: () => {
-        this.loading = false;
         this.messageService.add({
           severity: "success",
           detail: "Se ha cambiado correctamente tu contraseña"

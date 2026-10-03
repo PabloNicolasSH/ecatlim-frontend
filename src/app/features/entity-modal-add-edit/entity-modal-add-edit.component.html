@@ -25,15 +25,21 @@
       <div class="flex flex-col gap-4">
         <p class="text-cyan-900 font-bold border-b border-gray-200 pb-1">Identificación</p>
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <p-floatlabel variant="on" class="sm:col-span-1">
-            <input id="groupNumber" pInputText formControlName="groupNumber" type="number" class="w-full"/>
-            <label for="groupNumber">Nº Entidad</label>
-          </p-floatlabel>
+          <div class="sm:col-span-1">
+            <p-floatlabel variant="on">
+              <input id="groupNumber" pInputText formControlName="groupNumber" type="number" class="w-full"/>
+              <label for="groupNumber">Nº Entidad</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('groupNumber')" />
+          </div>
 
-          <p-floatlabel variant="on" class="sm:col-span-3">
-            <input id="name" pInputText formControlName="name" class="w-full" required/>
-            <label for="name">Nombre de la Entidad</label>
-          </p-floatlabel>
+          <div class="sm:col-span-3">
+            <p-floatlabel variant="on">
+              <input id="name" pInputText formControlName="name" class="w-full" required/>
+              <label for="name">Nombre de la Entidad</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('name')" />
+          </div>
         </div>
       </div>
 
@@ -54,10 +60,13 @@
             <label for="provinceId">Provincia / Delegación</label>
           </p-floatlabel>
 
-          <p-floatlabel variant="on">
-            <input id="email" pInputText formControlName="email" type="email" class="w-full" required/>
-            <label for="email">Email Corporativo</label>
-          </p-floatlabel>
+          <div>
+            <p-floatlabel variant="on">
+              <input id="email" pInputText formControlName="email" type="email" class="w-full" required/>
+              <label for="email">Email Corporativo</label>
+            </p-floatlabel>
+            <app-field-error [control]="form.get('email')" />
+          </div>
         </div>
       </div>
     </div>

@@ -17,27 +17,33 @@
 
       <p class="text-ecatlim font-bold mb-3">Nombre y Apellidos</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="name"
-            pInputText
-            formControlName="name"
-            type="text"
-            class="w-full"
-          />
-          <label for="name">Nombre</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="name"
+              pInputText
+              formControlName="name"
+              type="text"
+              class="w-full"
+            />
+            <label for="name">Nombre</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('name')" />
+        </div>
 
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="surname"
-            pInputText
-            formControlName="surname"
-            type="text"
-            class="w-full"
-          />
-          <label for="surname">Apellidos</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="surname"
+              pInputText
+              formControlName="surname"
+              type="text"
+              class="w-full"
+            />
+            <label for="surname">Apellidos</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('surname')" />
+        </div>
       </div>
 
       <p class="text-ecatlim font-bold mt-5 mb-3">Datos de Contacto</p>
@@ -53,76 +59,94 @@
           <label for="email">Correo Electrónico</label>
         </p-floatlabel>
 
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="phone"
-            pInputText
-            formControlName="phone"
-            type="text"
-            class="w-full"
-          />
-          <label for="phone">Teléfono/móvil</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="phone"
+              pInputText
+              formControlName="phone"
+              type="text"
+              class="w-full"
+            />
+            <label for="phone">Teléfono/móvil</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('phone')" />
+        </div>
       </div>
 
       <p class="text-ecatlim font-bold mt-5 mb-3">Información Personal</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="census"
-            pInputText
-            formControlName="census"
-            type="number"
-            class="w-full"
-          />
-          <label for="census">Censo en su grupo scout</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="census"
+              pInputText
+              formControlName="census"
+              type="number"
+              class="w-full"
+            />
+            <label for="census">Censo en su grupo scout</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('census')" />
+        </div>
 
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="nif"
-            pInputText
-            formControlName="nif"
-            type="text"
-            class="w-full"
-          />
-          <label for="nif">DNI/NIE</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="nif"
+              pInputText
+              formControlName="nif"
+              type="text"
+              class="w-full"
+            />
+            <label for="nif">DNI/NIE/Pasaporte</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('nif')" />
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full mt-5">
-        <p-floatlabel variant="on" class="w-full md:col-span-2">
-          <input
-            id="address"
-            pInputText
-            formControlName="address"
-            type="text"
-            class="w-full"
-          />
-          <label for="address">Dirección Postal</label>
-        </p-floatlabel>
+        <div class="w-full md:col-span-2">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="address"
+              pInputText
+              formControlName="address"
+              type="text"
+              class="w-full"
+            />
+            <label for="address">Dirección Postal</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('address')" />
+        </div>
 
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="city"
-            pInputText
-            formControlName="city"
-            type="text"
-            class="w-full"
-          />
-          <label for="city">Municipio</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="city"
+              pInputText
+              formControlName="city"
+              type="text"
+              class="w-full"
+            />
+            <label for="city">Municipio</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('city')" />
+        </div>
 
-        <p-floatlabel variant="on" class="w-full">
-          <input
-            id="country"
-            pInputText
-            formControlName="country"
-            type="text"
-            class="w-full"
-          />
-          <label for="country">País</label>
-        </p-floatlabel>
+        <div class="w-full">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="country"
+              pInputText
+              formControlName="country"
+              type="text"
+              class="w-full"
+            />
+            <label for="country">País</label>
+          </p-floatlabel>
+          <app-field-error [control]="form.get('country')" />
+        </div>
       </div>
     </div>
 

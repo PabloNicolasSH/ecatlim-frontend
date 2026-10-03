@@ -151,6 +151,31 @@ export class AdminEditCreateEventComponent implements OnInit {
     });
   }
 
+  resetForm() {
+    this.eventForm.reset({
+      title: '',
+      shortname: '',
+      description: '',
+      contents: '',
+      startDate: null,
+      endDate: null,
+      location: '',
+      organizer: 'ECATLIM',
+      selectedDirector: null,
+      selectedFacilitators: [],
+      selectedEducationStage: null,
+      selectedBlocks: [],
+      status: 'PENDING',
+      minParticipants: 1,
+      dateOpenInscription: null,
+      dateCloseInscription: null,
+      cost: 0,
+      transferBankNumber: '',
+      transferCode: '',
+      notificationTarget: []
+    });
+  }
+
   private loadSuggestions() {
     this.eventService.getSuggestions().subscribe({
       next: suggestions => this.suggestions = suggestions,
@@ -321,7 +346,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   }
 
   saveDraftEvent() {
-    if (this.eventForm.invalid) return;
+    if (!this.canSave()) return;
 
     this.loading = true;
     this.eventForm.patchValue({ status: 'DRAFT' });
@@ -347,7 +372,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   }
 
   saveEvent() {
-    if (this.eventForm.invalid) return;
+    if (!this.canSave()) return;
 
     this.loading = true;
     const eventDto = this.prepareDto(false);
@@ -400,7 +425,7 @@ export class AdminEditCreateEventComponent implements OnInit {
       title: formValue.title,
       shortname: formValue.shortname,
       description: formValue.description,
-      contents: formValue.contents,
+      contents: formValue.contents ?? '',
       startDate: this.eventCreatorService.toLocalISO(formValue.startDate),
       endDate: this.eventCreatorService.toLocalISO(formValue.endDate),
       location: formValue.location,
@@ -423,13 +448,14 @@ export class AdminEditCreateEventComponent implements OnInit {
     };
   }
 
-  isStepValid(currentStep: number): boolean {
-    const fieldsByStep: { [key: number]: string[] } = {
-      1: ['title', 'shortname', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector', 'selectedBlocks', 'status'],
-      2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
-    };
+  private readonly fieldsByStep: { [key: number]: string[] } = {
+    1: ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
+      'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status'],
+    2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
+  };
 
-    const fields = fieldsByStep[currentStep];
+  isStepValid(currentStep: number): boolean {
+    const fields = this.fieldsByStep[currentStep];
     if (!fields) return true;
 
     return fields.every(field => this.eventForm.get(field)?.valid);
@@ -441,7 +467,30 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.prepareBlocksForScheduler();
       }
       this.step++;
+    } else {
+      this.showStepErrors(this.step);
     }
+  }
+
+  private showStepErrors(currentStep: number) {
+    (this.fieldsByStep[currentStep] ?? []).forEach(field => {
+      this.eventForm.get(field)?.markAsTouched();
+      this.eventForm.get(field)?.markAsDirty();
+    });
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Revisa el formulario',
+      detail: 'Hay campos obligatorios vacíos o con un formato no válido'
+    });
+  }
+
+  private canSave(): boolean {
+    if (this.eventForm.valid) return true;
+
+    const invalidStep = this.isStepValid(1) ? 2 : 1;
+    this.step = invalidStep;
+    this.showStepErrors(invalidStep);
+    return false;
   }
 
   prevStep() {

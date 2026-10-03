@@ -18,6 +18,9 @@ import {Dialog} from "primeng/dialog";
 import {ScrollPanel} from "primeng/scrollpanel";
 import {HoursMetreComponent} from "../../shared/components/hours-metre/hours-metre.component";
 import {map, switchMap} from 'rxjs';
+import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
+import {FormUtils} from '../../shared/form-utils';
+import {MAX_LONG_TEXT, MAX_TEXT, notBlankValidator} from '../../shared/validation/validation-patterns';
 
 @Component({
   selector: 'app-admin-create-education-stage',
@@ -37,7 +40,8 @@ import {map, switchMap} from 'rxjs';
     RouterLink,
     Dialog,
     ScrollPanel,
-    HoursMetreComponent
+    HoursMetreComponent,
+    FieldErrorComponent
   ],
   templateUrl: './admin-create-education-stage.component.html',
   styleUrl: './admin-create-education-stage.component.scss'
@@ -163,19 +167,19 @@ export class AdminCreateEducationStageComponent implements OnInit{
 
   private initializeEducationStageForm() {
     this.educationStageForm = this.formBuilder.group({
-      name: ["", Validators.required],
-      code: ["", Validators.required],
-      onlineHours: [0, [Validators.required, Validators.min(0)]],
-      contactHours: [0, [Validators.required, Validators.min(0)]],
-      practicalHours: [0, [Validators.required, Validators.min(0)]],
+      name: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      code: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      onlineHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      contactHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      practicalHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
       previousStageRequired: [false],
       preEducationStage: [""],
-      description: ["", Validators.required],
+      description: ["", [Validators.required, notBlankValidator, Validators.maxLength(MAX_LONG_TEXT)]],
     })
   }
 
   onSubmitEducationStage() {
-    this.educationStageForm.markAsDirty();
+    FormUtils.markAllAsDirtyAndTouched(this.educationStageForm);
     if (this.educationStageForm.valid && !this.loading){
       this.loading = true;
       const educationStageForm: EducationStage = {...this.educationStageForm.value};
@@ -199,14 +203,7 @@ export class AdminCreateEducationStageComponent implements OnInit{
             this.initializeEducationStageForm();
           }
         },
-        error: error => {
-          this.loading = false;
-          this.messageService.add({
-            severity: "error",
-            summary: "Error",
-            detail: error.message
-          });
-        }
+        error: () => this.loading = false
       });
     }
   }
@@ -232,12 +229,12 @@ export class AdminCreateEducationStageComponent implements OnInit{
 
   private createModuleGroup(): FormGroup {
     return this.formBuilder.group({
-      name: ['', Validators.required],
-      number: ['', Validators.required],
-      description: [''],
+      name: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      number: ['', [Validators.required, Validators.min(1)]],
+      description: ['', Validators.maxLength(MAX_LONG_TEXT)],
       type: ['', Validators.required],
-      onlineHours: [0, [Validators.required, Validators.min(0)]],
-      contactHours: [0, [Validators.required, Validators.min(0)]]
+      onlineHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      contactHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]]
     });
   }
 
@@ -306,14 +303,7 @@ export class AdminCreateEducationStageComponent implements OnInit{
           this.load();
           this.loading = false;
         },
-        error: err => {
-          this.messageService.add({
-            severity: "error",
-            summary: "Error",
-            detail: err.message
-          });
-          this.loading = false;
-        }
+        error: () => this.loading = false
       });
     } else {
       this.modulesForm.markAllAsTouched();
@@ -339,11 +329,11 @@ export class AdminCreateEducationStageComponent implements OnInit{
 
   private createLessonBlockGroup(): FormGroup {
     return this.formBuilder.group({
-      name: ['', Validators.required],
-      description: [''],
-      lessonBlockId: ['', Validators.required],
-      onlineHours: [0, [Validators.required, Validators.min(0)]],
-      contactHours: [0, [Validators.required, Validators.min(0)]],
+      name: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      description: ['', Validators.maxLength(MAX_LONG_TEXT)],
+      lessonBlockId: ['', [Validators.required, Validators.min(1)]],
+      onlineHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      contactHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
       recognizable: [false]
     });
   }
@@ -406,17 +396,10 @@ export class AdminCreateEducationStageComponent implements OnInit{
           this.initializeLessonBlockForm();
           this.loading = false;
         },
-        error: err => {
-          this.messageService.add({
-            severity: "error",
-            summary: "Error",
-            detail: err.message
-          });
-          this.loading = false;
-        }
+        error: () => this.loading = false
       });
     } else {
-      this.modulesForm.markAllAsTouched();
+      this.lessonBlockForm.markAllAsTouched();
     }
   }
 
