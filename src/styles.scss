@@ -24,6 +24,7 @@ h2{
 }
 
 p-floatlabel:has(input[required]),
+p-floatlabel:has(textarea[required]),
 p-floatlabel:has(p-select[required]),
 p-floatlabel:has(p-multi-select[required]) {
   label::after {

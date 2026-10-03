@@ -25,8 +25,6 @@ import {EducationStageService} from '../../../shared/services/education-stage.se
 import {EducationStage} from '../../../shared/models/education-stage.model';
 import {forkJoin} from 'rxjs';
 import {EventForm, EventSuggestions} from '../../../shared/models/event.model';
-import {FieldErrorComponent} from '../../../shared/components/field-error/field-error.component';
-import {dateOrderValidator, MAX_RICH_TEXT, MAX_TEXT, notBlankValidator} from '../../../shared/validation/validation-patterns';
 
 type StaffOption = SimpleUser & { fullName: string };
 
@@ -50,8 +48,7 @@ const toStaffOption = (user: SimpleUser): StaffOption => ({
     PrimeTemplate,
     InputNumber,
     AutoComplete,
-    NgClass,
-    FieldErrorComponent
+    NgClass
   ],
   templateUrl: './admin-edit-create-event.component.html',
   styleUrl: './admin-edit-create-event.component.scss'
@@ -131,14 +128,14 @@ export class AdminEditCreateEventComponent implements OnInit {
 
   private initializeForm() {
     this.eventForm = this.formBuilder.group({
-      title: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
-      shortname: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
-      description: ['', Validators.maxLength(MAX_RICH_TEXT)],
-      contents: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_RICH_TEXT)]],
+      title: ['', Validators.required],
+      shortname: ['', Validators.required],
+      description: [''],
+      contents: ['', Validators.required],
       startDate: [null, Validators.required],
       endDate: [null, Validators.required],
-      location: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
-      organizer: ['ECATLIM', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      location: ['', Validators.required],
+      organizer: ['ECATLIM', Validators.required],
       selectedDirector: [null, Validators.required],
       selectedFacilitators: [[], [Validators.required, Validators.minLength(1)]],
       selectedEducationStage: [null, Validators.required],
@@ -148,14 +145,34 @@ export class AdminEditCreateEventComponent implements OnInit {
       dateOpenInscription: [null, Validators.required],
       dateCloseInscription: [null, Validators.required],
       cost: [0, [Validators.required, Validators.min(0)]],
-      transferBankNumber: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
-      transferCode: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      transferBankNumber: ['', Validators.required],
+      transferCode: ['', Validators.required],
       notificationTarget: [[], Validators.required]
-    }, {
-      validators: [
-        dateOrderValidator('startDate', 'endDate'),
-        dateOrderValidator('dateOpenInscription', 'dateCloseInscription')
-      ]
+    });
+  }
+
+  resetForm() {
+    this.eventForm.reset({
+      title: '',
+      shortname: '',
+      description: '',
+      contents: '',
+      startDate: null,
+      endDate: null,
+      location: '',
+      organizer: 'ECATLIM',
+      selectedDirector: null,
+      selectedFacilitators: [],
+      selectedEducationStage: null,
+      selectedBlocks: [],
+      status: 'PENDING',
+      minParticipants: 1,
+      dateOpenInscription: null,
+      dateCloseInscription: null,
+      cost: 0,
+      transferBankNumber: '',
+      transferCode: '',
+      notificationTarget: []
     });
   }
 
@@ -329,7 +346,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   }
 
   saveDraftEvent() {
-    if (this.eventForm.invalid) return;
+    if (!this.canSave()) return;
 
     this.loading = true;
     this.eventForm.patchValue({ status: 'DRAFT' });
@@ -347,6 +364,7 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]);
       },
       error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
         this.loading = false;
         this.eventForm.patchValue({ status: 'PENDING' });
       }
@@ -354,7 +372,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   }
 
   saveEvent() {
-    if (this.eventForm.invalid) return;
+    if (!this.canSave()) return;
 
     this.loading = true;
     const eventDto = this.prepareDto(false);
@@ -371,6 +389,7 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.router.navigate(['/app/eventos-formativos/detalle', this.eventId]);
       },
       error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
         this.loading = false;
         this.eventForm.patchValue({ status: 'PENDING' });
       }
@@ -393,7 +412,10 @@ export class AdminEditCreateEventComponent implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Evento y cronograma guardados' });
         this.router.navigate(['/app/eventos-formativos/detalle', finalId]);
       },
-      error: () => this.loading = false
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al finalizar' });
+      }
     });
   }
 
@@ -403,7 +425,7 @@ export class AdminEditCreateEventComponent implements OnInit {
       title: formValue.title,
       shortname: formValue.shortname,
       description: formValue.description,
-      contents: formValue.contents,
+      contents: formValue.contents ?? '',
       startDate: this.eventCreatorService.toLocalISO(formValue.startDate),
       endDate: this.eventCreatorService.toLocalISO(formValue.endDate),
       location: formValue.location,
@@ -426,14 +448,14 @@ export class AdminEditCreateEventComponent implements OnInit {
     };
   }
 
-  isStepValid(currentStep: number): boolean {
-    const fieldsByStep: { [key: number]: string[] } = {
-      1: ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
-        'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status'],
-      2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
-    };
+  private readonly fieldsByStep: { [key: number]: string[] } = {
+    1: ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
+      'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status'],
+    2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
+  };
 
-    const fields = fieldsByStep[currentStep];
+  isStepValid(currentStep: number): boolean {
+    const fields = this.fieldsByStep[currentStep];
     if (!fields) return true;
 
     return fields.every(field => this.eventForm.get(field)?.valid);
@@ -451,11 +473,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   }
 
   private showStepErrors(currentStep: number) {
-    const fields = currentStep === 1
-      ? ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
-        'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status']
-      : ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget'];
-    fields.forEach(field => {
+    (this.fieldsByStep[currentStep] ?? []).forEach(field => {
       this.eventForm.get(field)?.markAsTouched();
       this.eventForm.get(field)?.markAsDirty();
     });
@@ -464,6 +482,15 @@ export class AdminEditCreateEventComponent implements OnInit {
       summary: 'Revisa el formulario',
       detail: 'Hay campos obligatorios vacíos o con un formato no válido'
     });
+  }
+
+  private canSave(): boolean {
+    if (this.eventForm.valid) return true;
+
+    const invalidStep = this.isStepValid(1) ? 2 : 1;
+    this.step = invalidStep;
+    this.showStepErrors(invalidStep);
+    return false;
   }
 
   prevStep() {

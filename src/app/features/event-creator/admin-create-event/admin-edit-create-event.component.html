@@ -44,94 +44,70 @@
 
       <form [formGroup]="eventForm" class="flex flex-col gap-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="md:col-span-2">
-            <p-floatlabel variant="on">
-              <input id="title" pInputText formControlName="title" type="text" class="w-full" required/>
-              <label for="title">Título del Evento</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('title')" />
-          </div>
-          <div>
-            <p-floatlabel variant="on">
-              <input id="shortname" pInputText formControlName="shortname" type="text" class="w-full" required/>
-              <label for="shortname">Nombre Corto (Alias)</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('shortname')" />
-          </div>
+          <p-floatlabel variant="on" class="md:col-span-2">
+            <input id="title" pInputText formControlName="title" type="text" class="w-full" required/>
+            <label for="title">Título del Evento</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <input id="shortname" pInputText formControlName="shortname" type="text" class="w-full" required/>
+            <label for="shortname">Nombre Corto (Alias)</label>
+          </p-floatlabel>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p-floatlabel variant="on">
-              <p-date-picker
-                id="startDate"
-                formControlName="startDate"
-                appendTo="body"
-                styleClass="w-full"
-                required
-                [showIcon]="true"
-                [showTime]="true"
-                [defaultDate]="defaultStartDate"
-                [stepMinute]="5"
-                [hideOnDateTimeSelect]="false"/>
-              <label for="startDate">Fecha Inicio del Evento</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('startDate')" />
-          </div>
-          <div>
-            <p-floatlabel variant="on">
-              <p-date-picker id="endDate" formControlName="endDate" appendTo="body" styleClass="w-full" [minDate]="eventForm.value.startDate" required [showIcon]="true" [showTime]="true" [defaultDate]="defaultEndDate" [stepMinute]="5" [hideOnDateTimeSelect]="false"/>
-              <label for="endDate">Fecha Fin del Evento</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('endDate')" />
-          </div>
+          <p-floatlabel variant="on">
+            <p-date-picker
+              id="startDate"
+              formControlName="startDate"
+              appendTo="body"
+              styleClass="w-full"
+              required
+              [showIcon]="true"
+              [showTime]="true"
+              [defaultDate]="defaultStartDate"
+              [stepMinute]="5"
+              [hideOnDateTimeSelect]="false"/>
+            <label for="startDate">Fecha Inicio del Evento</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-date-picker id="endDate" formControlName="endDate" appendTo="body" styleClass="w-full" [minDate]="eventForm.value.startDate" required [showIcon]="true" [showTime]="true" [defaultDate]="defaultEndDate" [stepMinute]="5" [hideOnDateTimeSelect]="false"/>
+            <label for="endDate">Fecha Fin del Evento</label>
+          </p-floatlabel>
         </div>
 
         <div class="flex flex-col gap-4">
           <p class="text-cyan-900 font-bold">Responsables y Organización</p>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-            <div>
-              <p-floatlabel variant="on">
-                <input id="organizer" pInputText formControlName="organizer" type="text" class="w-full" required/>
-                <label for="organizer">Entidad Organizadora</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('organizer')" />
-            </div>
+            <p-floatlabel variant="on">
+              <input id="organizer" pInputText formControlName="organizer" type="text" class="w-full" required/>
+              <label for="organizer">Entidad Organizadora</label>
+            </p-floatlabel>
 
-            <div>
-              <p-floatlabel variant="on">
-                <p-select id="director" [options]="directors" optionLabel="fullName" formControlName="selectedDirector" appendTo="body" styleClass="w-full" required/>
-                <label for="director">Dirección del Evento</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('selectedDirector')" />
-            </div>
+            <p-floatlabel variant="on">
+              <p-select id="director" [options]="directors" optionLabel="fullName" formControlName="selectedDirector" appendTo="body" styleClass="w-full" required/>
+              <label for="director">Dirección del Evento</label>
+            </p-floatlabel>
 
-            <div>
-              <p-floatlabel variant="on">
-                <p-select id="educationStage" [options]="availableEducationStages" optionLabel="name" formControlName="selectedEducationStage" appendTo="body" styleClass="w-full" required/>
-                <label for="educationStage">Etapa Formativa</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('selectedEducationStage')" />
-            </div>
+            <p-floatlabel variant="on">
+              <p-select id="educationStage" [options]="availableEducationStages" optionLabel="name" formControlName="selectedEducationStage" appendTo="body" styleClass="w-full" required/>
+              <label for="educationStage">Etapa Formativa</label>
+            </p-floatlabel>
 
-            <div>
-              <p-floatlabel variant="on">
-                <p-autocomplete
-                  inputId="location"
-                  formControlName="location"
-                  [suggestions]="filteredLocations"
-                  (completeMethod)="searchLocations($event)"
-                  [dropdown]="true"
-                  [forceSelection]="false"
-                  appendTo="body"
-                  styleClass="w-full"
-                  inputStyleClass="w-full"
-                  emptyMessage="Sin sugerencias"
-                  required/>
-                <label for="location">Lugar de realización</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('location')" />
-            </div>
+            <p-floatlabel variant="on">
+              <p-autocomplete
+                inputId="location"
+                formControlName="location"
+                [suggestions]="filteredLocations"
+                (completeMethod)="searchLocations($event)"
+                [dropdown]="true"
+                [forceSelection]="false"
+                appendTo="body"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                emptyMessage="Sin sugerencias"
+                required/>
+              <label for="location">Lugar de realización</label>
+            </p-floatlabel>
           </div>
         </div>
 
@@ -139,60 +115,48 @@
           <p class="text-cyan-900 font-bold">Diseño Pedagógico</p>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <div>
-              <p-floatlabel variant="on">
-                <p-multi-select id="blocks" [options]="availableBlocks" formControlName="selectedBlocks" display="chip" [group]="true" [filter]="true" filterBy="label" appendTo="body" styleClass="w-full" scrollHeight="200px" (onChange)="onBlockSelectionChange($event)" required>
-                  <ng-template let-group pTemplate="group">
-                    <div class="flex font-bold py-1"><span>{{ group.label }}</span></div>
-                  </ng-template>
-                  <ng-template let-block pTemplate="item">
-                    <div class="flex items-center">
-                      <span class="mr-2 text-primary font-semibold">{{ block.value.code }}</span>
-                      <span>{{ block.value.name }}</span>
-                    </div>
-                  </ng-template>
-                </p-multi-select>
-                <label for="blocks">Bloques del plan de formación</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('selectedBlocks')" />
-            </div>
+            <p-floatlabel variant="on">
+              <p-multi-select id="blocks" [options]="availableBlocks" formControlName="selectedBlocks" display="chip" [group]="true" [filter]="true" filterBy="label" appendTo="body" styleClass="w-full" scrollHeight="200px" (onChange)="onBlockSelectionChange($event)" required>
+                <ng-template let-group pTemplate="group">
+                  <div class="flex font-bold py-1"><span>{{ group.label }}</span></div>
+                </ng-template>
+                <ng-template let-block pTemplate="item">
+                  <div class="flex items-center">
+                    <span class="mr-2 text-primary font-semibold">{{ block.value.code }}</span>
+                    <span>{{ block.value.name }}</span>
+                  </div>
+                </ng-template>
+              </p-multi-select>
+              <label for="blocks">Bloques del plan de formación</label>
+            </p-floatlabel>
 
-            <div>
-              <p-floatlabel variant="on">
-                <p-multi-select id="facilitators" [options]="facilitators" optionLabel="fullName" formControlName="selectedFacilitators" display="chip" [filter]="true" filterBy="fullName" appendTo="body" styleClass="w-full" scrollHeight="200px" required>
-                  <ng-template let-user pTemplate="item">
-                    <div class="flex items-center gap-2">
-                      <span>{{ user.fullName }}</span>
-                    </div>
-                  </ng-template>
-                </p-multi-select>
-                <label for="facilitators">Equipo de Formación</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('selectedFacilitators')" />
-            </div>
+            <p-floatlabel variant="on">
+              <p-multi-select id="facilitators" [options]="facilitators" optionLabel="fullName" formControlName="selectedFacilitators" display="chip" [filter]="true" filterBy="fullName" appendTo="body" styleClass="w-full" scrollHeight="200px" required>
+                <ng-template let-user pTemplate="item">
+                  <div class="flex items-center gap-2">
+                    <span>{{ user.fullName }}</span>
+                  </div>
+                </ng-template>
+              </p-multi-select>
+              <label for="facilitators">Equipo de Formación</label>
+            </p-floatlabel>
 
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p-floatlabel variant="on">
-                <textarea id="description" pTextarea formControlName="description" rows="3" class="w-full min-h-25"></textarea>
-                <label for="description">Información general del evento (Logística)</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('description')" />
-            </div>
-            <div>
-              <p-floatlabel variant="on">
-                <textarea id="contents" pTextarea formControlName="contents" rows="3" class="w-full min-h-25" required></textarea>
-                <label for="contents">Contenidos / Temario</label>
-              </p-floatlabel>
-              <app-field-error [control]="eventForm.get('contents')" />
-            </div>
+            <p-floatlabel variant="on">
+              <textarea id="description" pTextarea formControlName="description" rows="3" class="w-full min-h-25"></textarea>
+              <label for="description">Información general del evento (Logística)</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on">
+              <textarea id="contents" pTextarea formControlName="contents" rows="3" class="w-full min-h-25" required></textarea>
+              <label for="contents">Contenidos / Temario</label>
+            </p-floatlabel>
           </div>
         </div>
 
         <div class="flex justify-end gap-4">
-          <p-button label="Limpiar" [outlined]="true" severity="secondary" (onClick)="eventForm.reset()" />
+          <p-button label="Limpiar" [outlined]="true" severity="secondary" (onClick)="resetForm()" />
           <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
         </div>
       </form>
@@ -207,102 +171,81 @@
 
       <form [formGroup]="eventForm" class="flex flex-col gap-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p-floatlabel variant="on">
-              <p-date-picker id="dateOpenInscription" formControlName="dateOpenInscription" appendTo="body" styleClass="w-full" [showIcon]="true" [showTime]="true" required/>
-              <label for="dateOpenInscription">Apertura de Inscripciones</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('dateOpenInscription')" />
-          </div>
-          <div>
-            <p-floatlabel variant="on">
-              <p-date-picker id="dateCloseInscription" formControlName="dateCloseInscription" appendTo="body" styleClass="w-full" [minDate]="eventForm.value.dateOpenInscription" [showIcon]="true" [showTime]="true" required/>
-              <label for="dateCloseInscription">Cierre de Inscripciones</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('dateCloseInscription')" [messages]="{dateOrder: 'Debe ser posterior a la apertura de inscripción'}" />
-          </div>
+          <p-floatlabel variant="on">
+            <p-date-picker id="dateOpenInscription" formControlName="dateOpenInscription" appendTo="body" styleClass="w-full" [showIcon]="true" [showTime]="true" required/>
+            <label for="dateOpenInscription">Apertura de Inscripciones</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-date-picker id="dateCloseInscription" formControlName="dateCloseInscription" appendTo="body" styleClass="w-full" [minDate]="eventForm.value.dateOpenInscription" [showIcon]="true" [showTime]="true" required/>
+            <label for="dateCloseInscription">Cierre de Inscripciones</label>
+          </p-floatlabel>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <p-floatlabel variant="on">
-              <p-input-number id="cost" formControlName="cost" mode="currency" currency="EUR" locale="es-ES" class="w-full" required/>
-              <label for="cost">Coste de la Actividad</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('cost')" />
-          </div>
-          <div>
-            <p-floatlabel variant="on">
-              <p-autocomplete
-                inputId="transferBankNumber"
-                formControlName="transferBankNumber"
-                [suggestions]="filteredBankNumbers"
-                (completeMethod)="searchBankNumbers($event)"
-                [dropdown]="true"
-                [forceSelection]="false"
-                appendTo="body"
-                styleClass="w-full"
-                inputStyleClass="w-full font-mono"
-                emptyMessage="Sin sugerencias"
-                required/>
-              <label for="transferBankNumber">Nº Cuenta Bancaria (IBAN)</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('transferBankNumber')" />
-          </div>
-          <div>
-            <p-floatlabel variant="on">
-              <p-autocomplete
-                inputId="transferCode"
-                formControlName="transferCode"
-                [suggestions]="filteredTransferCodes"
-                (completeMethod)="searchTransferCodes($event)"
-                [dropdown]="true"
-                [forceSelection]="false"
-                appendTo="body"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-                emptyMessage="Sin sugerencias"
-                required/>
-              <label for="transferCode">Código de Transferencia Requerido</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('transferCode')" />
-          </div>
+          <p-floatlabel variant="on">
+            <p-input-number id="cost" formControlName="cost" mode="currency" currency="EUR" locale="es-ES" class="w-full" required/>
+            <label for="cost">Coste de la Actividad</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-autocomplete
+              inputId="transferBankNumber"
+              formControlName="transferBankNumber"
+              [suggestions]="filteredBankNumbers"
+              (completeMethod)="searchBankNumbers($event)"
+              [dropdown]="true"
+              [forceSelection]="false"
+              appendTo="body"
+              styleClass="w-full"
+              inputStyleClass="w-full font-mono"
+              emptyMessage="Sin sugerencias"
+              required/>
+            <label for="transferBankNumber">Nº Cuenta Bancaria (IBAN)</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-autocomplete
+              inputId="transferCode"
+              formControlName="transferCode"
+              [suggestions]="filteredTransferCodes"
+              (completeMethod)="searchTransferCodes($event)"
+              [dropdown]="true"
+              [forceSelection]="false"
+              appendTo="body"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+              emptyMessage="Sin sugerencias"
+              required/>
+            <label for="transferCode">Código de Transferencia Requerido</label>
+          </p-floatlabel>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <p-floatlabel variant="on">
-              <p-input-number id="minParticipants" formControlName="minParticipants" [min]="1" class="w-full" required/>
-              <label for="minParticipants">Mínimo de Participantes</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('minParticipants')" />
-          </div>
+          <p-floatlabel variant="on">
+            <p-input-number id="minParticipants" formControlName="minParticipants" [min]="1" class="w-full" required/>
+            <label for="minParticipants">Mínimo de Participantes</label>
+          </p-floatlabel>
 
-          <div class="w-full md:col-span-2">
-            <p-floatlabel variant="on" class="w-full">
-              <p-multi-select
-                id="notificationTarget"
-                [options]="notificationTargets"
-                optionLabel="label"
-                optionValue="value"
-                formControlName="notificationTarget"
-                display="chip"
-                appendTo="body"
-                styleClass="w-full"
-                required
-              />
-              <label for="notificationTarget">A quién Notificar</label>
-            </p-floatlabel>
-            <app-field-error [control]="eventForm.get('notificationTarget')" />
-          </div>
+          <p-floatlabel variant="on" class="w-full md:col-span-2">
+            <p-multi-select
+              id="notificationTarget"
+              [options]="notificationTargets"
+              optionLabel="label"
+              optionValue="value"
+              formControlName="notificationTarget"
+              display="chip"
+              appendTo="body"
+              styleClass="w-full"
+              required
+            />
+            <label for="notificationTarget">A quién Notificar</label>
+          </p-floatlabel>
         </div>
 
         <div class="mt-6 flex flex-col sm:flex-row justify-between gap-4">
           <p-button label="Atrás" icon="pi pi-arrow-left" [outlined]="true" severity="secondary" (onClick)="prevStep()" class="w-full sm:w-auto" />
 
           <div class="flex gap-4 w-full sm:w-auto justify-end">
-            <p-button label="Guardar como Borrador" [disabled]="!eventForm.valid" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-pencil" (onClick)="saveDraftEvent()" class="w-full sm:w-auto" />
-            <p-button label="Guardar" [disabled]="!eventForm.valid" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-save" (onClick)="saveEvent()" class="w-full sm:w-auto" />
+            <p-button label="Guardar como Borrador" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-pencil" (onClick)="saveDraftEvent()" class="w-full sm:w-auto" />
+            <p-button label="Guardar" [outlined]="true" [loading]="loading" severity="success" icon="pi pi-save" (onClick)="saveEvent()" class="w-full sm:w-auto" />
             <p-button label="Configurar Horarios" icon="pi pi-calendar" iconPos="right" (onClick)="nextStep()" class="w-full sm:w-auto" />
           </div>
         </div>
