@@ -1,198 +1,680 @@
-<div class="max-w-7xl mx-auto p-4 md:p-6">
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
     <div>
-      <h1 class="text-4xl font-bold text-orange-900 mb-2">Biblioteca de Recursos</h1>
-      <p class="text-gray-600">Descubre, descarga y comparte materiales educativos diseñados para inspirar la curiosidad y el aprendizaje en el aula.</p>
+      <h1 class="font-black text-3xl text-[#3D2E24] m-0">Biblioteca de Recursos</h1>
+      <p class="text-sm text-[#8C7A6B] mt-1 mb-0">Descubre, descarga y comparte materiales educativos para preparar tus sesiones y actividades.</p>
     </div>
     @if (canAddResources()) {
       <p-button
-        label="Nuevo Recurso"
         icon="pi pi-plus"
-        severity="warn"
+        label="Nuevo recurso"
         (onClick)="openAddModal()"
-        styleClass="shadow-sm font-semibold">
+        styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl font-bold">
       </p-button>
     }
   </div>
 
-  <div class="flex flex-wrap gap-2 mb-8">
-    @for (cat of categories; track cat) {
-      <p-button
-        [label]="cat"
-        [rounded]="true"
-        [severity]="activeCategory() === cat ? 'warn' : 'secondary'"
-        [outlined]="activeCategory() !== cat"
-        (onClick)="activeCategory.set(cat)"
-        styleClass="text-sm font-semibold px-4 py-2" />
+  <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+    <button
+      type="button"
+      (click)="setType('ALL')"
+      class="relative overflow-hidden text-left rounded-2xl text-white shadow-sm p-4 border-0 cursor-pointer bg-gradient-to-br from-[#4D3112] via-[#633F17] to-[#9c6a33] transition-all hover:-translate-y-0.5"
+      [class]="activeType() === 'ALL' ? 'ring-4 ring-[#d9a45b]/60' : ''"
+      [attr.aria-pressed]="activeType() === 'ALL'">
+      <i class="pi pi-book absolute -right-2 -bottom-3 text-6xl opacity-15"></i>
+      <p class="text-[10px] font-black uppercase tracking-wider text-amber-200 m-0">Recursos</p>
+      <p class="text-4xl font-black m-0 mt-2">{{ typeCounts().ALL }}</p>
+      <p class="text-[11px] text-amber-100/80 m-0 mt-1">{{ totalUses() }} {{ totalUses() === 1 ? 'uso' : 'usos' }} en total</p>
+    </button>
+
+    @for (type of resourceTypes; track type) {
+      <button
+        type="button"
+        (click)="setType(type)"
+        class="text-left bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition-all hover:-translate-y-0.5"
+        [class]="activeType() === type ? 'border-[#795221] ring-2 ring-[#d9a45b]/50' : 'border-[#EBE5DC]'"
+        [attr.aria-pressed]="activeType() === type">
+        <div class="flex items-center justify-between gap-2">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center" [class]="typeMeta[type].soft + ' ' + typeMeta[type].text">
+            <i [class]="typeMeta[type].icon"></i>
+          </span>
+          @if (activeType() === type) {
+            <i class="pi pi-filter-fill text-xs text-[#795221]"></i>
+          }
+        </div>
+        <p class="text-3xl font-black text-[#7f521d] m-0 mt-3">{{ typeCounts()[type] }}</p>
+        <p class="text-xs text-[#8C7A6B] m-0 mt-0.5 truncate">{{ typeMeta[type].plural }}</p>
+      </button>
     }
-  </div>
+  </section>
 
-  <p-data-view
-    [value]="filteredResources()"
-    [paginator]="true"
-    [rows]="8"
-    styleClass="!border-none"
-  >
-    <ng-template #list let-items>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-        @for (res of items; track res.id) {
-          <p-card styleClass="h-full flex flex-col shadow-sm border border-gray-100 hover:shadow-md transition-shadow rounded-2xl overflow-hidden bg-white !p-0">
+  <section class="bg-white rounded-3xl border border-[#EBE5DC] shadow-sm p-4 space-y-4">
+    <div class="flex flex-col lg:flex-row gap-3 lg:items-center">
+      <p-iconfield class="grow">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="search"
+          class="w-full !rounded-xl"
+          placeholder="Busca por nombre, descripción, etiqueta o autor..."
+          aria-label="Buscar recursos"
+          [ngModel]="search()"
+          (ngModelChange)="setSearch($event)" />
+      </p-iconfield>
 
-            <div class="flex justify-between items-start p-6 pb-2">
-              <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-800 text-xl">
-                <i [class]="getIconForType(res.type)"></i>
-              </div>
-              <p-tag [value]="res.type" [severity]="getSeverityForType(res.type)" />
-            </div>
+      <div class="flex gap-2 items-center">
+        <p-select
+          [options]="sortOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="sort()"
+          (ngModelChange)="setSort($event)"
+          ariaLabel="Ordenar recursos"
+          styleClass="min-w-44 !rounded-xl"
+          appendTo="body" />
 
-            <div class="grow flex flex-col p-6 pt-0">
-              <h2 class="text-xl font-bold text-gray-700 mb-2">{{ res.name }}</h2>
+        <div class="flex bg-[#FAF8F5] border border-[#EBE5DC] rounded-xl p-1" role="group" aria-label="Vista">
+          <button
+            type="button"
+            (click)="setLayout('grid')"
+            pTooltip="Vista en cuadrícula"
+            tooltipPosition="top"
+            aria-label="Vista en cuadrícula"
+            class="w-9 h-9 rounded-lg border-0 cursor-pointer transition-colors"
+            [class]="layout() === 'grid' ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'">
+            <i class="pi pi-th-large"></i>
+          </button>
+          <button
+            type="button"
+            (click)="setLayout('list')"
+            pTooltip="Vista en lista"
+            tooltipPosition="top"
+            aria-label="Vista en lista"
+            class="w-9 h-9 rounded-lg border-0 cursor-pointer transition-colors"
+            [class]="layout() === 'list' ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'">
+            <i class="pi pi-list"></i>
+          </button>
+        </div>
+      </div>
+    </div>
 
-              @if (res.description && res.description.trim() !== '') {
-                <p class="text-sm text-gray-600 mb-4 line-clamp-3">{{ res.description }}</p>
-              } @else {
-                <div class="mb-3"></div>
-              }
-
-              <div class="flex flex-wrap gap-2 mt-auto">
-                @for (tag of res.tags; track tag.id) {
-                  <p-tag [value]="tag.name" [rounded]="true" styleClass="bg-orange-50 text-orange-900 border-none" />
-                }
-              </div>
-            </div>
-
-            <div class="w-full">
-              <div class="grid w-full gap-2 p-6 pt-0"
-                   [class.grid-cols-1]="res.type === 'LINK' || res.type === 'VIDEO_LINK'"
-                   [class.grid-cols-2]="res.type !== 'LINK' && res.type !== 'VIDEO_LINK'">
-
-                @if (res.type === 'LINK') {
-                  <p-button label="Visitar" icon="pi pi-external-link" styleClass="w-full" (onClick)="viewResource(res)"/>
-                } @else if (res.type === 'VIDEO_LINK') {
-                  <p-button label="Ver Vídeo" icon="pi pi-play-circle" styleClass="w-full" (onClick)="viewResource(res)"/>
-                } @else {
-                  <p-button label="Ver" [outlined]="true" styleClass="w-full" (onClick)="viewResource(res)"/>
-                  <p-button label="Descargar" icon="pi pi-download" severity="warn" styleClass="w-full" (onClick)="download(res)"/>
-                }
-              </div>
-            </div>
-          </p-card>
+    @if (popularTags().length) {
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[10px] font-black uppercase tracking-wider text-[#A89B8F] mr-1">
+          <i class="pi pi-tags text-[10px] mr-1"></i>Etiquetas
+        </span>
+        @for (tag of visibleTags(); track tag.name) {
+          <button
+            type="button"
+            (click)="toggleTag(tag.name)"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border cursor-pointer transition-colors"
+            [class]="activeTags().includes(tag.name)
+              ? 'bg-[#633F17] border-[#633F17] text-white'
+              : 'bg-[#FAF8F5] border-[#EBE5DC] text-[#51453a] hover:border-[#d5c3b5]'"
+            [attr.aria-pressed]="activeTags().includes(tag.name)">
+            {{ tag.name }}
+            <span class="text-[10px] opacity-70">{{ tag.count }}</span>
+          </button>
+        }
+        @if (popularTags().length > 12) {
+          <button
+            type="button"
+            (click)="showAllTags.set(!showAllTags())"
+            class="text-xs font-bold text-[#795221] bg-transparent border-0 cursor-pointer underline-offset-2 hover:underline">
+            {{ showAllTags() ? 'Ver menos' : 'Ver todas (' + popularTags().length + ')' }}
+          </button>
         }
       </div>
-    </ng-template>
-  </p-data-view>
+    }
+  </section>
+
+  @if (!loading() && !failed() && resources().length) {
+    <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+      <p class="text-sm text-[#8C7A6B] m-0">
+        <b class="text-[#3D2E24]">{{ filteredResources().length }}</b>
+        {{ filteredResources().length === 1 ? 'recurso' : 'recursos' }}
+        @if (hasActiveFilters()) {
+          de {{ resources().length }}
+        }
+      </p>
+      @if (hasActiveFilters()) {
+        <button
+          type="button"
+          (click)="clearFilters()"
+          class="inline-flex items-center gap-1.5 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-3 py-1.5 cursor-pointer hover:bg-[#FAF8F5]">
+          <i class="pi pi-filter-slash text-[10px]"></i> Quitar filtros
+        </button>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      @for (s of skeletons; track $index) {
+        <div class="bg-white rounded-3xl border border-[#EBE5DC] overflow-hidden">
+          <p-skeleton height="10rem" borderRadius="0" />
+          <div class="p-4 space-y-3">
+            <p-skeleton width="70%" height="1.2rem" />
+            <p-skeleton width="100%" height="0.8rem" />
+            <p-skeleton width="40%" height="0.8rem" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (failed()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No se pudo cargar la biblioteca</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Comprueba tu conexión o inténtalo de nuevo.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="load()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+    </div>
+  } @else if (!resources().length) {
+    <div class="bg-white rounded-3xl border border-dashed border-[#d5c3b5] p-12 text-center">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-[#F3E3C3] flex items-center justify-center">
+        <i class="pi pi-book text-2xl text-[#633F17]"></i>
+      </div>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-4 mb-1">La biblioteca está vacía</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">
+        @if (canAddResources()) {
+          Sube el primer documento, imagen, plantilla, vídeo o enlace para compartirlo con todo el equipo.
+        } @else {
+          Todavía no se ha compartido ningún recurso. Vuelve a pasarte pronto.
+        }
+      </p>
+      @if (canAddResources()) {
+        <p-button label="Añadir el primer recurso" icon="pi pi-plus" (onClick)="openAddModal()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+      }
+    </div>
+  } @else if (!filteredResources().length) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-search text-3xl text-[#C2B7AC]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No hay recursos que coincidan</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Prueba con otras palabras o quita algún filtro.</p>
+      <p-button label="Quitar filtros" icon="pi pi-filter-slash" [outlined]="true" severity="secondary" (onClick)="clearFilters()" styleClass="!rounded-xl"></p-button>
+    </div>
+  } @else if (layout() === 'grid') {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      @for (res of pagedResources(); track res.id) {
+        <article class="group bg-white rounded-3xl border border-[#EBE5DC] shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-lg hover:-translate-y-0.5">
+          <button
+            type="button"
+            (click)="openPreview(res)"
+            class="relative h-40 w-full overflow-hidden cursor-pointer border-0 p-0 bg-gradient-to-br"
+            [class]="typeMeta[res.type].gradient"
+            [attr.aria-label]="'Ver detalles de ' + res.name">
+            @if (res.type === 'IMAGE' && thumbnails()[res.id]) {
+              <img [src]="thumbnails()[res.id]" [alt]="res.name" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            } @else if (videoThumbnail(res)) {
+              <img [src]="videoThumbnail(res)" [alt]="res.name" loading="lazy" referrerpolicy="no-referrer" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <span class="absolute inset-0 flex items-center justify-center">
+                <span class="w-14 h-14 rounded-full bg-black/55 text-white flex items-center justify-center shadow-lg group-hover:bg-[#B9412F] transition-colors">
+                  <i class="pi pi-play text-xl ml-1"></i>
+                </span>
+              </span>
+            } @else {
+              <span class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <span class="w-16 h-16 rounded-2xl bg-white/80 shadow-sm flex items-center justify-center transition-transform group-hover:scale-110" [class]="typeMeta[res.type].text">
+                  <i class="text-3xl" [class]="typeMeta[res.type].icon"></i>
+                </span>
+                <span class="text-[11px] font-bold text-[#51453a]/70 max-w-[80%] truncate">
+                  {{ isLink(res.type) ? domain(res.blobPath) : extension(res) }}
+                </span>
+              </span>
+            }
+
+            <span class="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wide rounded-full px-2.5 py-1 bg-white/90 shadow-sm" [class]="typeMeta[res.type].text">
+              <i class="text-[10px]" [class]="typeMeta[res.type].icon"></i>{{ typeMeta[res.type].label }}
+            </span>
+            @if (res.downloadCount > 0) {
+              <span class="absolute top-3 right-3 inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-2 py-1 bg-black/50 text-white"
+                    [pTooltip]="res.downloadCount + (res.downloadCount === 1 ? ' uso' : ' usos')" tooltipPosition="left">
+                <i class="pi pi-chart-bar text-[9px]"></i>{{ res.downloadCount }}
+              </span>
+            }
+          </button>
+
+          <div class="p-4 flex flex-col gap-2 grow">
+            <h2 class="text-base font-black text-[#3D2E24] m-0 leading-snug line-clamp-2">{{ res.name }}</h2>
+            @if (res.description) {
+              <p class="text-sm text-[#8C7A6B] m-0 line-clamp-2">{{ res.description }}</p>
+            }
+
+            @if (res.tags.length) {
+              <div class="flex flex-wrap gap-1.5 mt-1">
+                @for (tag of res.tags.slice(0, 3); track tag.id) {
+                  <button
+                    type="button"
+                    (click)="toggleTag(tag.name)"
+                    class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 border cursor-pointer transition-colors"
+                    [class]="activeTags().includes(tag.name) ? 'bg-[#633F17] border-[#633F17] text-white' : 'bg-[#FAF8F5] border-[#EBE5DC] text-[#795221] hover:border-[#d5c3b5]'">
+                    #{{ tag.name }}
+                  </button>
+                }
+                @if (res.tags.length > 3) {
+                  <span class="text-[11px] font-semibold text-[#A89B8F] px-1 py-0.5">+{{ res.tags.length - 3 }}</span>
+                }
+              </div>
+            }
+
+            <div class="mt-auto pt-2 flex items-center gap-2 text-[11px] text-[#A89B8F] min-w-0">
+              @if (res.uploadedBy) {
+                <span class="truncate"><i class="pi pi-user text-[10px] mr-1"></i>{{ res.uploadedBy }}</span>
+              }
+              @if (res.uploadedBy && res.createdAt) {
+                <span>·</span>
+              }
+              @if (res.createdAt) {
+                <span class="shrink-0">{{ res.createdAt | date: 'd MMM y' }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="px-4 pb-4 flex gap-2">
+            @switch (res.type) {
+              @case ('LINK') {
+                <p-button label="Abrir" icon="pi pi-external-link" (onClick)="openLink(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
+                <p-button icon="pi pi-copy" [outlined]="true" severity="secondary" (onClick)="copyLink(res)" pTooltip="Copiar enlace" tooltipPosition="top" ariaLabel="Copiar enlace" styleClass="!rounded-xl" />
+              }
+              @case ('VIDEO_LINK') {
+                <p-button label="Ver vídeo" icon="pi pi-play-circle" (onClick)="openPreview(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
+                <p-button icon="pi pi-copy" [outlined]="true" severity="secondary" (onClick)="copyLink(res)" pTooltip="Copiar enlace" tooltipPosition="top" ariaLabel="Copiar enlace" styleClass="!rounded-xl" />
+              }
+              @case ('TEMPLATE') {
+                <p-button label="Descargar" icon="pi pi-download" (onClick)="download(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
+              }
+              @default {
+                <p-button label="Ver" icon="pi pi-eye" (onClick)="openPreview(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
+                <p-button icon="pi pi-download" [outlined]="true" severity="secondary" (onClick)="download(res)" pTooltip="Descargar" tooltipPosition="top" ariaLabel="Descargar" styleClass="!rounded-xl" />
+              }
+            }
+            @if (res.canManage) {
+              <p-button icon="pi pi-pencil" [text]="true" severity="secondary" (onClick)="openEditModal(res)" pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar recurso" styleClass="!rounded-xl" />
+              <p-button icon="pi pi-trash" [text]="true" severity="danger" (onClick)="confirmDelete(res)" pTooltip="Eliminar" tooltipPosition="top" ariaLabel="Eliminar recurso" styleClass="!rounded-xl" />
+            }
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] shadow-sm divide-y divide-[#EFEAE2] overflow-hidden">
+      @for (res of pagedResources(); track res.id) {
+        <div class="flex items-center gap-3 md:gap-4 p-3 md:px-4 hover:bg-[#FAF8F5] transition-colors">
+          <button
+            type="button"
+            (click)="openPreview(res)"
+            class="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden border-0 p-0 cursor-pointer flex items-center justify-center"
+            [class]="typeMeta[res.type].soft + ' ' + typeMeta[res.type].text"
+            [attr.aria-label]="'Ver detalles de ' + res.name">
+            @if (res.type === 'IMAGE' && thumbnails()[res.id]) {
+              <img [src]="thumbnails()[res.id]" [alt]="res.name" class="w-full h-full object-cover" />
+            } @else if (videoThumbnail(res)) {
+              <img [src]="videoThumbnail(res)" [alt]="res.name" loading="lazy" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
+              <i class="pi pi-play absolute text-white text-sm drop-shadow"></i>
+            } @else {
+              <i class="text-xl" [class]="typeMeta[res.type].icon"></i>
+            }
+          </button>
+
+          <div class="min-w-0 grow">
+            <div class="flex items-center gap-2 min-w-0">
+              <button type="button" (click)="openPreview(res)" class="text-sm font-black text-[#3D2E24] truncate bg-transparent border-0 p-0 cursor-pointer text-left hover:underline">
+                {{ res.name }}
+              </button>
+              <span class="hidden sm:inline-flex shrink-0 text-[10px] font-black uppercase rounded-full px-2 py-0.5" [class]="typeMeta[res.type].soft + ' ' + typeMeta[res.type].text">
+                {{ typeMeta[res.type].label }}
+              </span>
+            </div>
+            <p class="text-xs text-[#8C7A6B] m-0 mt-0.5 truncate">
+              {{ res.description || (isLink(res.type) ? domain(res.blobPath) : 'Sin descripción') }}
+            </p>
+            @if (res.tags.length) {
+              <div class="hidden md:flex flex-wrap gap-1 mt-1">
+                @for (tag of res.tags.slice(0, 4); track tag.id) {
+                  <button type="button" (click)="toggleTag(tag.name)" class="text-[10px] font-semibold text-[#795221] bg-transparent border-0 p-0 cursor-pointer hover:underline">#{{ tag.name }}</button>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="hidden lg:flex flex-col items-end shrink-0 text-[11px] text-[#A89B8F] w-40">
+            @if (res.uploadedBy) {
+              <span class="truncate max-w-full">{{ res.uploadedBy }}</span>
+            }
+            <span>
+              @if (res.createdAt) { {{ res.createdAt | date: 'd MMM y' }} · }
+              {{ res.downloadCount }} {{ res.downloadCount === 1 ? 'uso' : 'usos' }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            @if (res.type === 'LINK') {
+              <p-button icon="pi pi-external-link" [rounded]="true" [text]="true" (onClick)="openLink(res)" pTooltip="Abrir" tooltipPosition="top" ariaLabel="Abrir enlace" />
+            } @else if (res.type === 'VIDEO_LINK') {
+              <p-button icon="pi pi-play-circle" [rounded]="true" [text]="true" (onClick)="openPreview(res)" pTooltip="Ver vídeo" tooltipPosition="top" ariaLabel="Ver vídeo" />
+            } @else {
+              <p-button icon="pi pi-download" [rounded]="true" [text]="true" (onClick)="download(res)" pTooltip="Descargar" tooltipPosition="top" ariaLabel="Descargar" />
+            }
+            @if (res.canManage) {
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" (onClick)="openEditModal(res)" pTooltip="Editar" tooltipPosition="top" ariaLabel="Editar recurso" />
+              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="confirmDelete(res)" pTooltip="Eliminar" tooltipPosition="top" ariaLabel="Eliminar recurso" />
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && filteredResources().length > 12) {
+    <p-paginator
+      [first]="first()"
+      [rows]="rows()"
+      [totalRecords]="filteredResources().length"
+      [rowsPerPageOptions]="[12, 24, 48]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="!bg-transparent" />
+  }
 </div>
 
 <p-dialog
-  header="Añadir Nuevo Recurso"
+  [visible]="!!previewResource()"
+  (visibleChange)="!$event && closePreview()"
   [modal]="true"
-  [(visible)]="displayAddModal"
-  [style]="{ width: '35rem' }"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '58rem' }"
+  [breakpoints]="{ '960px': '95vw' }"
+  styleClass="!rounded-3xl">
+  <ng-template #header>
+    @if (previewResource(); as res) {
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center" [class]="typeMeta[res.type].soft + ' ' + typeMeta[res.type].text">
+          <i [class]="typeMeta[res.type].icon"></i>
+        </span>
+        <div class="min-w-0">
+          <h2 class="text-lg font-black text-[#3D2E24] m-0 truncate">{{ res.name }}</h2>
+          <p class="text-xs text-[#8C7A6B] m-0">{{ typeMeta[res.type].label }}{{ isLink(res.type) ? ' · ' + domain(res.blobPath) : '' }}</p>
+        </div>
+      </div>
+    }
+  </ng-template>
+
+  @if (previewResource(); as res) {
+    <div class="space-y-4">
+      <div class="rounded-2xl overflow-hidden border border-[#EBE5DC] bg-[#FAF8F5]">
+        @if (previewLoading()) {
+          <div class="h-80 flex flex-col items-center justify-center text-[#8C7A6B]">
+            <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+            <p class="text-sm mt-3 mb-0">Cargando vista previa...</p>
+          </div>
+        } @else if (previewFailed()) {
+          <div class="h-64 flex flex-col items-center justify-center text-center px-6">
+            <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+            <p class="text-sm font-bold text-[#3D2E24] mt-3 mb-1">No se pudo cargar la vista previa</p>
+            <p class="text-xs text-[#8C7A6B] m-0">Es posible que el archivo ya no esté disponible.</p>
+          </div>
+        } @else if (res.type === 'IMAGE' && previewUrl()) {
+          <div class="flex items-center justify-center bg-[repeating-conic-gradient(#F3EEE7_0_25%,#FAF8F5_0_50%)] bg-[length:20px_20px]">
+            <img [src]="previewUrl()" [alt]="res.name" class="max-h-[65vh] max-w-full object-contain" />
+          </div>
+        } @else if (res.type === 'PDF' && previewSafeUrl()) {
+          <iframe [src]="previewSafeUrl()" [title]="res.name" class="w-full h-[65vh] border-0 bg-white"></iframe>
+        } @else if (res.type === 'VIDEO_LINK' && previewSafeUrl()) {
+          <div class="aspect-video bg-black">
+            <iframe
+              [src]="previewSafeUrl()"
+              [title]="res.name"
+              class="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowfullscreen
+              referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+        } @else {
+          <div class="py-12 px-6 flex flex-col items-center text-center bg-gradient-to-br" [class]="typeMeta[res.type].gradient">
+            <span class="w-20 h-20 rounded-3xl bg-white/85 shadow-sm flex items-center justify-center" [class]="typeMeta[res.type].text">
+              <i class="text-4xl" [class]="typeMeta[res.type].icon"></i>
+            </span>
+            @if (isLink(res.type)) {
+              <p class="text-sm font-bold text-[#3D2E24] mt-4 mb-1">{{ domain(res.blobPath) }}</p>
+              <p class="text-xs text-[#8C7A6B] m-0 break-all max-w-xl">{{ res.blobPath }}</p>
+            } @else {
+              <p class="text-sm font-bold text-[#3D2E24] mt-4 mb-1">Archivo {{ extension(res) }}</p>
+              <p class="text-xs text-[#8C7A6B] m-0 max-w-md">Esta plantilla no tiene vista previa. Descárgala para abrirla y editarla en tu equipo.</p>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="md:col-span-2 space-y-3">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-wider text-[#A89B8F] m-0">Descripción</p>
+            <p class="text-sm text-[#51453a] mt-1 mb-0 whitespace-pre-line">{{ res.description || 'Este recurso no tiene descripción.' }}</p>
+          </div>
+          @if (res.tags.length) {
+            <div class="flex flex-wrap gap-1.5">
+              @for (tag of res.tags; track tag.id) {
+                <button
+                  type="button"
+                  (click)="toggleTag(tag.name); closePreview()"
+                  class="text-xs font-semibold rounded-full px-2.5 py-1 bg-[#FAF8F5] border border-[#EBE5DC] text-[#795221] cursor-pointer hover:border-[#d5c3b5]"
+                  pTooltip="Ver recursos con esta etiqueta" tooltipPosition="top">
+                  #{{ tag.name }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <dl class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-2xl p-4 m-0 space-y-2 text-xs">
+          <div class="flex justify-between gap-2">
+            <dt class="text-[#A89B8F]">Subido por</dt>
+            <dd class="m-0 font-semibold text-[#3D2E24] text-right">{{ res.uploadedBy || '—' }}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-[#A89B8F]">Fecha</dt>
+            <dd class="m-0 font-semibold text-[#3D2E24]">{{ res.createdAt ? (res.createdAt | date: 'd MMM y, HH:mm') : '—' }}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-[#A89B8F]">{{ isLink(res.type) ? 'Aperturas' : 'Descargas' }}</dt>
+            <dd class="m-0 font-semibold text-[#3D2E24]">{{ res.downloadCount }}</dd>
+          </div>
+          @if (!isLink(res.type)) {
+            <div class="flex justify-between gap-2">
+              <dt class="text-[#A89B8F]">Formato</dt>
+              <dd class="m-0 font-semibold text-[#3D2E24]">{{ extension(res) }}</dd>
+            </div>
+          }
+        </dl>
+      </div>
+    </div>
+  }
+
+  <ng-template #footer>
+    @if (previewResource(); as res) {
+      <div class="flex flex-wrap justify-between gap-2 w-full">
+        <div class="flex gap-2">
+          @if (res.canManage) {
+            <p-button label="Editar" icon="pi pi-pencil" [text]="true" severity="secondary" (onClick)="closePreview(); openEditModal(res)" />
+            <p-button label="Eliminar" icon="pi pi-trash" [text]="true" severity="danger" (onClick)="confirmDelete(res)" />
+          }
+        </div>
+        <div class="flex flex-wrap gap-2">
+          @if (isLink(res.type)) {
+            <p-button label="Copiar enlace" icon="pi pi-copy" [outlined]="true" severity="secondary" (onClick)="copyLink(res)" styleClass="!rounded-xl" />
+            <p-button [label]="res.type === 'VIDEO_LINK' ? 'Abrir en ' + domain(res.blobPath) : 'Abrir enlace'" icon="pi pi-external-link" (onClick)="openLink(res)" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl" />
+          } @else {
+            @if (res.type === 'PDF' && previewUrl()) {
+              <p-button label="Pantalla completa" icon="pi pi-window-maximize" [outlined]="true" severity="secondary" (onClick)="openInNewTab()" styleClass="!rounded-xl" />
+            }
+            <p-button label="Descargar" icon="pi pi-download" (onClick)="download(res)" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl" />
+          }
+        </div>
+      </div>
+    }
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [header]="editingResource() ? 'Editar recurso' : 'Nuevo recurso'"
+  [modal]="true"
+  [(visible)]="displayFormModal"
+  [style]="{ width: '42rem' }"
+  [breakpoints]="{ '720px': '95vw' }"
   [draggable]="false"
   [resizable]="false">
 
-  <form [formGroup]="resourceForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 mt-2">
+  <form [formGroup]="resourceForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 mt-1">
+
+    <fieldset class="border-0 p-0 m-0">
+      <legend class="font-semibold text-[#3D2E24] text-sm mb-2">¿Qué quieres compartir? <span class="text-red-500">*</span></legend>
+      <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        @for (type of resourceTypes; track type) {
+          <button
+            type="button"
+            (click)="selectFormType(type)"
+            class="flex flex-col items-center gap-1.5 rounded-2xl border p-3 cursor-pointer transition-all text-center"
+            [class]="formType() === type ? 'border-[#795221] ring-2 ring-[#d9a45b]/50 bg-[#FAF8F5]' : 'border-[#EBE5DC] bg-white hover:border-[#d5c3b5]'"
+            [attr.aria-pressed]="formType() === type">
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center" [class]="typeMeta[type].soft + ' ' + typeMeta[type].text">
+              <i [class]="typeMeta[type].icon"></i>
+            </span>
+            <span class="text-xs font-bold text-[#3D2E24]">{{ typeMeta[type].label }}</span>
+          </button>
+        }
+      </div>
+      <p class="text-xs text-[#8C7A6B] mt-2 mb-0">{{ typeMeta[formType()].hint }}</p>
+    </fieldset>
+
+    @if (!isLink(formType())) {
+      <div class="flex flex-col gap-1">
+        <span class="font-semibold text-[#3D2E24] text-sm">
+          Archivo
+          @if (!editingResource() || isLink(editingResource()!.type)) {
+            <span class="text-red-500">*</span>
+          }
+        </span>
+        <input #fileInput type="file" class="hidden" [accept]="typeMeta[formType()].accept" (change)="onFileInput($event)" />
+        <div
+          role="button"
+          tabindex="0"
+          (click)="chooseFile()"
+          (keydown.enter)="chooseFile()"
+          (keydown.space)="$event.preventDefault(); chooseFile()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="isDragging.set(false)"
+          (drop)="onDrop($event)"
+          class="rounded-2xl border-2 border-dashed p-5 cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#d9a45b]"
+          [class]="isDragging() ? 'border-[#795221] bg-[#F3E3C3]/40' : 'border-[#d5c3b5] bg-[#FAF8F5] hover:border-[#795221]'">
+          @if (selectedFile(); as file) {
+            <div class="flex items-center gap-3">
+              <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" [class]="typeMeta[formType()].soft + ' ' + typeMeta[formType()].text">
+                <i [class]="typeMeta[formType()].icon"></i>
+              </span>
+              <div class="min-w-0 grow">
+                <p class="text-sm font-bold text-[#3D2E24] m-0 truncate">{{ file.name }}</p>
+                <p class="text-xs text-[#8C7A6B] m-0">{{ formatSize(file.size) }} · Pulsa para cambiarlo</p>
+              </div>
+              <i class="pi pi-check-circle text-green-600"></i>
+            </div>
+          } @else {
+            <div class="text-center">
+              <i class="pi pi-cloud-upload text-3xl text-[#795221]"></i>
+              <p class="text-sm font-bold text-[#3D2E24] mt-2 mb-0">
+                @if (editingResource() && !isLink(editingResource()!.type)) {
+                  Arrastra un archivo para sustituir el actual
+                } @else {
+                  Arrastra el archivo aquí o pulsa para elegirlo
+                }
+              </p>
+              <p class="text-xs text-[#8C7A6B] mt-1 mb-0">Máximo {{ maxUploadMb }} MB</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-1">
+        <label for="resource-url" class="font-semibold text-[#3D2E24] text-sm">URL del {{ formType() === 'VIDEO_LINK' ? 'vídeo' : 'enlace' }} <span class="text-red-500">*</span></label>
+        <p-iconfield>
+          <p-inputicon [styleClass]="typeMeta[formType()].icon" />
+          <input pInputText id="resource-url" formControlName="blobPath" type="url" placeholder="https://..." class="w-full" (blur)="onUrlBlur()" />
+        </p-iconfield>
+        <app-field-error [control]="resourceForm.get('blobPath')" />
+        @if (formType() === 'VIDEO_LINK') {
+          <small class="text-xs text-[#8C7A6B]">Los vídeos de YouTube y Vimeo se pueden ver directamente desde la biblioteca.</small>
+        }
+      </div>
+    }
 
     <div class="flex flex-col gap-1">
-      <label for="name" class="font-semibold text-gray-700">Nombre del recurso <span class="text-red-500">*</span></label>
-      <input pInputText id="name" formControlName="name" placeholder="Ej: Guía de nudos nivel 1" class="w-full" />
+      <label for="resource-name" class="font-semibold text-[#3D2E24] text-sm">Nombre <span class="text-red-500">*</span></label>
+      <input pInputText id="resource-name" formControlName="name" maxlength="100" placeholder="Ej: Guía de nudos nivel 1" class="w-full" />
       <app-field-error [control]="resourceForm.get('name')" />
     </div>
 
     <div class="flex flex-col gap-1">
-      <label for="description" class="font-semibold text-gray-700">Descripción</label>
-      <textarea pTextarea id="description" formControlName="description" rows="3" placeholder="Breve resumen del contenido..." class="w-full"></textarea>
+      <div class="flex justify-between items-end">
+        <label for="resource-description" class="font-semibold text-[#3D2E24] text-sm">Descripción</label>
+        <span class="text-[11px] text-[#A89B8F]">{{ resourceForm.get('description')?.value?.length || 0 }}/255</span>
+      </div>
+      <textarea pTextarea id="resource-description" formControlName="description" rows="3" maxlength="255" placeholder="¿Para qué sirve? ¿En qué actividad o sesión lo usarías?" class="w-full"></textarea>
       <app-field-error [control]="resourceForm.get('description')" />
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-1">
-        <label for="type" class="font-semibold text-gray-700">Tipo de Archivo <span class="text-red-500">*</span></label>
-        <p-select id="type" formControlName="type" [options]="resourceTypes" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
-      </div>
+    <div class="flex flex-col gap-1">
+      <label for="resource-tags" class="font-semibold text-[#3D2E24] text-sm">Etiquetas</label>
+      <p-multiselect
+        #tagSelect
+        inputId="resource-tags"
+        formControlName="tagNames"
+        [options]="availableTags()"
+        optionLabel="name"
+        optionValue="name"
+        display="chip"
+        placeholder="Selecciona o crea etiquetas"
+        [filter]="true"
+        filterPlaceHolder="Busca o escribe una nueva..."
+        (onFilter)="onTagFilter($event)"
+        (onPanelHide)="tagSearch.set('')"
+        [selectionLimit]="20"
+        styleClass="w-full"
+        appendTo="body">
 
-      <div class="flex flex-col gap-1">
-        <label for="tags" class="font-semibold text-gray-700">Etiquetas</label>
-        <p-multiSelect
-          #tagSelect
-          id="tags"
-          formControlName="tagNames"
-          [options]="availableTags()"
-          optionLabel="name"
-          optionValue="name"
-          display="chip"
-          placeholder="Selecciona o busca etiquetas..."
-          [filter]="true"
-          filterPlaceHolder="Escribe para buscar..."
-          (onFilter)="onTagFilter($event)"
-          styleClass="w-full"
-          appendTo="body">
+        <ng-template pTemplate="emptyfilter">
+          <div class="p-3 text-center text-sm text-[#8C7A6B]">No hay ninguna etiqueta "<b>{{ tagSearch() }}</b>"</div>
+        </ng-template>
 
-          <ng-template pTemplate="emptyfilter">
-            <div class="flex flex-col items-center justify-center p-4 text-center">
-              <i class="pi pi-tags text-2xl text-gray-300 mb-2"></i>
-              <span class="text-gray-600 mb-3">No se encontró "<b>{{ currentSearch() }}</b>"</span>
+        <ng-template pTemplate="empty">
+          <div class="p-3 text-center text-sm text-[#8C7A6B]">Todavía no hay etiquetas. Escribe una para crearla.</div>
+        </ng-template>
 
+        <ng-template pTemplate="footer">
+          @if (canCreateTypedTag()) {
+            <div class="p-2 border-t border-[#EBE5DC] bg-[#FAF8F5]">
               <p-button
-                label="Crear etiqueta"
-                icon="pi pi-plus"
-                size="small"
-                severity="warn"
-                [outlined]="true"
-                [loading]="isCreatingTag()"
-                (onClick)="createInlineTag(currentSearch())"
-                styleClass="w-full">
-              </p-button>
-            </div>
-          </ng-template>
-
-          <ng-template pTemplate="empty">
-            <div class="p-3 text-gray-500 text-center">No hay etiquetas creadas en el sistema.</div>
-          </ng-template>
-
-          <ng-template pTemplate="footer">
-            <div class="p-2 border-t border-gray-100 bg-gray-50 rounded-b-md">
-              <p-button
-                label="Añadir nueva etiqueta..."
+                [label]="'Crear etiqueta «' + tagSearch().trim() + '»'"
                 icon="pi pi-plus"
                 [text]="true"
-                severity="warn"
-                styleClass="w-full text-left justify-start font-semibold text-sm"
-                (onClick)="openNewTagModal()">
-              </p-button>
+                [loading]="isCreatingTag()"
+                (onClick)="createTypedTag()"
+                styleClass="w-full justify-start font-semibold text-sm !text-[#633F17]" />
             </div>
-          </ng-template>
-
-        </p-multiSelect>
-      </div>
+          }
+        </ng-template>
+      </p-multiselect>
+      <small class="text-xs text-[#8C7A6B]">Las etiquetas ayudan a encontrar el recurso. Ej.: nudos, campamento, rama scout...</small>
     </div>
 
-    @if (resourceForm.get('type')?.value !== 'LINK' && resourceForm.get('type')?.value !== 'VIDEO_LINK') {
-      <div class="flex flex-col gap-1 mt-2">
-        <label class="font-semibold text-gray-700">Archivo <span class="text-red-500">*</span></label>
-        <p-fileupload
-          mode="basic"
-          chooseLabel="Seleccionar Archivo"
-          chooseIcon="pi pi-upload"
-          [auto]="false"
-          (onSelect)="onFileSelect($event)"
-          [maxFileSize]="maxUploadBytes"
-          styleClass="w-full">
-        </p-fileupload>
-        @if (selectedFile) {
-          <small class="text-green-600 mt-1"><i class="pi pi-check-circle"></i> Archivo listo: {{ selectedFile.name }}</small>
-        }
-      </div>
-    } @else {
-      <div class="flex flex-col gap-1 mt-2">
-        <label class="font-semibold text-gray-700">URL del Enlace <span class="text-red-500">*</span></label>
-        <input pInputText formControlName="blobPath" placeholder="https://..." class="w-full" />
-        <app-field-error [control]="resourceForm.get('blobPath')" />
-      </div>
-    }
-
-    <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
-      <p-button label="Guardar Recurso" icon="pi pi-save" type="submit" [loading]="isSubmitting()"></p-button>
+    <div class="flex justify-end gap-2 pt-4 border-t border-[#EBE5DC]">
+      <p-button label="Cancelar" [text]="true" severity="secondary" (onClick)="displayFormModal.set(false)" />
+      <p-button
+        [label]="editingResource() ? 'Guardar cambios' : 'Añadir recurso'"
+        icon="pi pi-save"
+        type="submit"
+        [loading]="isSubmitting()"
+        styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl" />
     </div>
   </form>
 </p-dialog>
+
+<p-confirmDialog />
