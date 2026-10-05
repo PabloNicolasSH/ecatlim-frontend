@@ -1,3 +1,5 @@
+import {RecognitionSummary} from './recognition.model';
+
 export interface Activity {
   name: string;
   result?: string;
@@ -10,6 +12,8 @@ export interface Block {
   code: string;
   status: 'Superada' | 'Pendiente' | 'En Curso';
   completionDate?: string;
+  recognizable: boolean;
+  recognition: RecognitionSummary | null;
   activities: Activity[];
 }
 

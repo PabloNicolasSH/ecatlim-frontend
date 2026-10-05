@@ -5,6 +5,7 @@ import {DashboardData} from '../../dashboard-data.model';
 import {DashboardService} from '../../dashboard.service';
 import {Button} from 'primeng/button';
 import {Router, RouterLink} from '@angular/router';
+import {RecognitionInboxComponent} from '../recognition-inbox/recognition-inbox.component';
 import {UserModalAddEditComponent} from '../../../user-modal-add-edit/user-modal-add-edit.component';
 
 @Component({
@@ -16,7 +17,8 @@ import {UserModalAddEditComponent} from '../../../user-modal-add-edit/user-modal
     DatePipe,
     TitleCasePipe,
     RouterLink,
-    UserModalAddEditComponent
+    UserModalAddEditComponent,
+    RecognitionInboxComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
