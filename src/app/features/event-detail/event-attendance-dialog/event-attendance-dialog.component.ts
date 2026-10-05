@@ -1,4 +1,5 @@
 import {Component, computed, inject, input, model, output, signal} from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Dialog} from 'primeng/dialog';
 import {Button} from 'primeng/button';
@@ -34,6 +35,7 @@ interface TaskTarget {
 @Component({
   selector: 'app-event-attendance-dialog',
   imports: [
+    DatePipe,
     FormsModule,
     ReactiveFormsModule,
     Dialog,
@@ -124,8 +126,8 @@ export class EventAttendanceDialogComponent {
     return person.blocks.find(b => b.lessonBlockId === lessonBlockId)?.attendance ?? null;
   }
 
-  tasksOf(person: EventDetailParticipant): EventDetailActivity[] {
-    return this.event().activities.filter(a => a.assignedUser?.id === person.userId);
+  tasksOf(person: EventDetailParticipant, lessonBlockId: number): EventDetailActivity[] {
+    return this.event().activities.filter(a => a.assignedUser?.id === person.userId && a.lessonBlockId === lessonBlockId);
   }
 
   fullName(person: EventDetailParticipant): string {
@@ -150,7 +152,7 @@ export class EventAttendanceDialogComponent {
       next: () => {
         this.saving.set(null);
         this.attendanceChange.emit({userId: person.userId, lessonBlockId, attendance});
-        if (attendance === 'CONDITIONED_TASK' && this.canCreateTasks && this.tasksOf(person).length === 0) {
+        if (attendance === 'CONDITIONED_TASK' && this.canCreateTasks && this.tasksOf(person, lessonBlockId).length === 0) {
           this.openTaskForm(person, lessonBlockId);
         }
       },

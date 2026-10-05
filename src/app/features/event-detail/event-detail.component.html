@@ -253,6 +253,9 @@
                     <div class="flex flex-wrap items-center gap-2">
                       <span class="text-sm font-bold text-[#3D2E24]">{{ activity.title }}</span>
                       <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-[#EFEAE2] text-[#8C7A6B]">{{ activityType(activity).label }}</span>
+                      @if (activity.lessonBlockCode) {
+                        <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-[#F3E3C3] text-[#795221]" [pTooltip]="activity.lessonBlockName ?? ''">{{ activity.lessonBlockCode }}</span>
+                      }
                       <span
                         class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
                         [ngClass]="phase(activity) === 'PREVIA' ? 'bg-[#633F17] text-white' : 'bg-[#d9a45b] text-[#3D2E24]'"

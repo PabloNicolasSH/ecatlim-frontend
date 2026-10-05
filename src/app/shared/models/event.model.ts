@@ -120,6 +120,9 @@ export interface EventDetailActivity {
   progressStatus?: 'PENDING' | 'COMPLETED';
   responsible?: SimpleUser;
   assignedUser?: SimpleUser | null;
+  lessonBlockId?: number;
+  lessonBlockCode?: string;
+  lessonBlockName?: string;
 }
 
 export interface EventDetail {

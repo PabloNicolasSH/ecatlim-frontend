@@ -48,7 +48,7 @@
               <div class="flex flex-wrap items-center gap-2">
                 @if (attendanceOf(person, block.id) === 'CONDITIONED_TASK' && canCreateTasks && !isTaskOpen(person, block.id)) {
                   <p-button
-                    [label]="tasksOf(person).length > 0 ? 'Otra tarea' : 'Crear tarea'"
+                    [label]="tasksOf(person, block.id).length > 0 ? 'Otra tarea' : 'Crear tarea'"
                     icon="pi pi-plus"
                     size="small"
                     severity="secondary"
@@ -69,12 +69,15 @@
               </div>
             </div>
 
-            @if (attendanceOf(person, block.id) === 'CONDITIONED_TASK' && tasksOf(person).length > 0) {
-              <div class="flex flex-wrap gap-1.5">
-                @for (task of tasksOf(person); track task.id) {
-                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-100 text-sky-800">
-                    <i class="pi pi-list-check text-[10px]"></i> {{ task.title }}
-                  </span>
+            @if (attendanceOf(person, block.id) === 'CONDITIONED_TASK' && tasksOf(person, block.id).length > 0) {
+              <div class="space-y-1.5">
+                @for (task of tasksOf(person, block.id); track task.id) {
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs bg-sky-50 border border-sky-100 rounded-lg px-3 py-2">
+                    <i class="pi pi-list-check text-sky-800"></i>
+                    <span class="font-black uppercase text-[10px] text-sky-800">Tarea condicionada</span>
+                    <span class="font-bold text-[#3D2E24]">{{ task.title }}</span>
+                    <span class="text-[#8C7A6B]">· entrega {{ task.dueDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
                 }
               </div>
             }
