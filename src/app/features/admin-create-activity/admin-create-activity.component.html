@@ -76,6 +76,23 @@
 
         <p-floatlabel variant="on">
           <p-select
+            id="assignedUser"
+            [options]="assignableUsers"
+            optionLabel="fullName"
+            optionValue="id"
+            formControlName="assignedUserId"
+            appendTo="body"
+            styleClass="w-full"
+            [filter]="true"
+            filterBy="fullName"
+            [showClear]="true"
+            emptyMessage="Elige primero un bloque con personas inscritas"
+          ></p-select>
+          <label for="assignedUser">Solo para una persona (tarea condicionada, opcional)</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on">
+          <p-select
             id="activityType"
             [options]="activityTypes"
             optionLabel="label"

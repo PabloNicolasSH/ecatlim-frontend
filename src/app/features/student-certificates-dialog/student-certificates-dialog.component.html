@@ -1,0 +1,119 @@
+<p-dialog
+  [header]="'Certificados · ' + (student()?.name ?? '') + ' ' + (student()?.surname ?? '')"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '46rem' }"
+  [breakpoints]="{ '768px': '95vw' }"
+>
+  <div class="space-y-5">
+
+    <section class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-2xl p-4 flex items-center justify-between gap-3">
+      <div>
+        <h3 class="text-sm font-bold text-[#3D2E24] m-0">Certificado de asistencia</h3>
+        <p class="text-xs text-[#8C7A6B] m-0">Envía un correo indicando a cuántos eventos ha asistido y en cuántos bloques formativos ha participado.</p>
+      </div>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        size="small"
+        [loading]="busy() === 'attendance'"
+        (onClick)="sendAttendance()"
+      ></p-button>
+    </section>
+
+    @if (loading()) {
+      <div class="text-center text-[#8C7A6B] py-6"><i class="pi pi-spin pi-spinner text-xl text-[#795221]"></i></div>
+    } @else if (enrollments().length === 0) {
+      <p class="text-sm italic text-[#8C7A6B] m-0">Esta persona no está inscrita en ninguna etapa.</p>
+    } @else {
+      @for (enrollment of enrollments(); track enrollment.id) {
+        <section class="border border-[#EBE5DC] rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-base font-black text-[#3D2E24] m-0">{{ enrollment.stageName }}</h3>
+            <span
+              class="text-[10px] font-black uppercase px-2.5 py-1 rounded-full"
+              [ngClass]="enrollment.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+            >{{ enrollment.completed ? 'Etapa completada' : enrollment.percentage + '% superado' }}</span>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-xs font-bold text-[#8C7A6B] uppercase m-0">Bloques formativos</p>
+            @for (module of enrollment.modules; track module.code) {
+              @for (block of module.blocks; track block.id) {
+                <div class="flex items-center justify-between gap-3 text-xs bg-[#FAF8F5] rounded-lg border border-[#EBE5DC] p-2">
+                  <label class="flex items-center gap-2 cursor-pointer min-w-0">
+                    <input
+                      type="checkbox"
+                      [checked]="selectedBlockIds().includes(block.id)"
+                      [disabled]="!isPassed(block)"
+                      (change)="toggleSelected(block)"
+                    />
+                    <span class="font-bold truncate">{{ block.code }} {{ block.name }}</span>
+                  </label>
+                  <p-button
+                    [label]="isPassed(block) ? 'Superado' : 'Marcar superado'"
+                    [icon]="isPassed(block) ? 'pi pi-check-circle' : 'pi pi-circle'"
+                    [severity]="isPassed(block) ? 'success' : 'secondary'"
+                    [outlined]="!isPassed(block)"
+                    size="small"
+                    [loading]="busy() === 'passed-' + block.id"
+                    (onClick)="togglePassed(block)"
+                  ></p-button>
+                </div>
+              }
+            }
+            <div class="flex items-center justify-between gap-3 pt-1">
+              <p class="text-[11px] text-[#8C7A6B] m-0">Selecciona los bloques superados cuyo certificado quieras notificar.</p>
+              <p-button
+                label="Avisar certificados de bloque"
+                icon="pi pi-send"
+                size="small"
+                [disabled]="selectedBlockIds().length === 0"
+                [loading]="busy() === 'blocks'"
+                (onClick)="sendBlockCertificates()"
+              ></p-button>
+            </div>
+          </div>
+
+          <div class="space-y-2 border-t border-[#F2ECE4] pt-3">
+            <p class="text-xs font-bold text-[#8C7A6B] uppercase m-0">Certificado y diploma de etapa</p>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <label
+                class="inline-flex items-center gap-2 text-xs font-bold text-[#633F17] bg-[#EFEAE2] hover:bg-[#E5DDD2] rounded-xl px-3 py-2 cursor-pointer"
+              >
+                <i class="pi" [ngClass]="busy() === 'upload-' + enrollment.id ? 'pi-spin pi-spinner' : 'pi-upload'"></i>
+                {{ enrollment.documents.stageCertificate ? 'Reemplazar certificado (PDF)' : 'Subir certificado (PDF)' }}
+                <input type="file" accept=".pdf" class="hidden" (change)="onStageCertificateSelected($event, enrollment)" />
+              </label>
+              @if (enrollment.documents.stageCertificate; as certificate) {
+                <span class="text-xs text-emerald-700 font-bold"><i class="pi pi-check-circle"></i> {{ certificate.name }}</span>
+              }
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <p-button
+                label="Marcar etapa completada"
+                icon="pi pi-flag"
+                size="small"
+                severity="secondary"
+                [disabled]="enrollment.completed || !allBlocksPassed(enrollment)"
+                [loading]="busy() === 'complete-' + enrollment.id"
+                (onClick)="completeStage(enrollment)"
+              ></p-button>
+              <p-button
+                label="Enviar diploma y certificado"
+                icon="pi pi-send"
+                size="small"
+                [disabled]="!enrollment.completed || !enrollment.documents.stageCertificate"
+                [loading]="busy() === 'send-' + enrollment.id"
+                (onClick)="sendStageCertificate(enrollment)"
+              ></p-button>
+            </div>
+          </div>
+        </section>
+      }
+    }
+  </div>
+</p-dialog>

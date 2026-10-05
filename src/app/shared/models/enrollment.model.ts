@@ -5,7 +5,7 @@ export interface Activity {
 }
 
 export interface Block {
-  id: string;
+  id: number;
   name: string;
   code: string;
   status: 'Superada' | 'Pendiente' | 'En Curso';
@@ -28,6 +28,7 @@ export interface EnrollmentDocument {
 
 export interface EnrollmentDocuments {
   personalPlan: EnrollmentDocument | null;
+  stageCertificate: EnrollmentDocument | null;
   entityApproval: EnrollmentDocument | null;
 }
 

@@ -79,10 +79,13 @@ export interface EventSuggestions {
   transferCodes: string[];
 }
 
+export type AttendanceType = 'TOTAL' | 'PARTIAL' | 'CONDITIONED_TASK';
+
 export interface EventDetailParticipantBlock {
+  lessonBlockId: number;
   code: string;
   name: string;
-  attended: boolean;
+  attendance: AttendanceType | null;
 }
 
 export interface EventDetailParticipant {
@@ -116,6 +119,10 @@ export interface EventDetailActivity {
   isOptional: boolean;
   progressStatus?: 'PENDING' | 'COMPLETED';
   responsible?: SimpleUser;
+  assignedUser?: SimpleUser | null;
+  lessonBlockId?: number;
+  lessonBlockCode?: string;
+  lessonBlockName?: string;
 }
 
 export interface EventDetail {
@@ -149,4 +156,5 @@ export interface EventDetail {
   participants: EventDetailParticipant[];
   timeline: EventDetailTimelineEntry[];
   activities: EventDetailActivity[];
+  markableLessonBlockIds: number[];
 }

@@ -1,8 +1,9 @@
-import {Component, input, signal} from '@angular/core';
+import {Component, input, output, signal} from '@angular/core';
 import {NgClass} from '@angular/common';
 import {TableModule} from 'primeng/table';
 import {Tooltip} from 'primeng/tooltip';
-import {EventDetailParticipant} from '../../../shared/models/event.model';
+import {Button} from 'primeng/button';
+import {AttendanceType, EventDetailParticipant} from '../../../shared/models/event.model';
 import {UserAvatarComponent} from '../../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
@@ -11,6 +12,7 @@ import {UserAvatarComponent} from '../../../shared/components/user-avatar/user-a
     NgClass,
     TableModule,
     Tooltip,
+    Button,
     UserAvatarComponent
   ],
   templateUrl: './event-participants.component.html',
@@ -21,7 +23,10 @@ export class EventParticipantsComponent {
   readonly pageSize = 5;
 
   participants = input.required<EventDetailParticipant[]>();
-  isPast = input<boolean>(false);
+  started = input<boolean>(false);
+  canTakeAttendance = input<boolean>(false);
+
+  takeAttendance = output<void>();
 
   showFullData = signal<boolean>(true);
 
@@ -30,6 +35,16 @@ export class EventParticipantsComponent {
     PENDING: {label: 'Pendiente', classes: 'bg-amber-100 text-amber-800'},
     REFUNDED: {label: 'Devuelto', classes: 'bg-stone-200 text-stone-700'}
   };
+
+  readonly attendanceStyles: Record<AttendanceType, { label: string; classes: string }> = {
+    TOTAL: {label: 'Total', classes: 'bg-emerald-100 text-emerald-800'},
+    PARTIAL: {label: 'Parcial', classes: 'bg-amber-100 text-amber-800'},
+    CONDITIONED_TASK: {label: 'Tarea condicionada', classes: 'bg-sky-100 text-sky-800'}
+  };
+
+  attendanceStyle(attendance: AttendanceType) {
+    return this.attendanceStyles[attendance];
+  }
 
   paymentStyle(status: string) {
     return this.paymentStyles[status as keyof typeof this.paymentStyles] ?? this.paymentStyles.PENDING;
@@ -41,9 +56,5 @@ export class EventParticipantsComponent {
 
   initials(person: EventDetailParticipant): string {
     return this.fullName(person).charAt(0).toUpperCase();
-  }
-
-  attendedAll(participant: EventDetailParticipant): boolean {
-    return participant.blocks.length > 0 && participant.blocks.every(b => b.attended);
   }
 }
