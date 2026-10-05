@@ -36,31 +36,8 @@
             </span>
           </div>
 
-          <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
-            @for (message of req.messages; track message.id) {
-              <div
-                class="p-3 rounded-xl border text-xs space-y-1.5"
-                [ngClass]="message.kind === 'SUBMISSION' ? 'bg-white border-[#EBE5DC]' : 'bg-[#FAF8F5] border-[#E5DDD2]'"
-              >
-                <div class="flex justify-between items-center gap-2">
-                  <span class="font-bold text-[#3D2E24]">{{ messageTitle(message) }}</span>
-                  <span class="text-[10px] text-[#8C7A6B]">{{ message.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-                @if (message.comment) {
-                  <p class="m-0 whitespace-pre-line">{{ message.comment }}</p>
-                }
-                @for (file of message.files; track file.fileId) {
-                  <button
-                    type="button"
-                    (click)="download(file)"
-                    class="text-[11px] text-[#633F17] bg-white border border-[#EBE5DC] rounded-full px-2.5 py-1 cursor-pointer hover:bg-[#EFEAE2] flex items-center gap-1 max-w-full"
-                  >
-                    <i class="pi pi-paperclip text-[10px]"></i>
-                    <span class="truncate">{{ file.name }}</span>
-                  </button>
-                }
-              </div>
-            }
+          <div class="max-h-80 overflow-y-auto pr-1">
+            <app-recognition-conversation [request]="req" viewer="student"></app-recognition-conversation>
           </div>
 
           @if (req.status === 'PENDING_REVIEW') {

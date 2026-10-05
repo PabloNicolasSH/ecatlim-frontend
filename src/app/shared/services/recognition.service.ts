@@ -37,6 +37,10 @@ export class RecognitionService {
     return this.http.get<RecognitionRequest[]>(`${this.baseUrl}/admin${query}`);
   }
 
+  getPendingCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.baseUrl}/admin/pending-count`);
+  }
+
   getCommissionCandidates(): Observable<SimpleUser[]> {
     return this.http.get<SimpleUser[]>(`${this.baseUrl}/admin/commission-candidates`);
   }

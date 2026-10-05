@@ -195,6 +195,22 @@
                   </div>
                 </a>
 
+                <a routerLink="/app/convalidaciones" class="relative flex items-center gap-3 p-3 bg-white/50 hover:bg-white/80 rounded-xl transition-all group border border-[#554430]/10 hover:cursor-pointer">
+                  <div class="w-10 h-10 rounded-lg bg-[#633F17] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <i class="pi pi-verified text-base"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-[#554430]">Convalidaciones</span>
+                    <span class="text-xs opacity-75">Solicitudes y comisiones</span>
+                  </div>
+                  @if (pendingRecognitions() > 0) {
+                    <span
+                      class="absolute -top-2 -right-2 min-w-6 h-6 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center shadow-sm"
+                      [attr.aria-label]="pendingRecognitions() + ' convalidaciones pendientes'"
+                    >{{ pendingRecognitions() }}</span>
+                  }
+                </a>
+
               </div>
             </div>
           </div>
@@ -209,10 +225,6 @@
         </div>
       </div>
 
-    </div>
-
-    <div class="mt-6">
-      <app-recognition-inbox></app-recognition-inbox>
     </div>
   </div>
 } @else {

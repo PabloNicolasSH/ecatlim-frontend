@@ -1,13 +1,12 @@
 import {Component, effect, inject, input, model, output, signal} from '@angular/core';
-import {DatePipe, NgClass} from '@angular/common';
+import {NgClass} from '@angular/common';
+import {RecognitionConversationComponent} from '../../../shared/components/recognition-conversation/recognition-conversation.component';
 import {Dialog} from 'primeng/dialog';
 import {MessageService} from 'primeng/api';
 import {Block} from '../../../shared/models/enrollment.model';
 import {
   RECOGNITION_STATUS_LABELS,
   RECOGNITION_TYPE_OPTIONS,
-  RecognitionFile,
-  RecognitionMessage,
   RecognitionRequest,
   RecognitionType
 } from '../../../shared/models/recognition.model';
@@ -15,7 +14,7 @@ import {RecognitionService} from '../../../shared/services/recognition.service';
 
 @Component({
   selector: 'app-recognition-dialog',
-  imports: [Dialog, NgClass, DatePipe],
+  imports: [Dialog, NgClass, RecognitionConversationComponent],
   templateUrl: './recognition-dialog.component.html',
   styleUrl: './recognition-dialog.component.scss'
 })
@@ -142,30 +141,8 @@ export class RecognitionDialogComponent {
     this.startingNew.set(true);
   }
 
-  download(file: RecognitionFile): void {
-    this.recognitionService.downloadFile(file.fileId).subscribe(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  }
-
   typeLabel(type: RecognitionType): string {
     return this.typeOptions.find(o => o.value === type)?.label ?? type;
-  }
-
-  messageTitle(message: RecognitionMessage): string {
-    switch (message.kind) {
-      case 'SUBMISSION': return 'Tú';
-      case 'DOCUMENTATION_REQUESTED': return 'Equipo formativo · Falta documentación';
-      case 'APPROVED': return 'Equipo formativo · Convalidación aceptada';
-      case 'REJECTED': return 'Equipo formativo · Convalidación rechazada';
-    }
   }
 
   private resetForm(): void {

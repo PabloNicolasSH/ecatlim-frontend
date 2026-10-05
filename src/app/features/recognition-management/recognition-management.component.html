@@ -1,0 +1,233 @@
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <a
+    routerLink="/app/formacion"
+    class="inline-flex items-center gap-2 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-4 py-2 no-underline hover:bg-[#FAF8F5] transition-colors"
+  >
+    <i class="pi pi-arrow-left text-[10px]"></i> Volver al panel de formación
+  </a>
+
+  <div>
+    <h1 class="font-black text-3xl text-[#3D2E24] m-0">Convalidaciones</h1>
+    <p class="text-sm text-[#8C7A6B] mt-1 mb-0">Todas las solicitudes de convalidación de la escuela, abiertas y resueltas, para consultar decisiones anteriores.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm mb-0">Cargando las convalidaciones...</p>
+    </div>
+  } @else if (failed()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No se pudieron cargar las convalidaciones</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Comprueba tu conexión o inténtalo de nuevo.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="load()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+    </div>
+  } @else {
+
+    <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col xl:flex-row xl:items-center gap-3">
+      <p-iconfield class="flex-1">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full !rounded-xl"
+          placeholder="Buscar por persona, bloque o comentario"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </p-iconfield>
+
+      <p-select
+        [options]="statusOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="statusFilter()"
+        (ngModelChange)="statusFilter.set($event)"
+        appendTo="body"
+        styleClass="w-full xl:w-64"
+      />
+
+      <p-select
+        [options]="typeOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="typeFilter()"
+        (ngModelChange)="typeFilter.set($event)"
+        placeholder="Todas las vías"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full xl:w-64"
+      />
+
+      @if (hasActiveFilters()) {
+        <p-button label="Limpiar" icon="pi pi-filter-slash" severity="secondary" [text]="true" (onClick)="clearFilters()" />
+      }
+    </div>
+
+    <p-table
+      [value]="filtered()"
+      [rows]="pageSize"
+      [paginator]="filtered().length > pageSize"
+      styleClass="recognition-table"
+    >
+      <ng-template #caption>
+        <p class="m-0 text-sm text-[#51453a]">
+          Mostrando <span class="font-black">{{ filtered().length }}</span> de {{ requests().length }}
+          {{ requests().length === 1 ? 'solicitud' : 'solicitudes' }}
+        </p>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th>Persona</th>
+          <th>Bloque formativo</th>
+          <th>Vía</th>
+          <th>Estado</th>
+          <th>Comisión</th>
+          <th>Última actividad</th>
+          <th>Motivo de la resolución</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-request>
+        <tr (click)="open(request)">
+          <td class="font-bold text-base text-[#3D2E24]">{{ request.userName }}</td>
+          <td class="text-[0.95rem] text-[#51453a]">
+            <p-tag [value]="request.lessonBlockCode" severity="secondary" [rounded]="true" />
+            <span class="ml-2">{{ request.lessonBlockName }}</span>
+          </td>
+          <td class="text-[0.95rem] text-[#51453a]">{{ typeLabel(request) }}</td>
+          <td>
+            <div class="flex flex-col items-start gap-1">
+              <p-tag [value]="statusLabel(request.status)" [severity]="severity(request.status)" />
+              @if (needsMyAction(request)) {
+                <span class="text-[10px] font-black uppercase text-amber-800">Requiere tu acción</span>
+              }
+            </div>
+          </td>
+          <td class="text-[0.95rem] text-[#51453a]">
+            @if (request.commission.length > 0) {
+              <i class="pi pi-users text-xs"></i> {{ request.commission.length }}
+            } @else if (isActive(request)) {
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-200 text-stone-700">Sin comisión</span>
+            } @else {
+              —
+            }
+          </td>
+          <td class="text-[0.95rem] text-[#51453a]">{{ request.updatedAt | date: 'dd/MM/yyyy' }}</td>
+          <td class="text-sm text-[#6E5D50] max-w-64">
+            <span class="line-clamp-2 italic">{{ decisionComment(request) || '—' }}</span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="7" class="text-center !p-10 text-[#8C7A6B] text-sm">
+            <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
+            Ninguna solicitud coincide con los filtros aplicados.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<p-dialog
+  header="Solicitud de convalidación"
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '46rem' }"
+  [breakpoints]="{ '768px': '94vw' }"
+>
+  @if (selected(); as request) {
+    <div class="space-y-5 text-[#4A3B32]">
+
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-black text-[#3D2E24] m-0">{{ request.userName }}</h2>
+          <p class="text-xs text-[#8C7A6B] m-0 mt-0.5">
+            {{ request.lessonBlockCode }} {{ request.lessonBlockName }} · Vía: {{ typeLabel(request) }}
+          </p>
+          <p class="text-[10px] text-[#8C7A6B] m-0 mt-0.5">Abierta el {{ request.createdAt | date: 'dd/MM/yyyy' }}</p>
+        </div>
+        <p-tag [value]="statusLabel(request.status)" [severity]="severity(request.status)" />
+      </div>
+
+      <div class="space-y-2 p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+        <p class="text-xs font-bold m-0 flex items-center gap-1.5"><i class="pi pi-users text-[11px] text-[#795221]"></i> Comisión</p>
+        @if (canEditCommission()) {
+          <p-multiselect
+            [options]="candidates()"
+            [ngModel]="selectedMemberIds()"
+            (ngModelChange)="selectedMemberIds.set($event)"
+            optionLabel="fullName"
+            optionValue="id"
+            placeholder="Elige a las personas de la comisión"
+            display="chip"
+            [filter]="true"
+            filterBy="fullName"
+            appendTo="body"
+            styleClass="w-full"
+          />
+          <div class="flex justify-end">
+            <p-button
+              [label]="request.commission.length ? 'Actualizar comisión' : 'Asignar comisión'"
+              icon="pi pi-check"
+              size="small"
+              [loading]="working()"
+              [disabled]="selectedMemberIds().length === 0"
+              (onClick)="saveCommission()"
+              styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"
+            />
+          </div>
+        } @else {
+          <p class="text-xs m-0">
+            @for (member of request.commission; track member.id; let last = $last) {
+              {{ member.name }} {{ member.surname }}{{ last ? '' : ',' }}
+            } @empty {
+              <span class="italic text-[#8C7A6B]">Sin asignar</span>
+            }
+          </p>
+        }
+      </div>
+
+      <div>
+        <p class="text-xs font-bold m-0 mb-2 flex items-center gap-1.5"><i class="pi pi-comments text-[11px] text-[#795221]"></i> Conversación</p>
+        <div class="max-h-[26rem] overflow-y-auto pr-1">
+          <app-recognition-conversation [request]="request" viewer="staff"></app-recognition-conversation>
+        </div>
+      </div>
+
+      @if (canRespond()) {
+        <div class="space-y-3 border-t border-[#F2ECE4] pt-4">
+          <p class="text-xs font-bold m-0">Respuesta de la comisión</p>
+          <textarea
+            pTextarea
+            rows="3"
+            maxlength="2000"
+            class="w-full"
+            placeholder="Comentario (obligatorio si falta documentación)"
+            [ngModel]="responseComment()"
+            (ngModelChange)="responseComment.set($event)"
+          ></textarea>
+          <div class="flex flex-wrap gap-2 justify-end">
+            <p-button label="Falta documentación" icon="pi pi-file-edit" severity="secondary" [outlined]="true" size="small"
+                      [disabled]="working()" (onClick)="respond('REQUEST_DOCUMENTATION')" />
+            <p-button label="No convalidar" icon="pi pi-times" severity="danger" [outlined]="true" size="small"
+                      [disabled]="working()" (onClick)="respond('REJECT')" />
+            <p-button label="Convalidar" icon="pi pi-check" severity="success" size="small"
+                      [disabled]="working()" (onClick)="respond('APPROVE')" />
+          </div>
+        </div>
+      } @else if (request.status === 'AWAITING_DOCUMENTATION') {
+        <p class="text-[11px] text-[#8C7A6B] m-0">Esperando a que la persona aporte la documentación solicitada.</p>
+      } @else if (request.status === 'PENDING_REVIEW' && request.commission.length === 0) {
+        <p class="text-[11px] text-[#8C7A6B] m-0">La solicitud no puede responderse hasta que se asigne una comisión.</p>
+      } @else if (request.status === 'PENDING_REVIEW') {
+        <p class="text-[11px] text-[#8C7A6B] m-0">Solo las personas de la comisión pueden responder esta solicitud.</p>
+      }
+    </div>
+  }
+</p-dialog>
