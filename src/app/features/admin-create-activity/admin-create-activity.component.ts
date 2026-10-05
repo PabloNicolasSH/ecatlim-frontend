@@ -14,6 +14,7 @@ import {Tooltip} from 'primeng/tooltip';
 import {ToggleButton} from 'primeng/togglebutton';
 import {MessageService} from 'primeng/api';
 import {EventService} from '../../shared/services/event.service';
+import {EventDetailParticipant} from '../../shared/models/event.model';
 import {SimpleUser} from '../../shared/models/user.model';
 import {FieldErrorComponent} from '../../shared/components/field-error/field-error.component';
 import {dateOrderValidator, MAX_TEXT, notBlankValidator} from '../../shared/validation/validation-patterns';
@@ -50,6 +51,8 @@ export class AdminCreateActivityComponent implements OnInit {
   eventId!: number | null;
   availableBlocks: any[] = [];
   trainers: (SimpleUser & { fullName: string })[] = [];
+  private participants: EventDetailParticipant[] = [];
+  assignableUsers: { id: number; fullName: string }[] = [];
 
   activityTypes = [
     { label: 'Foro de Discusión', value: 'FORUM' },
@@ -82,6 +85,8 @@ export class AdminCreateActivityComponent implements OnInit {
 
     this.initForm();
 
+    this.activityForm.get('lessonBlockId')?.valueChanges.subscribe(() => this.refreshAssignableUsers());
+
     this.activityForm.get('activityType')?.valueChanges.subscribe(type => {
       if (type !== 'SURVEY') {
         this.questions.clear();
@@ -108,6 +113,7 @@ export class AdminCreateActivityComponent implements OnInit {
       dueDate: ['', Validators.required],
       lessonBlockId: [null, Validators.required],
       responsibleId: [null, Validators.required],
+      assignedUserId: [null],
       isOptional: [false],
       isGradable: [false],
       maxAttempts: [null, [Validators.min(1), Validators.max(100)]],
@@ -164,7 +170,7 @@ export class AdminCreateActivityComponent implements OnInit {
       return;
     }
 
-    const payload = this.activityForm.value;
+    const payload = {...this.activityForm.value, assignedUserId: this.activityForm.value.assignedUserId ?? null};
     if (this.eventId === null) {return;}
     this.activityService.createActivity(this.eventId, payload).subscribe({
       next: () => {
@@ -189,11 +195,24 @@ export class AdminCreateActivityComponent implements OnInit {
 
   loadEventTrainers(id: number): void {
     this.eventService.getEventDetail(id).subscribe(event => {
+      this.participants = event.participants;
+      this.refreshAssignableUsers();
       this.trainers = event.facilitators.map(t => ({
         ...t,
         fullName: [t.name, t.surname].filter(Boolean).join(" ") || t.email
       }));
     });
+  }
+
+  private refreshAssignableUsers(): void {
+    const blockId = this.activityForm?.get('lessonBlockId')?.value;
+    this.assignableUsers = blockId == null ? [] : this.participants
+      .filter(p => p.blocks.some(b => b.lessonBlockId === blockId))
+      .map(p => ({id: p.userId, fullName: [p.name, p.surname].filter(Boolean).join(' ') || p.email}));
+    const selected = this.activityForm?.get('assignedUserId')?.value;
+    if (selected != null && !this.assignableUsers.some(u => u.id === selected)) {
+      this.activityForm.get('assignedUserId')?.setValue(null);
+    }
   }
 
   loadEventBlocks(id: number): void {

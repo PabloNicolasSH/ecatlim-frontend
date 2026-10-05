@@ -156,6 +156,9 @@
             <th>Correo Electrónico</th>
             <th>Entidad de procedencia</th>
             <th>Etapa educativa actual</th>
+            @if (canManageCertificates) {
+              <th class="!text-center">Certificados</th>
+            }
           </tr>
         </ng-template>
         <ng-template #body let-student>
@@ -178,11 +181,16 @@
                 <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-200 text-stone-700">Sin etapa en curso</span>
               }
             </td>
+            @if (canManageCertificates) {
+              <td class="!text-center">
+                <p-button icon="pi pi-file-check" severity="secondary" [text]="true" [rounded]="true" pTooltip="Certificados" (onClick)="openCertificates(student)"></p-button>
+              </td>
+            }
           </tr>
         </ng-template>
         <ng-template #emptymessage>
           <tr>
-            <td colspan="4" class="text-center !p-10 text-[#8C7A6B] text-sm">
+            <td [attr.colspan]="canManageCertificates ? 5 : 4" class="text-center !p-10 text-[#8C7A6B] text-sm">
               <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
               Ninguna persona coincide con los filtros aplicados.
             </td>
@@ -208,6 +216,11 @@
     }
   }
 </div>
+
+<app-student-certificates-dialog
+  [student]="certificatesStudent()"
+  [(visible)]="certificatesVisible"
+></app-student-certificates-dialog>
 
 <app-user-modal-add-edit
 
