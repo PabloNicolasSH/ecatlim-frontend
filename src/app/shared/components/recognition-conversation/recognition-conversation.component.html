@@ -1,0 +1,50 @@
+<div class="space-y-3">
+  @for (entry of entries(); track entry.message.id) {
+    <div class="flex" [ngClass]="entry.fromStudent ? 'justify-end' : 'justify-start'">
+      <div
+        class="max-w-[88%] p-3 rounded-2xl border text-xs space-y-1.5"
+        [ngClass]="{
+          'bg-[#EFEAE2] border-[#E5DDD2] rounded-br-sm': entry.fromStudent,
+          'bg-white border-[#EBE5DC] rounded-bl-sm': !entry.fromStudent && entry.message.kind === 'DOCUMENTATION_REQUESTED',
+          'bg-emerald-50 border-emerald-200 rounded-bl-sm': entry.message.kind === 'APPROVED',
+          'bg-red-50 border-red-200 rounded-bl-sm': entry.message.kind === 'REJECTED'
+        }"
+      >
+        <div class="flex justify-between items-baseline gap-4">
+          <span class="font-bold text-[#3D2E24]">{{ entry.author }}</span>
+          <span class="text-[10px] text-[#8C7A6B] whitespace-nowrap">{{ entry.message.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <span
+          class="inline-block text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded"
+          [ngClass]="{
+            'bg-white/70 text-[#795221]': entry.fromStudent,
+            'bg-[#F3E3C3] text-[#795221]': entry.message.kind === 'DOCUMENTATION_REQUESTED',
+            'bg-emerald-100 text-emerald-800': entry.message.kind === 'APPROVED',
+            'bg-red-100 text-red-800': entry.message.kind === 'REJECTED'
+          }"
+        >{{ entry.phase }}</span>
+
+        @if (entry.message.comment) {
+          <p class="m-0 whitespace-pre-line text-[#4A3B32]">{{ entry.message.comment }}</p>
+        } @else if (entry.message.files.length === 0) {
+          <p class="m-0 italic text-[#8C7A6B]">Sin comentario.</p>
+        }
+
+        @if (entry.message.files.length > 0) {
+          <div class="flex flex-wrap gap-1.5 pt-0.5">
+            @for (file of entry.message.files; track file.fileId) {
+              <button
+                type="button"
+                (click)="download(file)"
+                class="text-[11px] text-[#633F17] bg-white border border-[#EBE5DC] rounded-full px-2.5 py-1 cursor-pointer hover:bg-[#EFEAE2] flex items-center gap-1 max-w-full"
+              >
+                <i class="pi pi-paperclip text-[10px]"></i>
+                <span class="truncate">{{ file.name }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

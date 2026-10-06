@@ -39,6 +39,7 @@ import {ChatListComponent} from './features/chat-list/chat-list.component';
 import {EventDetailComponent} from './features/event-detail/event-detail.component';
 import {StudentListComponent} from './features/student-list/student-list.component';
 import {TrainingTeamComponent} from './features/training-team/training-team.component';
+import {RecognitionManagementComponent} from './features/recognition-management/recognition-management.component';
 import {UserEventDetailComponent} from './features/user-event-detail/user-event-detail.component';
 
 export const routes: Routes = [
@@ -140,6 +141,11 @@ export const routes: Routes = [
       {
         path: "alumnado",
         component: StudentListComponent,
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+      },
+      {
+        path: "convalidaciones",
+        component: RecognitionManagementComponent,
         data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
       },
       {

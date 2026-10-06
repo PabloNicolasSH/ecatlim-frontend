@@ -141,6 +141,21 @@
                               </div>
 
                               <div class="flex items-center gap-2">
+                                @if (block.recognizable && block.status !== 'Superada') {
+                                  <button
+                                    type="button"
+                                    class="text-[10px] font-bold bg-white border rounded-full px-2.5 py-1 cursor-pointer hover:bg-[#EFEAE2] flex items-center gap-1"
+                                    [ngClass]="{
+                                      'text-[#633F17] border-[#EBE5DC]': !block.recognition || block.recognition.status === 'REJECTED',
+                                      'text-amber-800 border-amber-300': block.recognition?.status === 'PENDING_REVIEW',
+                                      'text-[#795221] border-[#D89052]': block.recognition?.status === 'AWAITING_DOCUMENTATION'
+                                    }"
+                                    (click)="openRecognition(block)"
+                                  >
+                                    <i class="pi pi-verified text-[9px]"></i>
+                                    {{ block.recognition && block.recognition.status !== 'REJECTED' ? recognitionLabels[block.recognition.status] : 'Convalidar' }}
+                                  </button>
+                                }
                                 @if (block.status === 'Superada') {
                                   <button
                                     type="button"
@@ -275,3 +290,9 @@
 
   </div>
 </div>
+
+<app-recognition-dialog
+  [(visible)]="recognitionVisible"
+  [block]="recognitionBlock()"
+  (recognitionChanged)="reloadProgress()"
+></app-recognition-dialog>
