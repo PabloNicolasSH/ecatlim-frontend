@@ -140,6 +140,31 @@
                                 <span class="font-bold text-[12px]">{{ block.code }} {{ block.name }}</span>
                               </div>
 
+                              <div class="flex items-center gap-2">
+                                @if (block.recognizable && block.status !== 'Superada') {
+                                  <button
+                                    type="button"
+                                    class="text-[10px] font-bold bg-white border rounded-full px-2.5 py-1 cursor-pointer hover:bg-[#EFEAE2] flex items-center gap-1"
+                                    [ngClass]="{
+                                      'text-[#633F17] border-[#EBE5DC]': !block.recognition || block.recognition.status === 'REJECTED',
+                                      'text-amber-800 border-amber-300': block.recognition?.status === 'PENDING_REVIEW',
+                                      'text-[#795221] border-[#D89052]': block.recognition?.status === 'AWAITING_DOCUMENTATION'
+                                    }"
+                                    (click)="openRecognition(block)"
+                                  >
+                                    <i class="pi pi-verified text-[9px]"></i>
+                                    {{ block.recognition && block.recognition.status !== 'REJECTED' ? recognitionLabels[block.recognition.status] : 'Convalidar' }}
+                                  </button>
+                                }
+                                @if (block.status === 'Superada') {
+                                  <button
+                                    type="button"
+                                    class="text-[10px] font-bold text-[#633F17] bg-white border border-[#EBE5DC] rounded-full px-2.5 py-1 cursor-pointer hover:bg-[#EFEAE2] flex items-center gap-1"
+                                    (click)="downloadBlockCertificate(block)"
+                                  >
+                                    <i class="pi pi-download text-[9px]"></i> Certificado
+                                  </button>
+                                }
                               <span
                                 class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
                                 [ngClass]="{
@@ -150,6 +175,7 @@
                               >
                             {{ block.status }}
                           </span>
+                              </div>
                             </div>
 
                             @if (block.activities && block.activities.length > 0) {
@@ -176,6 +202,19 @@
               </div>
             }
           </div>
+
+          @if (activeEnrollment()?.documents?.stageCertificate; as stageCertificate) {
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-[#EBE5DC] flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <i class="pi pi-graduation-cap text-xl text-emerald-600"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-[#3D2E24] m-0">Certificado de etapa</h3>
+                  <p class="text-xs text-[#8C7A6B] m-0">Emitido por la gestión de la escuela</p>
+                </div>
+              </div>
+              <p-button label="Descargar" icon="pi pi-download" size="small" (onClick)="downloadStageCertificate(stageCertificate)"></p-button>
+            </div>
+          }
 
           @if (activeEnrollment(); as enrollment) {
             <app-document-uploader
@@ -251,3 +290,9 @@
 
   </div>
 </div>
+
+<app-recognition-dialog
+  [(visible)]="recognitionVisible"
+  [block]="recognitionBlock()"
+  (recognitionChanged)="reloadProgress()"
+></app-recognition-dialog>

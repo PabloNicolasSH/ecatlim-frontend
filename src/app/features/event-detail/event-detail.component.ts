@@ -12,6 +12,7 @@ import {
 } from '../../shared/models/event.model';
 import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avatar.component';
 import {EventParticipantsComponent} from './event-participants/event-participants.component';
+import {AttendanceChange, EventAttendanceDialogComponent} from './event-attendance-dialog/event-attendance-dialog.component';
 
 interface TimelineDay {
   date: string;
@@ -28,7 +29,8 @@ interface TimelineDay {
     Button,
     Tooltip,
     UserAvatarComponent,
-    EventParticipantsComponent
+    EventParticipantsComponent,
+    EventAttendanceDialogComponent
   ],
   templateUrl: './event-detail.component.html',
   styleUrl: './event-detail.component.scss'
@@ -39,6 +41,7 @@ export class EventDetailComponent implements OnInit {
   private readonly eventService = inject(EventService);
 
   event = signal<EventDetail | null>(null);
+  attendanceVisible = false;
   loading = signal<boolean>(true);
   failed = signal<boolean>(false);
 
@@ -60,6 +63,11 @@ export class EventDetailComponent implements OnInit {
     SURVEY: {label: 'Encuesta', icon: 'pi-list-check'},
     FILE_UPLOAD: {label: 'Entrega de archivo', icon: 'pi-upload'}
   };
+
+  started = computed(() => {
+    const event = this.event();
+    return !!event && new Date(event.startDate).getTime() <= Date.now();
+  });
 
   isPast = computed(() => {
     const event = this.event();
@@ -83,11 +91,25 @@ export class EventDetailComponent implements OnInit {
     return (event?.theoreticalHours ?? 0) + (event?.practicalHours ?? 0) + (event?.onlineHours ?? 0);
   });
 
+  onActivityCreated(activity: EventDetailActivity): void {
+    this.event.update(event => event && {...event, activities: [...event.activities, activity]});
+  }
+
+  onAttendanceChange(change: AttendanceChange): void {
+    this.event.update(event => event && {
+      ...event,
+      participants: event.participants.map(p => p.userId !== change.userId ? p : {
+        ...p,
+        blocks: p.blocks.map(b => b.lessonBlockId === change.lessonBlockId ? {...b, attendance: change.attendance} : b)
+      })
+    });
+  }
+
   paidCount = computed(() => this.countByPayment('PAID'));
   pendingCount = computed(() => this.countByPayment('PENDING'));
 
   attendedCount = computed(() =>
-    (this.event()?.participants ?? []).filter(p => p.blocks.length > 0 && p.blocks.every(b => b.attended)).length
+    (this.event()?.participants ?? []).filter(p => p.blocks.length > 0 && p.blocks.every(b => b.attendance !== null)).length
   );
 
   quorumPercent = computed(() => {

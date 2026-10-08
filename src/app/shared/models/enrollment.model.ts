@@ -1,3 +1,5 @@
+import {RecognitionSummary} from './recognition.model';
+
 export interface Activity {
   name: string;
   result?: string;
@@ -5,11 +7,13 @@ export interface Activity {
 }
 
 export interface Block {
-  id: string;
+  id: number;
   name: string;
   code: string;
   status: 'Superada' | 'Pendiente' | 'En Curso';
   completionDate?: string;
+  recognizable: boolean;
+  recognition: RecognitionSummary | null;
   activities: Activity[];
 }
 
@@ -28,6 +32,7 @@ export interface EnrollmentDocument {
 
 export interface EnrollmentDocuments {
   personalPlan: EnrollmentDocument | null;
+  stageCertificate: EnrollmentDocument | null;
   entityApproval: EnrollmentDocument | null;
 }
 

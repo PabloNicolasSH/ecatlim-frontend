@@ -6,26 +6,38 @@
       <span class="text-[10px] font-black px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">{{ participants().length }}</span>
     </div>
 
-    @if (participants().length > 0) {
-      <div class="inline-flex bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1" role="group" aria-label="Datos a mostrar">
-        <button
-          type="button"
-          (click)="showFullData.set(true)"
-          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
-          [class]="showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
-        >
-          <i class="pi pi-table text-[11px]"></i> Todos los datos
-        </button>
-        <button
-          type="button"
-          (click)="showFullData.set(false)"
-          class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
-          [class]="!showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
-        >
-          <i class="pi pi-th-large text-[11px]"></i> Solo nombre
-        </button>
-      </div>
-    }
+    <div class="flex flex-wrap items-center gap-3">
+      @if (canTakeAttendance() && participants().length > 0) {
+        <p-button
+          label="Pasar lista"
+          icon="pi pi-check-square"
+          size="small"
+          styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl font-bold"
+          (onClick)="takeAttendance.emit()"
+        ></p-button>
+      }
+
+      @if (participants().length > 0) {
+        <div class="inline-flex bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1" role="group" aria-label="Datos a mostrar">
+          <button
+            type="button"
+            (click)="showFullData.set(true)"
+            class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
+            [class]="showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+          >
+            <i class="pi pi-table text-[11px]"></i> Todos los datos
+          </button>
+          <button
+            type="button"
+            (click)="showFullData.set(false)"
+            class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
+            [class]="!showFullData() ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+          >
+            <i class="pi pi-th-large text-[11px]"></i> Solo nombre
+          </button>
+        </div>
+      }
+    </div>
   </div>
 
   @if (participants().length === 0) {
@@ -44,10 +56,9 @@
         <tr>
           <th>Persona</th>
           <th>Entidad de procedencia</th>
-          <th>Bloques</th>
           <th class="!text-center">Pago</th>
-          @if (isPast()) {
-            <th class="!text-center">Asistió</th>
+          @if (started()) {
+            <th>Asistencia</th>
           }
         </tr>
       </ng-template>
@@ -63,28 +74,27 @@
             </div>
           </td>
           <td class="text-[0.95rem] text-[#51453a]">{{ p.entityName || '—' }}</td>
-          <td>
-            <div class="flex flex-wrap gap-1">
-              @for (b of p.blocks; track b.code) {
-                <span
-                  class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#633F17]"
-                  [pTooltip]="b.name"
-                >{{ b.code }}</span>
-              }
-            </div>
-          </td>
           <td class="!text-center">
             <span class="text-[11px] font-black uppercase px-3 py-1 rounded-full" [ngClass]="paymentStyle(p.paymentStatus).classes">
               {{ paymentStyle(p.paymentStatus).label }}
             </span>
           </td>
-          @if (isPast()) {
-            <td class="!text-center">
-              @if (attendedAll(p)) {
-                <i class="pi pi-check-circle text-emerald-600 text-lg"></i>
-              } @else {
-                <i class="pi pi-minus-circle text-[#C2B7AC] text-lg"></i>
-              }
+          @if (started()) {
+            <td>
+              <div class="flex flex-col gap-1.5">
+                @for (b of p.blocks; track b.code) {
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#633F17] w-16 text-center" [pTooltip]="b.name">{{ b.code }}</span>
+                    @if (b.attendance) {
+                      <span class="text-[11px] font-black uppercase px-3 py-1 rounded-full" [ngClass]="attendanceStyle(b.attendance).classes">
+                        {{ attendanceStyle(b.attendance).label }}
+                      </span>
+                    } @else {
+                      <span class="text-xs text-[#C2B7AC]">Sin registrar</span>
+                    }
+                  </div>
+                }
+              </div>
             </td>
           }
         </tr>

@@ -1,0 +1,140 @@
+<p-dialog
+  header="Convalidar bloque formativo"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '40rem' }"
+  [breakpoints]="{ '768px': '94vw' }"
+>
+  @if (block(); as block) {
+    <div class="space-y-4 text-[#4A3B32]">
+
+      <div class="p-3 rounded-xl bg-[#FAF8F5] border border-[#EBE5DC]">
+        <p class="text-xs font-bold m-0">{{ block.code }} {{ block.name }}</p>
+        <p class="text-[11px] text-[#8C7A6B] m-0 mt-1">
+          La convalidación es un proceso abierto con el equipo formativo: te irán pidiendo la documentación que necesiten y te responderán aquí.
+        </p>
+      </div>
+
+      @if (loading()) {
+        <p class="text-xs italic text-[#8C7A6B] text-center py-6 m-0">Cargando...</p>
+      } @else {
+
+        @if (request(); as req) {
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs text-[#8C7A6B]">Vía: <strong class="text-[#3D2E24]">{{ typeLabel(req.type) }}</strong></span>
+            <span
+              class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+              [ngClass]="{
+                'bg-amber-100 text-amber-800': req.status === 'PENDING_REVIEW',
+                'bg-[#F3E3C3] text-[#795221]': req.status === 'AWAITING_DOCUMENTATION',
+                'bg-emerald-100 text-emerald-800': req.status === 'APPROVED',
+                'bg-red-100 text-red-800': req.status === 'REJECTED'
+              }"
+            >
+              {{ statusLabels[req.status] }}
+            </span>
+          </div>
+
+          <div class="max-h-80 overflow-y-auto pr-1">
+            <app-recognition-conversation [request]="req" viewer="student"></app-recognition-conversation>
+          </div>
+
+          @if (req.status === 'PENDING_REVIEW') {
+            <p class="text-[11px] text-[#8C7A6B] m-0">Tu solicitud está pendiente de revisión por el equipo formativo.</p>
+          } @else if (req.status === 'APPROVED') {
+            <p class="text-[11px] text-emerald-700 m-0">El bloque ha quedado convalidado y figura como superado.</p>
+          }
+        }
+
+        @if (showOpenForm || showDocumentationForm) {
+          <div class="space-y-3 border-t border-[#F2ECE4] pt-4">
+
+            @if (showOpenForm) {
+              <p class="text-xs font-bold m-0">¿Por qué vía solicitas la convalidación?</p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                @for (option of typeOptions; track option.value) {
+                  <button
+                    type="button"
+                    (click)="selectedType.set(option.value)"
+                    class="p-3 rounded-xl border text-left cursor-pointer flex flex-col gap-1 transition-colors"
+                    [ngClass]="selectedType() === option.value
+                      ? 'bg-[#633F17] text-white border-[#633F17]'
+                      : 'bg-[#FAF8F5] text-[#3D2E24] border-[#EBE5DC] hover:border-[#795221]'"
+                  >
+                    <i class="pi text-sm" [ngClass]="option.icon"></i>
+                    <span class="text-xs font-bold">{{ option.label }}</span>
+                    <span class="text-[10px] leading-snug" [ngClass]="selectedType() === option.value ? 'text-white/80' : 'text-[#8C7A6B]'">{{ option.description }}</span>
+                  </button>
+                }
+              </div>
+            } @else {
+              <p class="text-xs font-bold m-0">Aporta la documentación solicitada</p>
+            }
+
+            <textarea
+              rows="3"
+              maxlength="2000"
+              class="w-full p-2 text-xs rounded-lg border border-[#D9CFC4] bg-white resize-y"
+              [placeholder]="showOpenForm ? 'Comentario (opcional)' : 'Comentario para el equipo formativo (opcional si adjuntas archivos)'"
+              [value]="comment()"
+              (input)="comment.set($any($event.target).value)"
+            ></textarea>
+
+            <input
+              #fileInput
+              type="file"
+              class="hidden"
+              multiple
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              (change)="onFilesSelected($event)"
+            />
+
+            @if (files().length > 0) {
+              <div class="flex flex-wrap gap-2">
+                @for (file of files(); track $index) {
+                  <span class="text-[11px] bg-[#EFEAE2] text-[#633F17] rounded-full pl-2.5 pr-1 py-1 flex items-center gap-1 max-w-full">
+                    <span class="truncate">{{ file.name }}</span>
+                    <button type="button" (click)="removeFile($index)" class="border-0 bg-transparent cursor-pointer text-[#633F17] p-0.5" title="Quitar archivo">
+                      <i class="pi pi-times text-[9px]"></i>
+                    </button>
+                  </span>
+                }
+              </div>
+            }
+
+            <div class="flex gap-2 justify-end">
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="py-1.5 px-3 text-xs font-bold border border-[#D9CFC4] bg-white text-[#5C4D42] rounded-lg hover:bg-gray-50 cursor-pointer flex items-center gap-1"
+              >
+                <i class="pi pi-paperclip text-[10px]"></i> Adjuntar archivos
+              </button>
+              <button
+                type="button"
+                (click)="submit()"
+                [disabled]="!canSubmit()"
+                class="py-1.5 px-3 text-xs font-bold bg-[#633F17] text-white rounded-lg hover:bg-[#4D3112] border-0 cursor-pointer flex items-center gap-1 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <i class="pi text-[10px]" [ngClass]="sending() ? 'pi-spin pi-spinner' : 'pi-send'"></i>
+                {{ showOpenForm ? 'Solicitar convalidación' : 'Enviar documentación' }}
+              </button>
+            </div>
+            <p class="text-[10px] text-[#8C7A6B] m-0">PDF, Word o imágenes (JPG, PNG). Máximo 10 archivos y 8MB en total por envío.</p>
+          </div>
+        } @else if (request()?.status === 'REJECTED') {
+          <div class="flex justify-end border-t border-[#F2ECE4] pt-4">
+            <button
+              type="button"
+              (click)="startNewRequest()"
+              class="py-1.5 px-3 text-xs font-bold bg-[#633F17] text-white rounded-lg hover:bg-[#4D3112] border-0 cursor-pointer"
+            >
+              Solicitar de nuevo
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+</p-dialog>

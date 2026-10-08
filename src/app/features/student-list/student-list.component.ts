@@ -7,12 +7,14 @@ import {InputText} from 'primeng/inputtext';
 import {IconField} from 'primeng/iconfield';
 import {InputIcon} from 'primeng/inputicon';
 import {Button} from 'primeng/button';
+import {Tooltip} from 'primeng/tooltip';
 import {UserService} from '../../shared/services/user.service';
 import {StudentOverview, StudentSummary} from '../../shared/models/training-people.model';
 import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avatar.component';
 import {UserModalAddEditComponent} from '../user-modal-add-edit/user-modal-add-edit.component';
 import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
 import {Role} from '../../shared/models/role.model';
+import {StudentCertificatesDialogComponent} from '../student-certificates-dialog/student-certificates-dialog.component';
 
 const NO_STAGE = 0;
 
@@ -27,8 +29,10 @@ const NO_STAGE = 0;
     IconField,
     InputIcon,
     Button,
+    Tooltip,
     UserAvatarComponent,
-    UserModalAddEditComponent
+    UserModalAddEditComponent,
+    StudentCertificatesDialogComponent
   ],
   templateUrl: './student-list.component.html',
   styleUrl: './student-list.component.scss'
@@ -40,6 +44,10 @@ export class StudentListComponent implements OnInit {
 
   readonly canAddStudents = this.loggedUserDataService.hasAnyRole(Role.MANAGEMENT, Role.MANAGER_DIRECTOR);
   modalVisible = false;
+
+  readonly canManageCertificates = this.loggedUserDataService.hasAnyRole(Role.ADMIN, Role.MANAGEMENT, Role.MANAGER_DIRECTOR);
+  certificatesVisible = false;
+  certificatesStudent = signal<StudentSummary | null>(null);
 
   readonly NO_STAGE = NO_STAGE;
   readonly pageSize = 10;
@@ -102,6 +110,11 @@ export class StudentListComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  openCertificates(student: StudentSummary) {
+    this.certificatesStudent.set(student);
+    this.certificatesVisible = true;
   }
 
   toggleStageFilter(stageId: number) {

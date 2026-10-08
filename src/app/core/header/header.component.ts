@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
+import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
@@ -15,6 +15,8 @@ import {WebsocketService} from '../../shared/services/websocket.service';
 import {Subscription} from 'rxjs';
 import {User} from '../../shared/models/user.model';
 import {Notification} from '../../shared/models/notification.model';
+import {NotificationService} from '../../shared/services/notification.service';
+import {DatePipe} from '@angular/common';
 import {Role} from '../../shared/models/role.model';
 
 @Component({
@@ -27,7 +29,8 @@ import {Role} from '../../shared/models/role.model';
     Popover,
     Avatar,
     PanelMenu,
-    Divider
+    Divider,
+    DatePipe
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
@@ -36,6 +39,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   protected readonly chatService = inject(ChatService);
   protected readonly websocketService = inject(WebsocketService);
+  protected readonly notificationService = inject(NotificationService);
   private notificationSub?: Subscription;
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
@@ -49,7 +53,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   windowWidth = signal(window.innerWidth);
   messages = signal(["¿Vienes al curso de Agosto?"]);
-  notifies: WritableSignal<Notification[]> = signal([]);
 
   sidebarMenu!: MenuItem[];
   unreadChats: number = 0;
@@ -65,10 +68,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.chatService.refreshUnreadChats();
     this.notificationSub = this.websocketService.getNotifications()
       .subscribe(notification => this.chatService.markChatUnread(notification.chatId));
+    this.notificationService.init();
   }
 
   ngOnDestroy() {
     this.notificationSub?.unsubscribe();
+    this.notificationService.reset();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -85,11 +90,30 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   handleNotifyClick(notify: Notification) {
-
+    this.notificationService.markAsRead(notify);
+    this.op.hide();
+    if (notify.link) {
+      this.router.navigateByUrl(notify.link);
+    }
   }
 
   markAllAsRead() {
-    this.notifies.set([]);
+    this.notificationService.markAllAsRead();
+  }
+
+  protected notificationIcon(notify: Notification): string {
+    switch (notify.type) {
+      case 'ACTIVITY_ASSIGNED':
+        return 'pi pi-clipboard';
+      case 'EVENT_PUBLISHED':
+        return 'pi pi-calendar';
+      case 'STAGE_CERTIFICATE_SENT':
+        return 'pi pi-verified';
+      case 'RECOGNITION_ANSWERED':
+        return 'pi pi-check-circle';
+      default:
+        return 'pi pi-file-check';
+    }
   }
 
   onMenuClick() {

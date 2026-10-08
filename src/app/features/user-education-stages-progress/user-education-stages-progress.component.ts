@@ -18,7 +18,7 @@ export class UserEducationStagesProgressComponent implements OnInit {
   protected readonly enrollmentsService = inject(EnrollmentService);
 
   activeTabIndex = signal<number>(0);
-  expandedBlockId = signal<string | null>(null);
+  expandedBlockId = signal<number | null>(null)| null>(null);
   enrollments = signal<Enrollment[]>([]);
 
   activeEnrollment = computed(() => this.enrollments()[this.activeTabIndex()]);
@@ -35,7 +35,7 @@ export class UserEducationStagesProgressComponent implements OnInit {
       })
   }
 
-  toggleBlock(id: string) {
+  toggleBlock(id: number) {
     this.expandedBlockId.set(this.expandedBlockId() === id ? null : id);
   }
 }

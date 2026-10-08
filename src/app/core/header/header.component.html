@@ -31,9 +31,9 @@
     </p-overlay-badge>
 
     <p-overlay-badge
-      [value]="notifies.length"
+      [value]="notificationService.pendingCount()"
       severity="danger"
-      [badgeDisabled]="notifies.length === 0">
+      [badgeDisabled]="notificationService.pendingCount() === 0">
       <p-button (onClick)="toggleNotifications($event)" icon="pi pi-bell" severity="secondary" rounded></p-button>
     </p-overlay-badge>
   </div>
@@ -104,32 +104,36 @@
   <div class="flex flex-col w-72 sm:w-80 max-h-96">
     <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-2 px-2">
       <span class="font-bold text-gray-700">Notificaciones</span>
-      @if (notifies().length > 0) {
+      @if (notificationService.pendingCount() > 0) {
         <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-medium">
-          {{ notifies().length }} nuevas
+          {{ notificationService.pendingCount() }} pendientes
         </span>
       }
     </div>
     <div class="overflow-y-auto custom-scrollbar">
-      @if (notifies().length > 0) {
-        @for (notify of notifies(); track notify.id) {
+      @if (notificationService.notifications().length > 0) {
+        @for (notify of notificationService.notifications(); track notify.id) {
           <div
             class="flex items-start p-3 hover:bg-gray-50 cursor-pointer rounded-lg transition-colors border-b border-gray-50 last:border-0"
+            [class.opacity-60]="!notify.pending"
             (click)="handleNotifyClick(notify)"
           >
             <div class="mr-3 mt-1">
-              <i [class]="notify.icon || 'pi pi-info-circle'"
-                 [style.color]="notify.color || '#3B82F6'"
+              <i [class]="notificationIcon(notify)"
+                 [style.color]="notify.pending ? '#3B82F6' : '#9CA3AF'"
                  class="text-lg"></i>
             </div>
 
             <div class="flex flex-col">
-              <span class="text-sm font-semibold text-gray-800">{{ notify.title }}</span>
+              <span class="text-sm text-gray-800" [class.font-semibold]="notify.pending">{{ notify.title }}</span>
               <p class="text-xs text-gray-500 leading-tight mt-1">
                 {{ notify.description }}
               </p>
               <span class="text-[10px] text-gray-400 mt-2 italic">
-                {{ notify.date }}
+                {{ notify.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                @if (notify.requiresAction && !notify.pending) {
+                  · Completada
+                }
               </span>
             </div>
           </div>
@@ -137,13 +141,13 @@
       } @else {
         <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
           <i class="pi pi-bell-slash text-3xl text-gray-300 mb-3"></i>
-          <p class="text-sm text-gray-500 font-medium">No tienes notificaciones nuevas</p>
+          <p class="text-sm text-gray-500 font-medium">No tienes notificaciones</p>
           <p class="text-xs text-gray-400 mt-1">¡Todo al día!</p>
         </div>
       }
     </div>
 
-    @if (notifies().length > 0) {
+    @if (notificationService.notifications().length > 0) {
       <button
         class="w-full mt-2 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-b-lg transition-colors border-t border-gray-100"
         (click)="markAllAsRead()"

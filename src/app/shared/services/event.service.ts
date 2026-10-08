@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {
   AdminEventCalendar,
+  AttendanceType,
   Event,
   EventDashboard,
   EventDetail,
@@ -22,6 +23,10 @@ export class EventService {
 
   getEventDetail(id: number): Observable<EventDetail> {
     return this.http.get<EventDetail>(`${environment.apiUrl}/events/${id}/detail`);
+  }
+
+  markAttendance(eventId: number, userId: number, lessonBlockId: number, attendance: AttendanceType | null): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/events/${eventId}/attendance`, {userId, lessonBlockId, attendance});
   }
 
   getSuggestions(): Observable<EventSuggestions> {

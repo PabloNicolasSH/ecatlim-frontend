@@ -1,0 +1,158 @@
+<p-dialog
+  header="Pasar lista"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '52rem' }"
+  [breakpoints]="{ '768px': '95vw' }"
+>
+  <div class="space-y-6">
+    @if (blocks().length === 0) {
+      <p class="text-sm italic text-[#8C7A6B] m-0">No tienes bloques de este evento en los que registrar asistencia.</p>
+    }
+
+    @if (blocks().length > 1) {
+      <div class="flex flex-wrap gap-2" role="tablist" aria-label="Bloques formativos">
+        @for (b of blocks(); track b.id) {
+          <button
+            type="button"
+            role="tab"
+            (click)="selectBlock(b.id)"
+            class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold transition-colors"
+            [class]="currentBlock().id === b.id ? 'bg-[#633F17] text-white' : 'bg-[#EFEAE2] text-[#633F17] hover:bg-[#E5DDD2]'"
+          >{{ b.code }}</button>
+        }
+      </div>
+    }
+
+    @if (currentBlock(); as block) {
+      <section class="space-y-3">
+        <div class="flex flex-wrap items-center gap-2 min-w-0">
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#633F17]">{{ block.code }}</span>
+          <h3 class="text-sm font-black text-[#3D2E24] m-0 truncate">{{ block.name }}</h3>
+          <span class="text-xs text-[#8C7A6B]">{{ summary(block) }}</span>
+        </div>
+
+        @if (block.participants.length === 0) {
+          <p class="text-xs italic text-[#8C7A6B] m-0">Nadie inscrito en este bloque.</p>
+        }
+
+        @for (person of block.participants; track person.userId) {
+          <div class="bg-[#FAF8F5] border border-[#EBE5DC] rounded-xl p-3 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-bold text-sm text-[#3D2E24] m-0 truncate">{{ fullName(person) }}</p>
+                <p class="text-xs text-[#8C7A6B] m-0 truncate">{{ person.email }}</p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                @if (attendanceOf(person, block.id) === 'CONDITIONED_TASK' && canCreateTasks && !isTaskOpen(person, block.id)) {
+                  <p-button
+                    [label]="tasksOf(person, block.id).length > 0 ? 'Otra tarea' : 'Crear tarea'"
+                    icon="pi pi-plus"
+                    size="small"
+                    severity="secondary"
+                    (onClick)="openTaskForm(person, block.id)"
+                  ></p-button>
+                }
+                <p-select
+                  [options]="attendanceOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="attendanceOf(person, block.id)"
+                  (ngModelChange)="setAttendance(person, block.id, $event)"
+                  [disabled]="saving() === person.userId + '-' + block.id"
+                  appendTo="body"
+                  size="small"
+                  styleClass="w-48"
+                />
+              </div>
+            </div>
+
+            @if (attendanceOf(person, block.id) === 'CONDITIONED_TASK' && tasksOf(person, block.id).length > 0) {
+              <div class="space-y-1.5">
+                @for (task of tasksOf(person, block.id); track task.id) {
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs bg-sky-50 border border-sky-100 rounded-lg px-3 py-2">
+                    <i class="pi pi-list-check text-sky-800"></i>
+                    <span class="font-black uppercase text-[10px] text-sky-800">Tarea condicionada</span>
+                    <span class="font-bold text-[#3D2E24]">{{ task.title }}</span>
+                    <span class="text-[#8C7A6B]">· entrega {{ task.dueDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (isTaskOpen(person, block.id)) {
+              <form [formGroup]="taskForm" (ngSubmit)="createTask()" class="bg-white border border-[#EBE5DC] rounded-xl p-3 space-y-4">
+                <p class="text-xs font-bold text-[#795221] uppercase m-0">Nueva tarea solo para {{ fullName(person) }}</p>
+
+                <p-floatlabel variant="on">
+                  <input pInputText id="task-title-{{ person.userId }}" formControlName="title" class="w-full" />
+                  <label for="task-title-{{ person.userId }}">Título</label>
+                </p-floatlabel>
+
+                <p-floatlabel variant="on">
+                  <textarea pTextarea id="task-description-{{ person.userId }}" formControlName="description" rows="3" class="w-full"></textarea>
+                  <label for="task-description-{{ person.userId }}">Descripción</label>
+                </p-floatlabel>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <p-floatlabel variant="on">
+                    <p-select
+                      id="task-type-{{ person.userId }}"
+                      [options]="taskTypes"
+                      optionLabel="label"
+                      optionValue="value"
+                      formControlName="activityType"
+                      appendTo="body"
+                      styleClass="w-full"
+                    ></p-select>
+                    <label for="task-type-{{ person.userId }}">Tipo</label>
+                  </p-floatlabel>
+
+                  <p-floatlabel variant="on">
+                    <p-datepicker
+                      inputId="task-due-{{ person.userId }}"
+                      formControlName="dueDate"
+                      [showTime]="true"
+                      dateFormat="dd/mm/yy"
+                      appendTo="body"
+                      styleClass="w-full"
+                    ></p-datepicker>
+                    <label for="task-due-{{ person.userId }}">Fecha de entrega</label>
+                  </p-floatlabel>
+
+                  <p-floatlabel variant="on">
+                    <p-select
+                      id="task-responsible-{{ person.userId }}"
+                      [options]="trainers()"
+                      optionLabel="fullName"
+                      optionValue="id"
+                      formControlName="responsibleId"
+                      appendTo="body"
+                      styleClass="w-full"
+                      emptyMessage="Este evento no tiene equipo de formación"
+                    ></p-select>
+                    <label for="task-responsible-{{ person.userId }}">Corrige</label>
+                  </p-floatlabel>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                  <p-button label="Cancelar" severity="secondary" [text]="true" size="small" (onClick)="cancelTask()"></p-button>
+                  <p-button
+                    type="submit"
+                    label="Crear tarea"
+                    icon="pi pi-check"
+                    size="small"
+                    [loading]="creatingTask()"
+                    [disabled]="taskForm.invalid"
+                  ></p-button>
+                </div>
+              </form>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</p-dialog>

@@ -3,7 +3,7 @@ import {EducationStageService} from '../../../shared/services/education-stage.se
 import {EnrollmentService} from '../../../shared/services/enrollment.service';
 import {MessageService, PrimeTemplate} from 'primeng/api';
 import {EducationStageCard} from '../../../shared/models/education-stage.model';
-import {Enrollment, EnrollmentDocuments, Module} from '../../../shared/models/enrollment.model';
+import {Block, Enrollment, EnrollmentDocument, EnrollmentDocuments, Module} from '../../../shared/models/enrollment.model';
 import {forkJoin} from 'rxjs';
 import {Carousel} from 'primeng/carousel';
 import {NgClass} from '@angular/common';
@@ -11,6 +11,9 @@ import {EducationStageStatusPipe} from '../../../shared/pipes/education-stage-st
 import {Button} from 'primeng/button';
 import {DocumentUploaderComponent} from '../document-uploader/document-uploader.component';
 import {AttendedEventsComponent} from '../attended-events/attended-events.component';
+import {CertificateService} from '../../../shared/services/certificate.service';
+import {RecognitionDialogComponent} from '../recognition-dialog/recognition-dialog.component';
+import {RECOGNITION_STATUS_LABELS} from '../../../shared/models/recognition.model';
 
 @Component({
   selector: 'app-education-progress',
@@ -21,7 +24,8 @@ import {AttendedEventsComponent} from '../attended-events/attended-events.compon
     PrimeTemplate,
     Button,
     DocumentUploaderComponent,
-    AttendedEventsComponent
+    AttendedEventsComponent,
+    RecognitionDialogComponent
   ],
   templateUrl: './education-progress.component.html',
   styleUrl: './education-progress.component.scss'
@@ -31,6 +35,7 @@ export class EducationProgressComponent implements OnInit {
   protected readonly educationStageService = inject(EducationStageService);
   protected readonly enrollmentService = inject(EnrollmentService);
   protected readonly messageService = inject(MessageService);
+  protected readonly certificateService = inject(CertificateService);
 
   stages = signal<EducationStageCard[]>([]);
   enrollments = signal<Enrollment[]>([]);
@@ -39,6 +44,10 @@ export class EducationProgressComponent implements OnInit {
 
   expandedModuleCode = signal<string | null>(null);
   loading = signal<boolean>(false);
+
+  readonly recognitionLabels = RECOGNITION_STATUS_LABELS;
+  recognitionVisible = signal<boolean>(false);
+  recognitionBlock = signal<Block | null>(null);
 
   responsiveOptions = [
     { breakpoint: '1400px', numVisible: 4, numScroll: 1 },
@@ -115,8 +124,44 @@ export class EducationProgressComponent implements OnInit {
     }
   }
 
+  openRecognition(block: Block): void {
+    this.recognitionBlock.set(block);
+    this.recognitionVisible.set(true);
+  }
+
+  reloadProgress(): void {
+    this.enrollmentService.getUserProgress().subscribe(enrollments => {
+      this.enrollments.set(enrollments as unknown as Enrollment[]);
+      const open = this.recognitionBlock();
+      if (open) {
+        const refreshed = this.enrollments().flatMap(e => e.modules).flatMap(m => m.blocks).find(b => b.id === open.id);
+        if (refreshed) this.recognitionBlock.set(refreshed);
+      }
+    });
+  }
+
   onDocumentsChange(enrollmentId: number, documents: EnrollmentDocuments): void {
     this.enrollments.update(list => list.map(e => e.id === enrollmentId ? {...e, documents} : e));
+  }
+
+  downloadBlockCertificate(block: Block): void {
+    this.certificateService.downloadBlockCertificate(block.id).subscribe(blob =>
+      this.saveBlob(blob, `certificado-${block.code}.pdf`));
+  }
+
+  downloadStageCertificate(doc: EnrollmentDocument): void {
+    this.enrollmentService.downloadDocument(doc.fileId).subscribe(blob => this.saveBlob(blob, doc.name));
+  }
+
+  private saveBlob(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   toggleModule(code: string): void {
