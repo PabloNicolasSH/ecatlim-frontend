@@ -9,6 +9,8 @@ import {HttpClient} from '@angular/common/http';
 import {Role} from '../../../shared/models/role.model';
 import {LoggedUserDataService} from '../../../core/auth/logged-user-data-service';
 import {UserService} from '../../../shared/services/user.service';
+import {NotificationService} from '../../../shared/services/notification.service';
+import {ToggleSwitch} from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-user-profile',
@@ -17,7 +19,8 @@ import {UserService} from '../../../shared/services/user.service';
     FormsModule,
     UserModalMeEditComponent,
     RouterLink,
-    UserAvatarModalComponent
+    UserAvatarModalComponent,
+    ToggleSwitch
   ],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.scss'
@@ -26,16 +29,27 @@ export class UserProfileComponent implements OnInit {
   protected readonly userService = inject(UserService);
   protected readonly http = inject(HttpClient);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
+  protected readonly notificationService = inject(NotificationService);
 
   user!: User;
   secureAvatarUrl: any = null;
 
   visibleEditProfile: boolean = false;
   visibleEditAvatar: boolean = false;
+  emailReminders: boolean | null = null;
 
   ngOnInit(): void {
     this.loggedUserDataService.avatarUrl$.subscribe(url => this.secureAvatarUrl = url);
     this.updateUser();
+    this.notificationService.getPreferences().subscribe(prefs => this.emailReminders = prefs.emailReminders);
+  }
+
+  onEmailRemindersChange(enabled: boolean) {
+    const previous = this.emailReminders;
+    this.emailReminders = enabled;
+    this.notificationService.setEmailReminders(enabled).subscribe({
+      error: () => this.emailReminders = previous
+    });
   }
 
   updateUser() {

@@ -131,6 +131,26 @@
           </div>
         </div>
 
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm w-full">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-orange-50/70 flex items-center justify-center text-ecatlim">
+              <i class="pi pi-bell text-lg"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-800">Notificaciones</h3>
+          </div>
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-gray-700">Recordatorio semanal por correo</span>
+              <span class="text-xs text-gray-400">Cada lunes te avisamos de lo que tengas pendiente en el Aula Virtual.</span>
+            </div>
+            <p-toggleswitch
+              [ngModel]="emailReminders"
+              (ngModelChange)="onEmailRemindersChange($event)"
+              [disabled]="emailReminders === null"
+            ></p-toggleswitch>
+          </div>
+        </div>
+
       </div>
     </div>
   } @else {
