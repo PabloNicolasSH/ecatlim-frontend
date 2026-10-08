@@ -180,6 +180,43 @@ export class AdminEventCalendarComponent implements OnInit {
     });
   }
 
+  canEditEvent(event: any): boolean {
+    const me = this.loggedUserDataService.getLoggedUserData();
+    return this.loggedUserDataService.hasAnyRole(Role.ADMIN, Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR)
+      || (!!me && event.director?.email === me.email);
+  }
+
+  setEventPending(event: any) {
+    this.confirmationService.confirm({
+      message: `¿Quieres sacar el evento "${event.title}" de borrador y pasarlo a pendiente de publicación?`,
+      header: 'Confirmar cambio de estado',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, pasar a pendiente',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-warning text-sm',
+      rejectButtonStyleClass: 'p-button-text text-sm',
+      accept: () => {
+        this.eventService.setPending(event.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Evento pendiente',
+              detail: `El evento "${event.title}" está pendiente de que el director lo publique.`
+            });
+            this.loadEvents();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo pasar el evento a pendiente.'
+            });
+          }
+        });
+      }
+    });
+  }
+
   openMenu(eventClick: Event, eventItem: any) {
     this.menuContextEvent = eventItem;
     this.menuComponent.toggle(eventClick);

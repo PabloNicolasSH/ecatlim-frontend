@@ -18,6 +18,7 @@ import {Notification} from '../../shared/models/notification.model';
 import {NotificationService} from '../../shared/services/notification.service';
 import {DatePipe} from '@angular/common';
 import {Role} from '../../shared/models/role.model';
+import {RoleNamePipe} from '../../shared/pipes/role-name.pipe';
 
 @Component({
   selector: 'app-header',
@@ -30,7 +31,8 @@ import {Role} from '../../shared/models/role.model';
     Avatar,
     PanelMenu,
     Divider,
-    DatePipe
+    DatePipe,
+    RoleNamePipe
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
@@ -239,28 +241,5 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   protected logout() {
     this.authService.logout()
-  }
-
-  protected getUserRolesTag() {
-    if (!this.user.roles || this.user.roles.length === 0) {
-      return [{label: 'Sin Rol', severity: 'secondary'}];
-    }
-
-    return this.user.roles.map(role => {
-      switch (role.toUpperCase()) {
-        case 'MANAGER_DIRECTOR':
-          return 'Dirección ECATLIM';
-        case 'ADMIN':
-          return 'Administración';
-        case 'EVENT_DIRECTOR':
-          return 'Dirección de Eventos';
-        case 'HEAD_OF_EDUCATION':
-          return 'Coord. Formación';
-        case 'STUDENT':
-          return 'Persona en Formación';
-        default:
-          return role;
-      }
-    }).join(", ");
   }
 }

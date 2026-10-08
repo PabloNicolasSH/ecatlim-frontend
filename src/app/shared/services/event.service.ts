@@ -46,7 +46,7 @@ export class EventService {
   }
 
   getAdminEventsForCalendar(): Observable<AdminEventCalendar[]> {
-    return this.http.get<AdminEventCalendar[]>(`${environment.apiUrl}/events/admin/calendar`);
+    return this.http.get<AdminEventCalendar[]>(`${environment.apiUrl}/events/calendar`);
   }
 
   getEventsForHome(): Observable<EventDashboard[]> {
@@ -54,15 +54,19 @@ export class EventService {
   }
 
   saveEvent(event: EventForm): Observable<Event> {
-    return this.http.post<Event>(`${environment.apiUrl}/events/admin/add`, event);
+    return this.http.post<Event>(`${environment.apiUrl}/events/add`, event);
   }
 
   updateEvent(eventId: number, eventDto: EventForm) {
-    return this.http.put<Event>(`${environment.apiUrl}/events/admin/${eventId}`, eventDto);
+    return this.http.put<Event>(`${environment.apiUrl}/events/${eventId}`, eventDto);
+  }
+
+  setPending(id: number) {
+    return this.http.put<Event>(`${environment.apiUrl}/events/${id}/set-pending`, null);
   }
 
   updateStatus(id: number, status: string) {
-    return this.http.put<Event>(`${environment.apiUrl}/events/admin/update-status/${id}`, status);
+    return this.http.put<Event>(`${environment.apiUrl}/events/update-status/${id}`, status);
   }
 
   delete(id: number) {
