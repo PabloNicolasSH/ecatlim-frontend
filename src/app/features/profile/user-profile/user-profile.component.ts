@@ -6,11 +6,11 @@ import {UserModalMeEditComponent} from '../user-modal-me-edit/user-modal-me-edit
 import {RouterLink} from '@angular/router';
 import {UserAvatarModalComponent} from '../user-avatar-modal/user-avatar-modal.component';
 import {HttpClient} from '@angular/common/http';
-import {Role} from '../../../shared/models/role.model';
 import {LoggedUserDataService} from '../../../core/auth/logged-user-data-service';
 import {UserService} from '../../../shared/services/user.service';
 import {NotificationService} from '../../../shared/services/notification.service';
 import {ToggleSwitch} from 'primeng/toggleswitch';
+import {RoleNamePipe} from '../../../shared/pipes/role-name.pipe';
 
 @Component({
   selector: 'app-user-profile',
@@ -20,7 +20,8 @@ import {ToggleSwitch} from 'primeng/toggleswitch';
     UserModalMeEditComponent,
     RouterLink,
     UserAvatarModalComponent,
-    ToggleSwitch
+    ToggleSwitch,
+    RoleNamePipe
   ],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.scss'
@@ -84,28 +85,5 @@ export class UserProfileComponent implements OnInit {
     ].filter(value => value && value.trim() !== '');
 
     return parts.length > 0 ? parts.join(', ') : 'No tiene dirección registrada';
-  }
-
-  protected getRoleNames(roles: Role[]) {
-    if (!roles || roles.length === 0) {
-      return ['Sin Rol'];
-    }
-
-    return roles.map(role => {
-      switch (role.toUpperCase()) {
-        case 'MANAGER_DIRECTOR':
-          return 'Dirección ECATLIM';
-        case 'ADMIN':
-          return 'Administración';
-        case 'EVENT_DIRECTOR':
-          return 'Dirección de Eventos';
-        case 'HEAD_OF_EDUCATION':
-          return 'Coord. Formación';
-        case 'STUDENT':
-          return 'Persona en Formación';
-        default:
-          return role;
-      }
-    });
   }
 }

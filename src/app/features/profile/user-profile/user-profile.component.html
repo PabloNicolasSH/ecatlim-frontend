@@ -26,10 +26,12 @@
           </h2>
 
           <div class="flex flex-wrap gap-2 mt-2">
-            @for (roleName of getRoleNames(user.roles); track $index) {
+            @for (role of user.roles; track role) {
               <span class="px-3 py-1 bg-orange-50 text-ecatlim text-xs font-semibold rounded-full tracking-wide">
-                {{ roleName }}
+                {{ role | roleName }}
               </span>
+            } @empty {
+              <span class="px-3 py-1 bg-orange-50 text-ecatlim text-xs font-semibold rounded-full tracking-wide">Sin Rol</span>
             }
           </div>
         </div>
