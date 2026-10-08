@@ -47,6 +47,7 @@ export class HoursMetreComponent {
         label: mapping[key].label,
         value: mapping[key].value,
         max: mapping[key].max,
+        percent: mapping[key].max > 0 ? (mapping[key].value * 100) / mapping[key].max : (mapping[key].value > 0 ? 100 : 0),
         icon: mapping[key].icon,
         color: mapping[key].color,
         exceeded

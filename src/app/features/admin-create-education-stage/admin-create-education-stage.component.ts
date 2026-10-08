@@ -10,6 +10,7 @@ import {EducationStage} from '../../shared/models/education-stage.model';
 import {EducationStageService} from '../../shared/services/education-stage.service';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {ActivatedRoute, RouterLink} from '@angular/router';
+import {forkJoin, Observable} from 'rxjs';
 import {ModuleService} from '../../shared/services/module.service';
 import {ModuleModel} from '../../shared/models/module.model';
 import {LessonBlockService} from '../../shared/services/lesson-block.service';
@@ -80,14 +81,9 @@ export class AdminCreateEducationStageComponent implements OnInit{
   educationStageOnlineHours: number = 0;
   educationStageContactHours: number = 0;
   educationStagePracticalHours: number = 0;
-  educationStageAllocatedOnlineHours: number = 0;
-  educationStageAllocatedContactHours: number = 0;
-  educationStageAllocatedPracticalHours: number = 0;
 
   moduleOnlineHours: number = 0;
   moduleContactHours: number = 0;
-  moduleAllocatedOnlineHours: number = 0;
-  moduleAllocatedContactHours: number = 0;
 
   ngOnInit(): void {
     this.moduleTypes = ["Teórico", "Práctico"]
@@ -120,7 +116,11 @@ export class AdminCreateEducationStageComponent implements OnInit{
     const control = this.modulesForm.get("selectedEducationStage");
     const fresh = this.educationStages.find(s => s.id === control?.value?.id);
     if (fresh && fresh !== control?.value) {
-      control?.setValue(fresh);
+      control?.setValue(fresh, {emitEvent: false});
+      this.updateStageHours(fresh);
+      if (this.modulesForm.pristine) {
+        this.fillModules(fresh);
+      }
     }
   }
 
@@ -188,6 +188,7 @@ export class AdminCreateEducationStageComponent implements OnInit{
         ? this.educationStageService.updateEducationStage(this.editingStageId, educationStageForm)
         : this.educationStageService.createEducationStage(educationStageForm);
       const editing = this.editingStageId !== null;
+      const lowered = editing ? this.loweredStageHours(educationStageForm) : [];
       request$.subscribe({
         next: () => {
           this.loading = false;
@@ -198,6 +199,14 @@ export class AdminCreateEducationStageComponent implements OnInit{
               ? "Se han guardado los cambios de la etapa formativa"
               : "Se ha creado exitosamente la nueva etapa formativa"
           });
+          if (lowered.length > 0) {
+            this.messageService.add({
+              severity: "warn",
+              summary: "Revisa los módulos de la etapa",
+              detail: `Has bajado las horas (${lowered.join(", ")}) por debajo de las ya asignadas a los módulos. Revisa los módulos de la etapa para ajustarlos.`,
+              life: 12000
+            });
+          }
           this.load();
           if (!editing) {
             this.initializeEducationStageForm();
@@ -208,6 +217,17 @@ export class AdminCreateEducationStageComponent implements OnInit{
     }
   }
 
+  private loweredStageHours(form: EducationStage): string[] {
+    const stage = this.educationStages.find(s => s.id === this.editingStageId);
+    if (!stage) return [];
+
+    const lowered: string[] = [];
+    if (+form.onlineHours < (stage.allocatedOnlineHours ?? 0)) lowered.push(`online ${form.onlineHours}/${stage.allocatedOnlineHours}`);
+    if (+form.contactHours < (stage.allocatedContactHours ?? 0)) lowered.push(`presenciales ${form.contactHours}/${stage.allocatedContactHours}`);
+    if (+form.practicalHours < (stage.allocatedPracticalHours ?? 0)) lowered.push(`prácticas ${form.practicalHours}/${stage.allocatedPracticalHours}`);
+    return lowered;
+  }
+
   private initializeModulesForm() {
     this.modulesForm = this.formBuilder.group({
       selectedEducationStage: ['', Validators.required],
@@ -216,32 +236,48 @@ export class AdminCreateEducationStageComponent implements OnInit{
 
     this.modulesForm.get('selectedEducationStage')?.valueChanges.subscribe(stage => {
       if (stage) {
-        this.educationStageOnlineHours = stage.onlineHours ?? 0;
-        this.educationStageContactHours = stage.contactHours ?? 0;
-        this.educationStagePracticalHours = stage.practicalHours ?? 0;
-
-        this.educationStageAllocatedOnlineHours = stage.allocatedOnlineHours ?? 0;
-        this.educationStageAllocatedContactHours = stage.allocatedContactHours ?? 0;
-        this.educationStageAllocatedPracticalHours = stage.allocatedPracticalHours ?? 0;
+        this.updateStageHours(stage);
+        this.fillModules(stage);
       }
     });
   }
 
-  private createModuleGroup(): FormGroup {
+  private updateStageHours(stage: EducationStage): void {
+    this.educationStageOnlineHours = stage.onlineHours ?? 0;
+    this.educationStageContactHours = stage.contactHours ?? 0;
+    this.educationStagePracticalHours = stage.practicalHours ?? 0;
+  }
+
+  private fillModules(stage: EducationStage): void {
+    const existing = this.modulesList
+      .filter(m => m.educationStage === stage.id)
+      .sort((a, b) => (a.moduleId ?? 0) - (b.moduleId ?? 0));
+
+    this.modules.clear();
+    (existing.length > 0 ? existing : [undefined]).forEach(module => this.modules.push(this.createModuleGroup(module)));
+    this.modulesForm.markAsPristine();
+  }
+
+  private createModuleGroup(module?: ModuleModel): FormGroup {
     return this.formBuilder.group({
-      name: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
-      number: ['', [Validators.required, Validators.min(1)]],
-      description: ['', Validators.maxLength(MAX_LONG_TEXT)],
-      type: ['', Validators.required],
-      onlineHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
-      contactHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]]
+      id: [module?.id ?? null],
+      name: [module?.name ?? '', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      number: [module?.moduleId ?? '', [Validators.required, Validators.min(1)]],
+      description: [module?.description ?? '', Validators.maxLength(MAX_LONG_TEXT)],
+      type: [module ? this.moduleTypeLabel(module.type) : '', Validators.required],
+      onlineHours: [module?.onlineHours ?? 0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      contactHours: [module?.contactHours ?? 0, [Validators.required, Validators.min(0), Validators.max(10000)]]
     });
   }
 
+  private moduleTypeLabel(type: string): string {
+    return type === 'THEORETICAL' ? 'Teórico' : type === 'PRACTICAL' ? 'Práctico' : type;
+  }
+
   calculateEducationStageAllocatedHours() {
-    let online = this.educationStageAllocatedOnlineHours || 0;
-    let contact = this.educationStageAllocatedContactHours || 0;
-    let practical = this.educationStageAllocatedPracticalHours || 0;
+    let online = 0;
+    let contact = 0;
+    let practical = 0;
 
     this.modules.controls.forEach(control => {
       const type = control.get('type')?.value;
@@ -284,21 +320,48 @@ export class AdminCreateEducationStageComponent implements OnInit{
   onSubmitModules(): void {
     if (this.modulesForm.valid && !this.loading) {
       this.loading = true;
-      const educationStage = this.modulesForm.get('selectedEducationStage')!.value.id;
-      const modulesRaw = this.modulesForm.get('modules')!.value;
+      const stage: EducationStage = this.modulesForm.get('selectedEducationStage')!.value;
 
-      const modulesToSend: ModuleModel[] = modulesRaw.map((mod: any) => ({
+      const toModule = (mod: any): ModuleModel => ({
         ...mod,
-        educationStage
-      }));
+        moduleId: Number(mod.number),
+        educationStage: stage.id!
+      });
 
-      this.moduleService.createModules(modulesToSend).subscribe({
+      const requests: Observable<unknown>[] = [];
+      const modulesToUpdate = this.modules.controls.filter(c => c.value.id && c.dirty).map(c => toModule(c.value));
+      const modulesToCreate = this.modules.controls.filter(c => !c.value.id).map(c => toModule(c.value));
+
+      const modulesToReview = modulesToUpdate.filter(mod => {
+        const saved = this.modulesList.find(m => m.id === mod.id);
+        return !!saved && (+mod.onlineHours < (saved.allocatedOnlineHours ?? 0) || +mod.contactHours < (saved.allocatedContactHours ?? 0));
+      });
+
+      modulesToUpdate.forEach(mod => requests.push(this.moduleService.updateModule(mod.id!, mod)));
+      if (modulesToCreate.length > 0) {
+        requests.push(this.moduleService.createModules(modulesToCreate));
+      }
+
+      if (requests.length === 0) {
+        this.loading = false;
+        return;
+      }
+
+      forkJoin(requests).subscribe({
         next: () => {
           this.messageService.add({
             severity: "success",
-            summary: "Creado módulos con éxito",
-            detail: "Se han creado exitosamente los nuevos módulos del bloque formativo " + educationStage.name
+            summary: "Módulos guardados con éxito",
+            detail: "Se han guardado los módulos de la etapa formativa " + stage.name
           });
+          if (modulesToReview.length > 0) {
+            this.messageService.add({
+              severity: "warn",
+              summary: "Revisa los bloques formativos",
+              detail: `Has bajado las horas por debajo de las ya asignadas a sus bloques en: ${modulesToReview.map(m => m.name).join(", ")}. Revisa los bloques de esos módulos para ajustarlos.`,
+              life: 12000
+            });
+          }
           this.initializeModulesForm();
           this.load();
           this.loading = false;
@@ -316,36 +379,43 @@ export class AdminCreateEducationStageComponent implements OnInit{
       lessonBlocks: this.formBuilder.array([this.createLessonBlockGroup()])
     });
 
-    this.lessonBlockForm.get('selectedModule')?.valueChanges.subscribe(module => {
+    this.lessonBlockForm.get('selectedModule')?.valueChanges.subscribe((module: ModuleModel) => {
       if (module) {
         this.moduleOnlineHours = module.onlineHours ?? 0;
         this.moduleContactHours = module.contactHours ?? 0;
-
-        this.moduleAllocatedOnlineHours = module.allocatedOnlineHours ?? 0;
-        this.moduleAllocatedContactHours = module.allocatedContactHours ?? 0;
+        this.fillLessonBlocks(module);
       }
     });
   }
 
-  private createLessonBlockGroup(): FormGroup {
+  private fillLessonBlocks(module: ModuleModel): void {
+    const existing = [...(module.lessonBlocks ?? [])].sort((a, b) => a.lessonBlockId - b.lessonBlockId);
+
+    this.lessonBlocks.clear();
+    (existing.length > 0 ? existing : [undefined]).forEach(lb => this.lessonBlocks.push(this.createLessonBlockGroup(lb)));
+    this.lessonBlockForm.markAsPristine();
+  }
+
+  private createLessonBlockGroup(lessonBlock?: LessonBlock): FormGroup {
     return this.formBuilder.group({
-      name: ['', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
-      description: ['', Validators.maxLength(MAX_LONG_TEXT)],
-      lessonBlockId: ['', [Validators.required, Validators.min(1)]],
-      onlineHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
-      contactHours: [0, [Validators.required, Validators.min(0), Validators.max(10000)]],
-      recognizable: [false]
+      id: [lessonBlock?.id ?? null],
+      name: [lessonBlock?.name ?? '', [Validators.required, notBlankValidator, Validators.maxLength(MAX_TEXT)]],
+      description: [lessonBlock?.description ?? '', Validators.maxLength(MAX_LONG_TEXT)],
+      lessonBlockId: [lessonBlock?.lessonBlockId ?? '', [Validators.required, Validators.min(1)]],
+      onlineHours: [lessonBlock?.onlineHours ?? 0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      contactHours: [lessonBlock?.contactHours ?? 0, [Validators.required, Validators.min(0), Validators.max(10000)]],
+      recognizable: [lessonBlock?.recognizable ?? false]
     });
   }
 
   calculateModuleAllocatedHours() {
-    let online = this.moduleAllocatedOnlineHours || 0;
-    let contact = this.moduleAllocatedContactHours || 0;
+    let online = 0;
+    let contact = 0;
     let practical = 0;
 
     this.lessonBlocks.controls.forEach(control => {
-      const onlineHours = +control.get('lbOnlineHours')?.value || 0;
-      const contactHours = +control.get('lbContactHours')?.value || 0;
+      const onlineHours = +control.get('onlineHours')?.value || 0;
+      const contactHours = +control.get('contactHours')?.value || 0;
 
       online += onlineHours;
       contact += contactHours;
@@ -379,21 +449,32 @@ export class AdminCreateEducationStageComponent implements OnInit{
     if (this.lessonBlockForm.valid && !this.loading) {
       this.loading = true;
       const moduleId = this.lessonBlockForm.get('selectedModule')!.value.id;
-      const lessonBlocks = this.lessonBlockForm.get('lessonBlocks')!.value;
 
-      const lessonsToSend: LessonBlock[] = lessonBlocks.map((lessonBlock: any) => ({
-        ...lessonBlock,
-        moduleId
-      }));
+      const toLessonBlock = (lessonBlock: any): LessonBlock => ({...lessonBlock, moduleId});
 
-      this.lessonBlockService.createLessonBlocks(lessonsToSend).subscribe({
+      const requests: Observable<unknown>[] = [];
+      const toUpdate = this.lessonBlocks.controls.filter(c => c.value.id && c.dirty).map(c => toLessonBlock(c.value));
+      const toCreate = this.lessonBlocks.controls.filter(c => !c.value.id).map(c => toLessonBlock(c.value));
+
+      toUpdate.forEach(lb => requests.push(this.lessonBlockService.updateLessonBlock(lb.id!, lb)));
+      if (toCreate.length > 0) {
+        requests.push(this.lessonBlockService.createLessonBlocks(toCreate));
+      }
+
+      if (requests.length === 0) {
+        this.loading = false;
+        return;
+      }
+
+      forkJoin(requests).subscribe({
         next: () => {
           this.messageService.add({
             severity: "success",
-            summary: "Creado bloques formativos con éxito",
-            detail: "Se han creado exitosamente los nuevos bloques formativos del módulo"
+            summary: "Bloques formativos guardados con éxito",
+            detail: "Se han guardado los bloques formativos del módulo"
           });
           this.initializeLessonBlockForm();
+          this.load();
           this.loading = false;
         },
         error: () => this.loading = false

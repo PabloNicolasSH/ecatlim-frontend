@@ -3,6 +3,7 @@ import {LessonBlock} from './lesson-block.model';
 export interface ModuleModel {
   id?: number;
   name: string;
+  moduleId?: number;
   description: string;
   onlineHours: number;
   contactHours: number;
