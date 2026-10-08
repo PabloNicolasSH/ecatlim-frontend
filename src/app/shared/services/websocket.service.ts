@@ -4,6 +4,7 @@ import {environment} from '../../../environments/environment';
 import {Observable, Subject} from 'rxjs';
 import {ChatMessage} from '../models/chat-message.model';
 import {Chat} from '../models/chat.model';
+import {Notification} from '../models/notification.model';
 import {HttpClient} from '@angular/common/http';
 
 interface ChatStreams {
@@ -35,6 +36,8 @@ export class WebsocketService {
   private errors = new Subject<ChatError>();
   private notifications = new Subject<ChatNotification>();
   private newChats = new Subject<Chat>();
+  private newNotifications = new Subject<Notification>();
+  private updatedNotifications = new Subject<Notification>();
 
   protected readonly http = inject(HttpClient);
 
@@ -56,6 +59,12 @@ export class WebsocketService {
         });
         this.stompClient.subscribe('/user/queue/new-chats', (msg: IMessage) => {
           this.newChats.next(JSON.parse(msg.body) as Chat);
+        });
+        this.stompClient.subscribe('/user/queue/notifications', (msg: IMessage) => {
+          this.newNotifications.next(JSON.parse(msg.body) as Notification);
+        });
+        this.stompClient.subscribe('/user/queue/notifications-updated', (msg: IMessage) => {
+          this.updatedNotifications.next(JSON.parse(msg.body) as Notification);
         });
       },
       onDisconnect: () => {
@@ -121,6 +130,14 @@ export class WebsocketService {
 
   getNewChats(): Observable<Chat> {
     return this.newChats.asObservable();
+  }
+
+  getNewNotifications(): Observable<Notification> {
+    return this.newNotifications.asObservable();
+  }
+
+  getUpdatedNotifications(): Observable<Notification> {
+    return this.updatedNotifications.asObservable();
   }
 
   getNotifications(): Observable<ChatNotification> {
