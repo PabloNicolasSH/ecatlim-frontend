@@ -14,6 +14,10 @@ export class ModuleService {
     return this.http.post(`${environment.apiUrl}/module/admin/create-modules`, modulesToSend);
   }
 
+  updateModule(id: number, module: ModuleModel) {
+    return this.http.put<void>(`${environment.apiUrl}/module/${id}`, module);
+  }
+
   getAll() {
     return this.http.get<ModuleModel[]>(`${environment.apiUrl}/module/admin/all`);
   }

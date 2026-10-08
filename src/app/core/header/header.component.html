@@ -82,7 +82,7 @@
             {{ user.profile?.name ?? 'Administrador' }} {{ user.profile?.surname ?? 'Global' }}
           </span>
           <span class="text-xs sm:text-sm text-gray-600 font-medium truncate w-full">
-            {{ getUserRolesTag() }}
+            {{ user.roles | roleName }}
           </span>
           <span class="text-xs text-gray-400 truncate w-full">
             {{ user.email }}

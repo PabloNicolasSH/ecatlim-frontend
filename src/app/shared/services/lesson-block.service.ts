@@ -14,6 +14,10 @@ export class LessonBlockService {
     return this.http.post<LessonBlock[]>(`${environment.apiUrl}/lesson-block/admin/add`, lessonBlocks);
   }
 
+  updateLessonBlock(id: number, lessonBlock: LessonBlock) {
+    return this.http.put<void>(`${environment.apiUrl}/lesson-block/${id}`, lessonBlock);
+  }
+
   getAll() {
     return this.http.get<LessonBlock[]>(`${environment.apiUrl}/lesson-block/all`);
   }

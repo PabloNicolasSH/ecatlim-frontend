@@ -93,6 +93,15 @@
                   </button>
                 </div>
               }
+              @if (event.status === 'DRAFT' && canEditEvent(event)) {
+                <div class="mt-1">
+                  <button (click)="$event.stopPropagation(); setEventPending(event)"
+                          class="w-full py-1.5 px-3 bg-stone-500 cursor-pointer hover:bg-stone-600 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1">
+                    <i class="pi pi-check-circle text-[10px]"></i>
+                    Pasar a pendiente
+                  </button>
+                </div>
+              }
             </div>
           }
         </div>

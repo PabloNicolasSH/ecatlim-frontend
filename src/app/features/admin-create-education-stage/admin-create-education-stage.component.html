@@ -13,8 +13,8 @@
       <div class="flex flex-row justify-between items-center">
         <p-tablist>
           <p-tab value="0">{{ editingStageId !== null ? 'Editar Etapa Formativa' : 'Crear Etapa Formativa' }}</p-tab>
-          <p-tab value="1">Crear Módulos</p-tab>
-          <p-tab value="2">Crear Bloques Formativos</p-tab>
+          <p-tab value="1">Módulos</p-tab>
+          <p-tab value="2">Bloques Formativos</p-tab>
         </p-tablist>
         <p-button
           severity="info"
@@ -142,7 +142,7 @@
           <form [formGroup]="modulesForm" (ngSubmit)="onSubmitModules()">
             <div class="flex flex-row justify-between items-center mb-2">
               <div class="flex flex-col">
-                <p class="mb-3">Los módulos se crean todos para la etapa formativa seleccionada. Cuando decida cambiar guarde
+                <p class="mb-3">Aquí puedes editar los módulos de la etapa formativa seleccionada y añadir otros nuevos. Cuando decida cambiar guarde
                   primero y cambie de etapa.</p>
                 <p-select
                   id="educationStage"
@@ -171,7 +171,7 @@
                           <div [formGroupName]="i" class="mt-3 p-3 bg-[var(--p-surface-50)] rounded-lg">
                               <div class="flex flex-row justify-between">
                                   <h2>Módulo {{ module.get("name")?.value || "Nuevo" }}</h2>
-                                  @if (modules.length > 1) {
+                                  @if (!module.get('id')?.value && modules.length > 1) {
                                       <p-button severity="danger" (onClick)="removeModule(i)">Eliminar Módulo</p-button>
                                   }
                               </div>
@@ -267,7 +267,7 @@
             <div class="flex flex-row justify-between items-center gap-1 mb-2">
               <div class="flex flex-col">
                 <p>
-                  Los bloques funcionan como los módulos, se crean todos para el módulo formativo seleccionado.
+                  Los bloques funcionan como los módulos: puedes editar los del módulo formativo seleccionado y añadir otros nuevos.
                   Cuando decida cambiar, guarde primero y cambie el módulo al que pertenece el o los bloques.
                 </p>
                 <p-select
@@ -298,8 +298,8 @@
                     <div [formGroupName]="index" class="mt-3 p-3 bg-[var(--p-surface-50)] rounded-lg">
                       <div class="flex flex-row justify-between">
                           <h2>Bloque {{(lb.get("lessonBlockId")?.value) || "Nuevo"}}</h2>
-                          @if (lessonBlocks.length > 1) {
-                              <p-button severity="danger" (onClick)="removeLessonBlock(index)">Eliminar Módulo</p-button>
+                          @if (!lb.get('id')?.value && lessonBlocks.length > 1) {
+                              <p-button severity="danger" (onClick)="removeLessonBlock(index)">Eliminar Bloque</p-button>
                           }
                       </div>
                       <div class="flex flex-row w-full gap-2 mt-4">

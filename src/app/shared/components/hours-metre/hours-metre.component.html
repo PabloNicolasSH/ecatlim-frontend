@@ -8,12 +8,12 @@
             @if (meterItem.exceeded){
               <span class="text-red-600 text-sm">{{ meterItem.label }}</span>
               <span class="font-bold text-base text-red-600">
-                {{ (meterItem.value * 100) / meterItem.max | number:'1.0-0' }}%
+                {{ meterItem.percent | number:'1.0-0' }}%
               </span>
             } @else {
               <span class="text-surface-500 text-sm">{{ meterItem.label }}</span>
               <span class="font-bold text-base">
-                {{ (meterItem.value * 100) / meterItem.max | number:'1.0-0' }}%
+                {{ meterItem.percent | number:'1.0-0' }}%
               </span>
             }
           </div>
