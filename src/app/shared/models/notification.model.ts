@@ -5,7 +5,8 @@ export type NotificationType =
   | 'RECOGNITION_COMMISSION_NEEDED'
   | 'RECOGNITION_REVIEW_NEEDED'
   | 'RECOGNITION_DOCUMENTATION_REQUESTED'
-  | 'RECOGNITION_ANSWERED';
+  | 'RECOGNITION_ANSWERED'
+  | 'NEWS_PUBLISHED';
 
 export interface Notification {
   id: number;

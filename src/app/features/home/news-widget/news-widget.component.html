@@ -1,0 +1,145 @@
+<div class="p-4 md:p-6">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <i class="pi pi-megaphone text-ecatlim"></i>
+      <h3 class="text-lg font-bold text-(--p-surface-700) m-0">Novedades y noticias</h3>
+    </div>
+    @if (canManage) {
+      <p-button label="Nueva noticia" icon="pi pi-plus" size="small" (onClick)="openCreate()"></p-button>
+    }
+  </div>
+
+  <div class="flex flex-col gap-4">
+    @for (item of news(); track item.id) {
+      <article class="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-(--p-surface-200) bg-(--p-surface-50)/50">
+        @if (item.hasImage) {
+          @if (thumbnails()[item.id]; as src) {
+            <img [src]="src" [alt]="item.title" class="w-full sm:w-44 h-40 sm:h-32 object-cover rounded-lg shrink-0">
+          } @else {
+            <div class="w-full sm:w-44 h-40 sm:h-32 rounded-lg bg-(--p-surface-100) animate-pulse shrink-0"></div>
+          }
+        }
+
+        <div class="flex-1 min-w-0 flex flex-col gap-1">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="text-base font-bold text-(--p-surface-800) m-0 leading-tight">{{ item.title }}</h4>
+            @if (canManage) {
+              <div class="flex gap-1 shrink-0">
+                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" size="small" severity="secondary" ariaLabel="Editar noticia" (onClick)="openEdit(item)"></p-button>
+                <p-button icon="pi pi-trash" [text]="true" [rounded]="true" size="small" severity="danger" ariaLabel="Eliminar noticia" (onClick)="confirmDelete(item)"></p-button>
+              </div>
+            }
+          </div>
+
+          <span class="text-xs text-(--p-surface-400)">
+            {{ item.createdAt | date:'dd MMM yyyy, HH:mm' }}
+            @if (item.author) { · {{ item.author }} }
+            @if (item.updatedAt) { · editada }
+          </span>
+
+          <p class="text-sm text-(--p-surface-600) whitespace-pre-line m-0 mt-1" [class.line-clamp-3]="expandedId() !== item.id">{{ item.content }}</p>
+
+          @if (expandedId() === item.id && item.attachments.length > 0) {
+            <div class="flex flex-col gap-1 mt-2">
+              <span class="text-xs font-bold text-(--p-surface-500) uppercase tracking-wider">Adjuntos</span>
+              @for (attachment of item.attachments; track attachment.id) {
+                <button type="button" (click)="download(item, attachment)"
+                        class="flex items-center gap-2 text-left text-sm text-ecatlim hover:underline cursor-pointer bg-transparent border-0 p-0">
+                  <i class="pi pi-paperclip text-xs"></i>
+                  <span class="truncate">{{ attachment.name }}</span>
+                  <span class="text-xs text-(--p-surface-400) shrink-0">({{ formatSize(attachment.sizeBytes) }})</span>
+                </button>
+              }
+            </div>
+          }
+
+          <div class="mt-1">
+            <button type="button" (click)="toggle(item)"
+                    class="text-xs font-semibold text-ecatlim hover:underline cursor-pointer bg-transparent border-0 p-0">
+              {{ expandedId() === item.id ? 'Mostrar menos' : (item.attachments.length > 0 ? 'Leer más y ver adjuntos (' + item.attachments.length + ')' : 'Leer más') }}
+            </button>
+          </div>
+        </div>
+      </article>
+    } @empty {
+      @if (!loading()) {
+        <div class="flex flex-col items-center justify-center text-center py-8">
+          <i class="pi pi-megaphone text-(--p-surface-200) text-5xl mb-3"></i>
+          <p class="text-(--p-surface-400) text-sm m-0">Todavía no hay novedades</p>
+        </div>
+      }
+    }
+  </div>
+
+  @if (hasMore()) {
+    <div class="flex justify-center mt-4">
+      <p-button label="Ver más noticias" icon="pi pi-angle-down" severity="secondary" [text]="true" [loading]="loading()" (onClick)="loadMore()"></p-button>
+    </div>
+  }
+</div>
+
+<p-dialog
+  [header]="editing() ? 'Editar noticia' : 'Nueva noticia'"
+  [modal]="true"
+  [(visible)]="displayForm"
+  [style]="{ width: '40rem' }"
+  [breakpoints]="{ '720px': '95vw' }"
+  [draggable]="false"
+  [resizable]="false">
+  <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4 pt-2">
+    <div class="flex flex-col gap-1">
+      <label for="newsTitle" class="text-sm font-semibold">Título *</label>
+      <input id="newsTitle" pInputText formControlName="title" type="text" class="w-full" [maxlength]="maxTitle">
+      <app-field-error [control]="form.get('title')" />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="newsContent" class="text-sm font-semibold">Texto *</label>
+      <textarea id="newsContent" pTextarea formControlName="content" rows="7" class="w-full" [maxlength]="maxContent"></textarea>
+      <app-field-error [control]="form.get('content')" />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-semibold">Imagen de portada (opcional)</span>
+      @if (coverPreview(); as preview) {
+        <img [src]="preview" alt="Portada" class="w-full max-h-48 object-cover rounded-lg">
+      } @else if (editing()?.hasImage && !removeCover()) {
+        <p class="text-xs text-(--p-surface-500) m-0">La noticia ya tiene una portada. Elige otra imagen para sustituirla.</p>
+      }
+      <div class="flex gap-2">
+        <input #coverInput type="file" accept="image/*" class="hidden" (change)="onCoverSelected($event)">
+        <p-button type="button" label="Elegir imagen" icon="pi pi-image" severity="secondary" size="small" (onClick)="coverInput.click()"></p-button>
+        @if (coverPreview() || (editing()?.hasImage && !removeCover())) {
+          <p-button type="button" label="Quitar portada" icon="pi pi-times" severity="danger" [text]="true" size="small" (onClick)="clearCover()"></p-button>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-semibold">Adjuntos (máx. {{ maxAttachments }}, 8 MB cada uno)</span>
+      @for (attachment of keptAttachments(); track attachment.id) {
+        <div class="flex items-center justify-between gap-2 text-sm bg-(--p-surface-50) rounded-lg px-3 py-2">
+          <span class="truncate"><i class="pi pi-paperclip text-xs mr-2"></i>{{ attachment.name }}</span>
+          <p-button type="button" icon="pi pi-times" [text]="true" [rounded]="true" size="small" severity="danger" ariaLabel="Quitar adjunto" (onClick)="removeKeptAttachment(attachment)"></p-button>
+        </div>
+      }
+      @for (file of newFiles(); track $index) {
+        <div class="flex items-center justify-between gap-2 text-sm bg-(--p-surface-50) rounded-lg px-3 py-2">
+          <span class="truncate"><i class="pi pi-file-plus text-xs mr-2"></i>{{ file.name }} <span class="text-xs text-(--p-surface-400)">({{ formatSize(file.size) }})</span></span>
+          <p-button type="button" icon="pi pi-times" [text]="true" [rounded]="true" size="small" severity="danger" ariaLabel="Quitar adjunto" (onClick)="removeNewFile($index)"></p-button>
+        </div>
+      }
+      <div>
+        <input #filesInput type="file" multiple class="hidden" (change)="onFilesSelected($event)">
+        <p-button type="button" label="Añadir adjuntos" icon="pi pi-paperclip" severity="secondary" size="small" (onClick)="filesInput.click()"></p-button>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button type="button" label="Cancelar" severity="secondary" [text]="true" (onClick)="displayForm = false"></p-button>
+      <p-button type="submit" [label]="editing() ? 'Guardar cambios' : 'Publicar'" icon="pi pi-save" [loading]="saving()"></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-confirmDialog />
