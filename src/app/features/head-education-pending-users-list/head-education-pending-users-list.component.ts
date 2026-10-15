@@ -111,7 +111,7 @@ export class HeadEducationPendingUsersListComponent implements OnInit{
   }
 
   private createUserFromPendingUser(pendingUser: PendingUser) {
-    this.pendingUserService.createUserFromRequest(pendingUser).subscribe({
+    this.pendingUserService.createUserFromRequestAsHeadEducation(pendingUser).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
@@ -123,7 +123,7 @@ export class HeadEducationPendingUsersListComponent implements OnInit{
   }
 
   private deletePendingUserRequest(pendingUser: PendingUser) {
-    this.pendingUserService.deletePendingUser(pendingUser).subscribe({
+    this.pendingUserService.deletePendingUserAsHeadEducation(pendingUser).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',

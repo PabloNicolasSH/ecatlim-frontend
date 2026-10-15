@@ -31,5 +31,13 @@ export class PendingUserService {
     return this.http.put<any>(`${environment.apiUrl}/pending-user/admin/delete`, pendingUser);
   }
 
+  createUserFromRequestAsHeadEducation(pendingUser: PendingUser): Observable<PendingUser>{
+    return this.http.post<PendingUser>(`${environment.apiUrl}/pending-user/head-education/create-user`, pendingUser);
+  }
+
+  deletePendingUserAsHeadEducation(pendingUser: PendingUser): Observable<any>{
+    return this.http.put<any>(`${environment.apiUrl}/pending-user/head-education/delete`, pendingUser);
+  }
+
 
 }

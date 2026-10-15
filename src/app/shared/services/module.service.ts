@@ -11,7 +11,7 @@ export class ModuleService {
   protected readonly http = inject(HttpClient);
 
   createModules(modulesToSend: ModuleModel[]) {
-    return this.http.post(`${environment.apiUrl}/module/admin/create-modules`, modulesToSend);
+    return this.http.post(`${environment.apiUrl}/module/create-modules`, modulesToSend);
   }
 
   updateModule(id: number, module: ModuleModel) {
@@ -19,6 +19,6 @@ export class ModuleService {
   }
 
   getAll() {
-    return this.http.get<ModuleModel[]>(`${environment.apiUrl}/module/admin/all`);
+    return this.http.get<ModuleModel[]>(`${environment.apiUrl}/module/all`);
   }
 }

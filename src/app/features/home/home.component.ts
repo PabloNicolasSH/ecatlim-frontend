@@ -1,12 +1,14 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {EventWidgetComponent} from './event-widget/event-widget.component';
+import {NewsWidgetComponent} from './news-widget/news-widget.component';
 import {User} from '../../shared/models/user.model';
 import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
 
 @Component({
   selector: 'app-home',
   imports: [
-    EventWidgetComponent
+    EventWidgetComponent,
+    NewsWidgetComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'

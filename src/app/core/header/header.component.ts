@@ -111,8 +111,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
         return 'pi pi-calendar';
       case 'STAGE_CERTIFICATE_SENT':
         return 'pi pi-verified';
+      case 'NEWS_PUBLISHED':
+        return 'pi pi-megaphone';
       case 'RECOGNITION_ANSWERED':
         return 'pi pi-check-circle';
+      case 'PENDING_USER_REQUESTS':
+        return 'pi pi-user-plus';
       default:
         return 'pi pi-file-check';
     }

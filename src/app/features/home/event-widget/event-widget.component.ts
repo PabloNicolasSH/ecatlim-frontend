@@ -4,6 +4,7 @@ import {EventService} from '../../../shared/services/event.service';
 import {DatePipe} from '@angular/common';
 import {Button} from 'primeng/button';
 import {RouterLink} from '@angular/router';
+import {catchError, of} from 'rxjs';
 
 @Component({
   selector: 'app-event-widget',
@@ -19,9 +20,10 @@ export class EventWidgetComponent implements OnInit, OnDestroy{
 
   private readonly eventService = inject(EventService);
 
-  private allEvents = toSignal(this.eventService.getEventsForHome(), { initialValue: [], rejectErrors: true });
-  public nextEvent = computed(() => this.allEvents()[0]);
-  public upcomingEvents = computed(() => this.allEvents().slice(1));
+  private allEvents = toSignal(this.eventService.getEventsForHome().pipe(catchError(() => of([]))));
+  public loading = computed(() => this.allEvents() === undefined);
+  public nextEvent = computed(() => this.allEvents()?.[0]);
+  public upcomingEvents = computed(() => this.allEvents()?.slice(1) ?? []);
 
   public currentTime = signal(new Date().getTime());
   private timerId?: any;
