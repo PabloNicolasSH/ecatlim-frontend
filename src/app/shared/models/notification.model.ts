@@ -6,6 +6,7 @@ export type NotificationType =
   | 'RECOGNITION_REVIEW_NEEDED'
   | 'RECOGNITION_DOCUMENTATION_REQUESTED'
   | 'RECOGNITION_ANSWERED'
+  | 'NEWS_PUBLISHED';
   | 'PENDING_USER_REQUESTS';
 
 export interface Notification {
