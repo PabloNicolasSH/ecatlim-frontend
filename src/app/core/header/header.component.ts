@@ -113,6 +113,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
         return 'pi pi-verified';
       case 'RECOGNITION_ANSWERED':
         return 'pi pi-check-circle';
+      case 'PENDING_USER_REQUESTS':
+        return 'pi pi-user-plus';
       default:
         return 'pi pi-file-check';
     }

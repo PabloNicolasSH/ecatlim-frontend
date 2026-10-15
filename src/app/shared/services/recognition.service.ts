@@ -34,23 +34,23 @@ export class RecognitionService {
 
   getForReview(statuses?: RecognitionStatus[]): Observable<RecognitionRequest[]> {
     const query = statuses?.length ? `?status=${statuses.join(',')}` : '';
-    return this.http.get<RecognitionRequest[]>(`${this.baseUrl}/admin${query}`);
+    return this.http.get<RecognitionRequest[]>(`${this.baseUrl}/staff${query}`);
   }
 
   getPendingCount(): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>(`${this.baseUrl}/admin/pending-count`);
+    return this.http.get<{ count: number }>(`${this.baseUrl}/staff/pending-count`);
   }
 
   getCommissionCandidates(): Observable<SimpleUser[]> {
-    return this.http.get<SimpleUser[]>(`${this.baseUrl}/admin/commission-candidates`);
+    return this.http.get<SimpleUser[]>(`${this.baseUrl}/staff/commission-candidates`);
   }
 
   assignCommission(requestId: number, userIds: number[]): Observable<RecognitionRequest> {
-    return this.http.put<RecognitionRequest>(`${this.baseUrl}/admin/${requestId}/commission`, {userIds});
+    return this.http.put<RecognitionRequest>(`${this.baseUrl}/staff/${requestId}/commission`, {userIds});
   }
 
   respond(requestId: number, decision: RecognitionDecision, comment: string): Observable<RecognitionRequest> {
-    return this.http.post<RecognitionRequest>(`${this.baseUrl}/admin/${requestId}/respond`, {decision, comment});
+    return this.http.post<RecognitionRequest>(`${this.baseUrl}/staff/${requestId}/respond`, {decision, comment});
   }
 
   downloadFile(fileId: number): Observable<Blob> {

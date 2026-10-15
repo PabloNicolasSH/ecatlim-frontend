@@ -1,7 +1,7 @@
 @reference "../../../../styles/tailwind.css";
 
 .time-block {
-  @apply flex flex-col items-center min-w-[52px] sm:min-w-[64px] md:min-w-[80px];
+  @apply flex flex-col items-center min-w-11 sm:min-w-[64px] md:min-w-[80px];
 }
 
 .time-value {

@@ -11,7 +11,7 @@ export class LessonBlockService {
   protected readonly http = inject(HttpClient);
 
   createLessonBlocks(lessonBlocks: LessonBlock[]){
-    return this.http.post<LessonBlock[]>(`${environment.apiUrl}/lesson-block/admin/add`, lessonBlocks);
+    return this.http.post<LessonBlock[]>(`${environment.apiUrl}/lesson-block/add`, lessonBlocks);
   }
 
   updateLessonBlock(id: number, lessonBlock: LessonBlock) {

@@ -12,15 +12,15 @@ export class EducationStageService {
   protected readonly http = inject(HttpClient);
 
   getEducationStages(): Observable<EducationStage[]>{
-    return this.http.get<EducationStage[]>(`${environment.apiUrl}/education-stage/admin/all`)
+    return this.http.get<EducationStage[]>(`${environment.apiUrl}/education-stage/all`)
   }
 
   createEducationStage(educationStageForm: EducationStage): Observable<any> {
-    return this.http.post<Observable<any>>(`${environment.apiUrl}/education-stage/admin/add`, educationStageForm);
+    return this.http.post<Observable<any>>(`${environment.apiUrl}/education-stage/add`, educationStageForm);
   }
 
   updateEducationStage(id: number, educationStageForm: EducationStage): Observable<EducationStage> {
-    return this.http.put<EducationStage>(`${environment.apiUrl}/education-stage/admin/${id}`, educationStageForm);
+    return this.http.put<EducationStage>(`${environment.apiUrl}/education-stage/${id}`, educationStageForm);
   }
 
   getEducationStageWithModulesAndLessonBlocks(id: number) {
