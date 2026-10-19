@@ -69,6 +69,10 @@ export class UserService {
     return this.http.get<User>(`${environment.apiUrl}/user/me`);
   }
 
+  completeOnboarding(): Observable<User> {
+    return this.http.put<User>(`${environment.apiUrl}/user/me/onboarding-completed`, {});
+  }
+
   getStudentOverview(): Observable<StudentOverview> {
     return this.http.get<StudentOverview>(`${environment.apiUrl}/user/students/overview`);
   }

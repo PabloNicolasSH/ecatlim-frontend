@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, effect, HostListener, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
@@ -19,6 +19,7 @@ import {NotificationService} from '../../shared/services/notification.service';
 import {DatePipe} from '@angular/common';
 import {Role} from '../../shared/models/role.model';
 import {RoleNamePipe} from '../../shared/pipes/role-name.pipe';
+import {OnboardingService} from '../onboarding/onboarding.service';
 
 @Component({
   selector: 'app-header',
@@ -46,6 +47,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
+  protected readonly onboardingService = inject(OnboardingService);
+
+  constructor() {
+    effect(() => {
+      this.sidebarVisible = this.onboardingService.menuOpen();
+    });
+  }
 
   @ViewChild('op') op!: Popover;
 
@@ -166,6 +174,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       }
     ];
+
+    this.sidebarMenu.push({
+      label: 'Guía de inicio y logros',
+      icon: "pi pi-question-circle",
+      command: () => {
+        this.sidebarVisible = false;
+        this.onboardingService.openHub();
+      }
+    });
 
     if (this.user?.roles.includes(Role.STUDENT)) {
       this.addStudentOptions();

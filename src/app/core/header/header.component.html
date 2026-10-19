@@ -1,6 +1,7 @@
 <header class="flex items-center justify-between border-b border-gray-300 px-4 py-4 md:px-6">
   <div class="flex items-center space-x-2 md:space-x-4">
     <p-button
+      data-tour="menu-button"
       (onClick)="onMenuClick()"
       icon="pi pi-bars"
       [label]="windowWidth() > 768 ? 'Menú' : ''"
@@ -24,6 +25,7 @@
 
   <div class="flex items-center space-x-3">
     <p-overlay-badge
+      data-tour="chat-button"
       [value]="unreadChats"
       severity="info"
       [badgeDisabled]="unreadChats === 0">
@@ -31,6 +33,7 @@
     </p-overlay-badge>
 
     <p-overlay-badge
+      data-tour="notifications-button"
       [value]="notificationService.pendingCount()"
       severity="danger"
       [badgeDisabled]="notificationService.pendingCount() === 0">

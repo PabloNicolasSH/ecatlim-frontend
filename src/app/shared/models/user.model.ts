@@ -6,6 +6,7 @@ export interface User {
   email: string;
   roles: Role[];
   profile?: UserProfile;
+  onboardingCompleted?: boolean;
 }
 
 export interface UserProfile {

@@ -19,6 +19,51 @@ h2{
   right: 0 !important;
 }
 
+.driver-popover.ecatlim-tour {
+  max-width: 340px;
+
+  .driver-popover-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--p-orange-600);
+  }
+
+  .driver-popover-description {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .ecatlim-tour-progress {
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: .6;
+  }
+
+  .driver-popover-next-btn {
+    background-color: var(--p-orange-500);
+    border-color: var(--p-orange-500);
+    color: #fff;
+    text-shadow: none;
+  }
+}
+
+/* Page explanations dock to the bottom-right corner on large screens, without the speech-bubble arrow. */
+@media (min-width: 1024px) {
+  .driver-popover.ecatlim-tour-page {
+    position: fixed !important;
+    top: auto !important;
+    left: auto !important;
+    right: 24px !important;
+    bottom: 24px !important;
+    transform: none !important;
+    margin: 0;
+
+    .driver-popover-arrow {
+      display: none;
+    }
+  }
+}
+
 .p-panelmenu-panel {
   border-style: none;
 }
