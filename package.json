@@ -26,6 +26,7 @@
     "@fullcalendar/timegrid": "^6.1.20",
     "@primeng/themes": "^19.0.10",
     "@stomp/stompjs": "^7.1.1",
+    "driver.js": "^1.10.2",
     "primeicons": "^7.0.0",
     "primeng": "^19.0.10",
     "rxjs": "~7.8.0",

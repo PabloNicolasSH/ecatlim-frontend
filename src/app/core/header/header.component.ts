@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, effect, HostListener, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {MenuItem} from 'primeng/api';
 import {AuthService} from '../auth/auth.service';
 import {Button} from 'primeng/button';
@@ -47,7 +47,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
-  private readonly onboardingService = inject(OnboardingService);
+  protected readonly onboardingService = inject(OnboardingService);
+
+  constructor() {
+    effect(() => {
+      this.sidebarVisible = this.onboardingService.menuOpen();
+    });
+  }
 
   @ViewChild('op') op!: Popover;
 
@@ -170,11 +176,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     ];
 
     this.sidebarMenu.push({
-      label: 'Ver guía de inicio',
+      label: 'Guía de inicio y logros',
       icon: "pi pi-question-circle",
       command: () => {
         this.sidebarVisible = false;
-        this.onboardingService.open();
+        this.onboardingService.openHub();
       }
     });
 
