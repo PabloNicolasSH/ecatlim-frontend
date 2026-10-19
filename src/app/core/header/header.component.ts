@@ -19,6 +19,7 @@ import {NotificationService} from '../../shared/services/notification.service';
 import {DatePipe} from '@angular/common';
 import {Role} from '../../shared/models/role.model';
 import {RoleNamePipe} from '../../shared/pipes/role-name.pipe';
+import {OnboardingService} from '../onboarding/onboarding.service';
 
 @Component({
   selector: 'app-header',
@@ -46,6 +47,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
+  private readonly onboardingService = inject(OnboardingService);
 
   @ViewChild('op') op!: Popover;
 
@@ -166,6 +168,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       }
     ];
+
+    this.sidebarMenu.push({
+      label: 'Ver guía de inicio',
+      icon: "pi pi-question-circle",
+      command: () => {
+        this.sidebarVisible = false;
+        this.onboardingService.open();
+      }
+    });
 
     if (this.user?.roles.includes(Role.STUDENT)) {
       this.addStudentOptions();

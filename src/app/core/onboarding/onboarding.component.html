@@ -1,0 +1,56 @@
+<p-dialog
+  [visible]="onboardingService.visible()"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{width: '32rem', maxWidth: '92vw'}"
+  header="Guía de inicio"
+>
+  <div class="flex flex-col items-center text-center gap-4 py-2 min-h-64">
+    @if (isManualStep()) {
+      <i class="pi pi-book text-5xl text-(--p-primary-color)"></i>
+      <h3 class="text-xl font-bold text-(--p-surface-700)">¡Listo! Ya conoces lo básico</h3>
+      <p class="text-(--p-surface-600) leading-relaxed">
+        Si en algún momento tienes dudas, consulta el manual de usuario, donde encontrarás
+        cada funcionalidad explicada con más detalle.
+      </p>
+      @if (manualUrl) {
+        <a [href]="manualUrl" target="_blank" rel="noopener">
+          <p-button label="Abrir el manual de usuario" icon="pi pi-external-link" severity="secondary" outlined/>
+        </a>
+      }
+      <p class="text-sm text-(--p-surface-500)">
+        Puedes volver a ver esta guía cuando quieras desde «Menú» → «Ver guía de inicio».
+      </p>
+    } @else {
+      <i [class]="currentStep().icon + ' text-5xl text-(--p-primary-color)'"></i>
+      <h3 class="text-xl font-bold text-(--p-surface-700)">{{ currentStep().title }}</h3>
+      <p class="text-(--p-surface-600) leading-relaxed">{{ currentStep().description }}</p>
+    }
+  </div>
+
+  <div class="flex justify-center gap-1.5 mt-2" aria-hidden="true">
+    @for (dot of dots(); track $index) {
+      <span
+        class="h-2 rounded-full transition-all"
+        [class]="$index === stepIndex() ? 'w-6 bg-(--p-primary-color)' : 'w-2 bg-(--p-surface-300)'"
+      ></span>
+    }
+  </div>
+
+  <ng-template #footer>
+    <div class="flex w-full items-center justify-between">
+      @if (isManualStep()) {
+        <p-button label="Anterior" icon="pi pi-arrow-left" severity="secondary" variant="text" (onClick)="previous()"/>
+        <p-button label="Empezar" icon="pi pi-check" (onClick)="finish()"/>
+      } @else {
+        @if (stepIndex() === 0) {
+          <p-button label="Saltar" severity="secondary" variant="text" (onClick)="finish()"/>
+        } @else {
+          <p-button label="Anterior" icon="pi pi-arrow-left" severity="secondary" variant="text" (onClick)="previous()"/>
+        }
+        <p-button label="Siguiente" icon="pi pi-arrow-right" iconPos="right" (onClick)="next()"/>
+      }
+    </div>
+  </ng-template>
+</p-dialog>
