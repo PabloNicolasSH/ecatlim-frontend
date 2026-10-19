@@ -218,15 +218,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private addHeadEducationOptions() {
     this.sidebarMenu.push({
-      label: 'Responsable de Formación',
-      items: [
-        {
-          label: 'Solicitudes de Alta', icon: 'pi pi-user-plus', command: () => {
-            this.router.navigateByUrl('/app/responsable-formacion/solicitudes-alta');
-            this.sidebarVisible = false;
-          }
-        }
-      ]
+      label: 'Responsable de Formación', icon: 'pi pi-th-large', command: () => {
+        this.router.navigateByUrl('/app/responsable-formacion');
+        this.sidebarVisible = false;
+      }
     });
   }
 

@@ -1,0 +1,29 @@
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-4">
+  <div>
+    <h1 class="font-black text-3xl text-[#3D2E24] m-0">Responsable de formación</h1>
+    <p class="text-sm text-[#8C7A6B] mt-1 mb-0">
+      Gestiona las solicitudes de alta, las personas de tu entidad y sus eventos formativos.
+    </p>
+  </div>
+
+  <div class="head-dashboard-tabs inline-flex max-w-full overflow-x-auto bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1" role="tablist" aria-label="Secciones">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab() === tab.id"
+        (click)="activeTab.set(tab.id)"
+        class="px-4 py-2 rounded-full border-0 cursor-pointer text-sm font-bold flex items-center gap-2 whitespace-nowrap transition-colors"
+        [class]="activeTab() === tab.id ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+      >
+        <i [class]="tab.icon + ' text-xs'"></i> {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  @switch (activeTab()) {
+    @case ('requests') { <app-head-education-pending-users-list /> }
+    @case ('members') { <app-head-education-members /> }
+    @case ('events') { <app-head-education-events /> }
+  }
+</div>

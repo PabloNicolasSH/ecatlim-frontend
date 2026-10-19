@@ -151,22 +151,30 @@ export const ONBOARDING_MODULES: OnboardingModuleDef[] = [
   {
     id: 'HEAD_OF_EDUCATION',
     title: 'Responsable de formación',
-    description: 'Cómo revisar y resolver las solicitudes de alta de nuevas personas.',
+    description: 'Tu panel: solicitudes de alta, las personas de tu entidad y sus eventos.',
     icon: 'pi pi-user-plus',
     appliesTo: roles => roles.includes(Role.HEAD_OF_EDUCATION),
     tasks: {
       OPEN_PENDING_REQUESTS: {
-        label: 'Abre las solicitudes de alta',
-        route: '/app/responsable-formacion/solicitudes-alta',
-        visitRoute: '/app/responsable-formacion/solicitudes-alta'
+        label: 'Abre tu panel de responsable de formación',
+        route: '/app/responsable-formacion',
+        visitRoute: '/app/responsable-formacion'
       }
     },
     steps: () => [
-      pageStep('/app/responsable-formacion/solicitudes-alta', 'Solicitudes de alta',
-        'Aquí revisas y resuelves las solicitudes de quienes quieren unirse a la escuela. ' +
-        'Recibirás una notificación cuando haya solicitudes pendientes.'),
+      pageStep('/app/responsable-formacion', 'Panel de responsable de formación',
+        'Desde aquí gestionas todo lo de tu entidad. Recibirás una notificación cuando haya solicitudes de alta pendientes.'),
+      {
+        route: '/app/responsable-formacion',
+        selectors: ['.head-dashboard-tabs', ...PAGE_TITLE_OR_PAGE],
+        title: 'Solicitudes, entidad y eventos',
+        description: '«Solicitudes de alta» para aceptar o rechazar nuevas personas; «Mi entidad» para ver la etapa y el ' +
+          'detalle de formación de cada persona y desactivar a quien ya no esté en activo; «Eventos» para ver quién va a cada ' +
+          'evento formativo y cuánto debe pagar tu entidad.',
+        side: 'bottom'
+      },
       closingStep('Módulo completado',
-        'Para ganar la insignia, abre la página de solicitudes de alta por tu cuenta.')
+        'Para ganar la insignia, abre por tu cuenta el panel de responsable de formación.')
     ]
   },
   {

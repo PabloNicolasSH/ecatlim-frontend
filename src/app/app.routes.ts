@@ -38,6 +38,8 @@ import {ChatComponent} from './features/chat/chat.component';
 import {ChatListComponent} from './features/chat-list/chat-list.component';
 import {EventDetailComponent} from './features/event-detail/event-detail.component';
 import {StudentListComponent} from './features/student-list/student-list.component';
+import {HeadEducationDashboardComponent} from './features/head-education-dashboard/head-education-dashboard.component';
+import {HeadEducationMemberDetailComponent} from './features/head-education-member-detail/head-education-member-detail.component';
 import {TrainingTeamComponent} from './features/training-team/training-team.component';
 import {RecognitionManagementComponent} from './features/recognition-management/recognition-management.component';
 import {UserEventDetailComponent} from './features/user-event-detail/user-event-detail.component';
@@ -129,9 +131,19 @@ export const routes: Routes = [
         data: {roles: [Role.STUDENT]}
       },
       {
-        path: "responsable-formacion/solicitudes-alta",
-        component: HeadEducationPendingUsersListComponent,
+        path: "responsable-formacion",
+        component: HeadEducationDashboardComponent,
         data: {roles: [Role.HEAD_OF_EDUCATION]}
+      },
+      {
+        path: "responsable-formacion/personas/:id",
+        component: HeadEducationMemberDetailComponent,
+        data: {roles: [Role.HEAD_OF_EDUCATION]}
+      },
+      {
+        // Old link sent in emails and notifications.
+        path: "responsable-formacion/solicitudes-alta",
+        redirectTo: "responsable-formacion"
       },
       {
         path: "formacion",
