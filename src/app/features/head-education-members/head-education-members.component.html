@@ -1,0 +1,135 @@
+<div class="w-full space-y-5">
+  <div>
+    <h2 class="font-black text-xl text-[#3D2E24] m-0">Mi entidad</h2>
+    <p class="text-sm text-[#8C7A6B] mt-1 mb-0">
+      Las personas de tu entidad, la etapa que cursa cada una y su historial formativo. Desde aquí puedes desactivar a quien ya no esté en activo.
+    </p>
+  </div>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm mb-0">Cargando tu entidad...</p>
+    </div>
+  } @else if (failed()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No se pudo cargar tu entidad</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Comprueba tu conexión o inténtalo de nuevo.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="load()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+    </div>
+  } @else {
+    <div class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-3 flex flex-col lg:flex-row lg:items-center gap-3">
+      <p-iconfield class="flex-1">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          class="w-full !rounded-xl"
+          placeholder="Buscar por nombre, correo o etapa"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </p-iconfield>
+
+      <div class="inline-flex bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1 self-start lg:self-auto" role="group" aria-label="Estado">
+        @for (option of [{value: 'ACTIVE', label: 'Activos'}, {value: 'INACTIVE', label: 'Inactivos'}, {value: 'ALL', label: 'Todos'}]; track option.value) {
+          <button
+            type="button"
+            (click)="statusFilter.set($any(option.value))"
+            class="px-3.5 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold transition-colors"
+            [class]="statusFilter() === option.value ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+          >{{ option.label }}</button>
+        }
+      </div>
+    </div>
+
+    <p-table
+      [value]="filteredMembers()"
+      [rows]="pageSize"
+      [paginator]="filteredMembers().length > pageSize"
+      styleClass="user-table"
+    >
+      <ng-template #caption>
+        <p class="m-0 text-sm text-[#51453a]">
+          Mostrando <span class="font-black">{{ filteredMembers().length }}</span> de {{ members().length }}
+          {{ members().length === 1 ? 'persona' : 'personas' }} · {{ activeCount() }} en activo
+        </p>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th>Nombre</th>
+          <th>Correo Electrónico</th>
+          <th>Etapa educativa actual</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-member>
+        <tr [class.opacity-60]="!member.enabled">
+          <td>
+            <div class="flex items-center gap-3">
+              <app-user-avatar [avatarUrl]="member.avatarUrl" [label]="initials(member)" customSize="2.75rem"></app-user-avatar>
+              <span class="font-bold text-base text-[#3D2E24]">{{ fullName(member) }}</span>
+            </div>
+          </td>
+          <td class="text-[0.95rem] text-[#51453a]">{{ member.email }}</td>
+          <td>
+            @if (member.currentStage; as stage) {
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-black px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">{{ stage.code }}</span>
+                <span class="text-[0.95rem] text-[#51453a]">{{ stage.name }}</span>
+              </div>
+            } @else {
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-200 text-stone-700">Sin etapa en curso</span>
+            }
+          </td>
+          <td>
+            @if (member.enabled) {
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">Activo</span>
+            } @else {
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-200 text-stone-700">Inactivo</span>
+            }
+          </td>
+          <td>
+            <div class="flex gap-1 justify-end">
+              <p-button
+                icon="pi pi-eye"
+                label="Ver formación"
+                size="small"
+                severity="secondary"
+                [outlined]="true"
+                [routerLink]="['/app/responsable-formacion/personas', member.id]"
+                styleClass="!rounded-xl"
+              ></p-button>
+              <p-button
+                [icon]="member.enabled ? 'pi pi-user-minus' : 'pi pi-user-plus'"
+                [rounded]="true"
+                [text]="true"
+                [severity]="member.enabled ? 'danger' : 'success'"
+                [pTooltip]="member.enabled ? 'Desactivar' : 'Reactivar'"
+                (onClick)="confirmToggle($event, member)"
+                [ariaLabel]="member.enabled ? 'Desactivar usuario' : 'Reactivar usuario'"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5" class="text-center !p-10 text-[#8C7A6B] text-sm">
+            <i class="pi pi-users text-2xl text-[#C2B7AC] block mb-2"></i>
+            @if (members().length === 0) {
+              Todavía no hay personas de tu entidad en el aula.
+            } @else {
+              Ninguna persona coincide con la búsqueda.
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+
+<p-confirm-dialog styleClass="max-w-[40rem]"/>

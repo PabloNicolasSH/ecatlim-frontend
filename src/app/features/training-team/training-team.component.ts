@@ -9,7 +9,9 @@ import {Button} from 'primeng/button';
 import {ConfirmDialog} from 'primeng/confirmdialog';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {UserService} from '../../shared/services/user.service';
-import {TeamMember} from '../../shared/models/training-people.model';
+import {TeamMember, TrainerStage} from '../../shared/models/training-people.model';
+import {EducationStageService} from '../../shared/services/education-stage.service';
+import {Select} from 'primeng/select';
 import {Role} from '../../shared/models/role.model';
 import {ROLE_CLASSES, ROLE_LABELS} from '../../shared/models/role-labels';
 import {LoggedUserDataService} from '../../core/auth/logged-user-data-service';
@@ -19,6 +21,7 @@ import {TeamCandidateDialogComponent} from './team-candidate-dialog/team-candida
 
 const TEAM_ROLES = [Role.TRAINER, Role.EVENT_DIRECTOR, Role.MANAGEMENT];
 const REMOVABLE_ROLES: string[] = [Role.TRAINER, Role.EVENT_DIRECTOR];
+const TRAINER_STAGE_CODES = ['AF', 'FS', 'FF'];
 
 @Component({
   selector: 'app-training-team',
@@ -30,6 +33,7 @@ const REMOVABLE_ROLES: string[] = [Role.TRAINER, Role.EVENT_DIRECTOR];
     IconField,
     InputIcon,
     Button,
+    Select,
     ConfirmDialog,
     UserAvatarComponent,
     UserModalAddEditComponent,
@@ -41,6 +45,7 @@ const REMOVABLE_ROLES: string[] = [Role.TRAINER, Role.EVENT_DIRECTOR];
 export class TrainingTeamComponent implements OnInit {
 
   private readonly userService = inject(UserService);
+  private readonly educationStageService = inject(EducationStageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly messageService = inject(MessageService);
   private readonly loggedUserDataService = inject(LoggedUserDataService);
@@ -53,6 +58,7 @@ export class TrainingTeamComponent implements OnInit {
   readonly canManage = this.loggedUserDataService.hasAnyRole(Role.MANAGEMENT, Role.MANAGER_DIRECTOR);
 
   members = signal<TeamMember[]>([]);
+  trainerStages = signal<TrainerStage[]>([]);
   loading = signal<boolean>(true);
   failed = signal<boolean>(false);
   modalVisible = false;
@@ -82,6 +88,29 @@ export class TrainingTeamComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    if (this.canManage) {
+      this.educationStageService.getEducationStages().subscribe(stages =>
+        this.trainerStages.set(stages
+          .filter(stage => TRAINER_STAGE_CODES.includes(stage.code))
+          .map(stage => ({id: stage.id!, code: stage.code, name: stage.name}))
+          .sort((a, b) => TRAINER_STAGE_CODES.indexOf(a.code) - TRAINER_STAGE_CODES.indexOf(b.code))));
+    }
+  }
+
+  changeTrainerStage(member: TeamMember, stageId: number | null) {
+    this.userService.setTrainerStage(member.id, stageId).subscribe({
+      next: updated => {
+        this.members.update(members => members.map(m => m.id === updated.id ? updated : m));
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Etapa actualizada',
+          detail: updated.trainerStage
+            ? `${this.fullName(member)} está ahora en la etapa ${updated.trainerStage.code}.`
+            : `${this.fullName(member)} ya no tiene etapa asignada.`
+        });
+      },
+      error: () => this.members.update(members => [...members])
+    });
   }
 
   load() {

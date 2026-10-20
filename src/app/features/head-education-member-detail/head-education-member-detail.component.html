@@ -1,0 +1,140 @@
+<div class="w-full max-w-7xl mx-auto px-2 md:px-4 py-4 space-y-5">
+
+  <a
+    routerLink="/app/responsable-formacion"
+    [queryParams]="{tab: 'members'}"
+    class="inline-flex items-center gap-2 text-xs font-bold text-[#795221] bg-white border border-[#EBE5DC] rounded-full px-4 py-2 no-underline hover:bg-[#FAF8F5] transition-colors"
+  >
+    <i class="pi pi-arrow-left text-[10px]"></i> Volver a mi entidad
+  </a>
+
+  @if (loading()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center text-[#8C7A6B]">
+      <i class="pi pi-spin pi-spinner text-2xl text-[#795221]"></i>
+      <p class="mt-3 text-sm mb-0">Cargando la formación...</p>
+    </div>
+  } @else if (failed()) {
+    <div class="bg-white rounded-3xl border border-[#EBE5DC] p-12 text-center">
+      <i class="pi pi-exclamation-circle text-3xl text-[#795221]"></i>
+      <h2 class="text-lg font-bold text-[#3D2E24] mt-3 mb-1">No se pudo cargar la formación</h2>
+      <p class="text-sm text-[#8C7A6B] mt-0 mb-4">Puede que esta persona ya no pertenezca a tu entidad.</p>
+      <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="load()" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl"></p-button>
+    </div>
+  } @else if (detail()) {
+    @let d = detail()!;
+
+    <section class="bg-white rounded-3xl border border-[#EBE5DC] shadow-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <app-user-avatar [avatarUrl]="d.member.avatarUrl" [label]="initials()" customSize="4.5rem"></app-user-avatar>
+      <div class="flex-1 min-w-0">
+        <h1 class="font-black text-2xl text-[#3D2E24] m-0">{{ fullName() }}</h1>
+        <p class="text-sm text-[#8C7A6B] mt-1 mb-0">{{ d.member.email }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        @if (d.member.currentStage; as stage) {
+          <span class="text-xs font-black px-3 py-1.5 rounded-full bg-[#F3E3C3] text-[#795221]">{{ stage.code }} · {{ stage.name }}</span>
+        } @else {
+          <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-stone-200 text-stone-700">Sin etapa en curso</span>
+        }
+        @if (d.member.enabled) {
+          <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800">Activo</span>
+        } @else {
+          <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-stone-200 text-stone-700">Inactivo</span>
+        }
+      </div>
+    </section>
+
+    <section class="space-y-3">
+      <h2 class="text-sm font-black uppercase tracking-wide text-[#8C7A6B] m-0">Etapas formativas</h2>
+
+      @if (d.stages.length === 0) {
+        <div class="bg-white border border-[#EBE5DC] rounded-2xl p-10 text-center text-[#8C7A6B] text-sm">
+          <i class="pi pi-graduation-cap text-2xl text-[#C2B7AC] block mb-2"></i>
+          Todavía no se ha inscrito en ninguna etapa.
+        </div>
+      } @else {
+        <div class="inline-flex max-w-full overflow-x-auto bg-[#FAF8F5] border border-[#EBE5DC] rounded-full p-1" role="tablist" aria-label="Etapas">
+          @for (stage of d.stages; track stage.id; let i = $index) {
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="activeStageIndex() === i"
+              (click)="activeStageIndex.set(i)"
+              class="px-4 py-1.5 rounded-full border-0 cursor-pointer text-xs font-bold whitespace-nowrap transition-colors"
+              [class]="activeStageIndex() === i ? 'bg-[#633F17] text-white' : 'bg-transparent text-[#8C7A6B] hover:text-[#633F17]'"
+            >{{ stage.stageName }}</button>
+          }
+        </div>
+
+        @if (activeStage(); as stage) {
+          <article class="bg-white rounded-2xl border border-[#EBE5DC] shadow-sm p-5">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-black text-lg text-[#3D2E24] m-0">{{ stage.stageName }}</h3>
+              @if (stage.completed) {
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">Superada</span>
+              } @else {
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#F3E3C3] text-[#795221]">En curso</span>
+              }
+            </div>
+            <div class="mt-3 w-full h-2.5 bg-[#EFEAE2] rounded-full overflow-hidden">
+              <div class="h-full bg-[#633F17]" [style.width.%]="stage.percentage"></div>
+            </div>
+            <p class="text-xs text-[#8C7A6B] mt-1 mb-0">{{ stage.percentage }}% completado</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+              @for (module of stage.modules; track module.code) {
+                <div class="border border-[#EBE5DC] rounded-2xl p-4">
+                  <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="min-w-0">
+                      <span class="text-[10px] font-black uppercase bg-[#EFEAE2] text-[#633F17] px-2 py-0.5 rounded-md">{{ module.code }}</span>
+                      <p class="font-bold text-[#3D2E24] mt-1 mb-0 truncate">{{ module.name }}</p>
+                    </div>
+                    <span class="text-xs text-[#8C7A6B] shrink-0">{{ module.blocks.length }} {{ module.blocks.length === 1 ? 'bloque' : 'bloques' }}</span>
+                  </div>
+                  <div class="space-y-2">
+                    @for (block of module.blocks; track block.id) {
+                      <div class="flex items-center justify-between gap-3 bg-[#FAF8F5] rounded-xl px-3 py-2">
+                        <span class="flex items-center gap-2 min-w-0">
+                          <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#EFEAE2] text-[#633F17] shrink-0">{{ block.code }}</span>
+                          <span class="text-sm text-[#3D2E24] truncate" [pTooltip]="block.name">{{ block.name }}</span>
+                        </span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" [class]="blockClass(block.status)">
+                          {{ block.status }}
+                          @if (block.status === 'Superada' && block.completionDate) {
+                            · {{ block.completionDate | date: 'dd/MM/yyyy' }}
+                          }
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <h4 class="text-sm font-black uppercase tracking-wide text-[#8C7A6B] mt-6 mb-3">Eventos a los que ha asistido en esta etapa</h4>
+            @if (activeStageEvents().length === 0) {
+              <p class="text-sm text-[#8C7A6B] m-0">Todavía no consta asistencia a ningún evento de esta etapa.</p>
+            } @else {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                @for (event of activeStageEvents(); track event.id) {
+                  <div class="border border-[#EBE5DC] rounded-2xl p-4">
+                    <p class="font-bold text-[#3D2E24] m-0">{{ event.title }}</p>
+                    <p class="text-xs text-[#8C7A6B] mt-1 mb-2">
+                      <i class="pi pi-calendar text-[10px]"></i> {{ event.startDate | date: 'dd/MM/yyyy' }}
+                      · <i class="pi pi-map-marker text-[10px]"></i> {{ event.location }}
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (block of event.lessonBlocks; track block.id) {
+                        <span class="text-[11px] font-black px-2 py-0.5 rounded-full bg-[#F3E3C3] text-[#795221]" [pTooltip]="block.name">{{ block.code }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        }
+      }
+    </section>
+
+  }
+</div>

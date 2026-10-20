@@ -33,6 +33,7 @@
               }
             ],
             "styles": [
+              "node_modules/driver.js/dist/driver.css",
               "src/styles/tailwind.css",
               "src/styles.scss"
             ],

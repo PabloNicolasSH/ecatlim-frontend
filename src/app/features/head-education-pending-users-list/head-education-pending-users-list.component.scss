@@ -43,6 +43,11 @@
       border-radius: 0 14px 14px 0;
     }
 
+    > td:only-child {
+      border: 1px solid #ebe5dc;
+      border-radius: 14px;
+    }
+
     &:hover > td {
       background: #faf8f5;
     }

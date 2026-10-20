@@ -69,6 +69,10 @@ export class UserService {
     return this.http.get<User>(`${environment.apiUrl}/user/me`);
   }
 
+  completeOnboarding(): Observable<User> {
+    return this.http.put<User>(`${environment.apiUrl}/user/me/onboarding-completed`, {});
+  }
+
   getStudentOverview(): Observable<StudentOverview> {
     return this.http.get<StudentOverview>(`${environment.apiUrl}/user/students/overview`);
   }
@@ -91,6 +95,10 @@ export class UserService {
 
   removeTeamRole(userId: number, role: Role): Observable<TeamMember> {
     return this.http.delete<TeamMember>(`${environment.apiUrl}/user/team/${userId}/roles/${role}`);
+  }
+
+  setTrainerStage(userId: number, stageId: number | null): Observable<TeamMember> {
+    return this.http.put<TeamMember>(`${environment.apiUrl}/user/team/${userId}/trainer-stage`, {stageId});
   }
 
   getEventStaff(role: Role.EVENT_DIRECTOR | Role.TRAINER) {
