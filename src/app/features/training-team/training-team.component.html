@@ -112,6 +112,7 @@
           <th>Nombre</th>
           <th>Correo Electrónico</th>
           <th>Roles</th>
+          <th>Etapa de formador</th>
         </tr>
       </ng-template>
       <ng-template #body let-member>
@@ -141,11 +142,35 @@
               }
             </div>
           </td>
+          <td>
+            @if (!member.roles.includes('TRAINER')) {
+              <span class="text-[#C2B7AC]">—</span>
+            } @else if (canManage) {
+              <p-select
+                [options]="trainerStages()"
+                optionLabel="name"
+                optionValue="id"
+                [ngModel]="member.trainerStage?.id ?? null"
+                (ngModelChange)="changeTrainerStage(member, $event)"
+                [showClear]="true"
+                placeholder="Sin etapa"
+                styleClass="team-stage-select w-52"
+                appendTo="body"
+              ></p-select>
+            } @else if (member.trainerStage) {
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EFEAE2] text-[#633F17]"
+                    [title]="member.trainerStage.name">
+                {{ member.trainerStage.code }} · {{ member.trainerStage.name }}
+              </span>
+            } @else {
+              <span class="text-xs text-[#8C7A6B]">Sin etapa</span>
+            }
+          </td>
         </tr>
       </ng-template>
       <ng-template #emptymessage>
         <tr>
-          <td colspan="3" class="text-center !p-10 text-[#8C7A6B] text-sm">
+          <td colspan="4" class="text-center !p-10 text-[#8C7A6B] text-sm">
             <i class="pi pi-search text-2xl text-[#C2B7AC] block mb-2"></i>
             Ninguna persona coincide con los filtros aplicados.
           </td>
