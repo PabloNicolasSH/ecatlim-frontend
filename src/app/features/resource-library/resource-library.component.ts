@@ -48,30 +48,45 @@ type SortOption = 'recent' | 'name' | 'popular';
 type TypeFilter = LearningResourceType | 'ALL';
 
 const RESOURCE_TYPE_META: Record<LearningResourceType, TypeMeta> = {
-  PDF: {
-    label: 'PDF', plural: 'PDFs', icon: 'pi pi-file-pdf', hint: 'Documentos y guías',
-    accept: 'application/pdf,.pdf',
+  BOOK: {
+    label: 'Libro', plural: 'Libros', icon: 'pi pi-book', hint: 'Libros y manuales en PDF, EPUB...',
+    accept: '',
+    text: 'text-[#8A4B2A]', soft: 'bg-[#F6E6DC]', gradient: 'from-[#EBCFBD] to-[#F9EFE8]'
+  },
+  DOCUMENT: {
+    label: 'Documento', plural: 'Documentos', icon: 'pi pi-file-pdf', hint: 'PDF, Word y otros documentos',
+    accept: '.pdf,.doc,.docx,.odt,.txt,.rtf',
     text: 'text-[#B9412F]', soft: 'bg-[#FBE9E5]', gradient: 'from-[#F8D9D2] to-[#FBEFEC]'
+  },
+  PRESENTATION: {
+    label: 'Presentación', plural: 'Presentaciones', icon: 'pi pi-desktop', hint: 'PowerPoint, Keynote, PDF...',
+    accept: '.ppt,.pptx,.pps,.ppsx,.odp,.key,.pdf',
+    text: 'text-[#C2561A]', soft: 'bg-[#FCEADD]', gradient: 'from-[#F7D4BB] to-[#FDF3EB]'
   },
   IMAGE: {
     label: 'Imagen', plural: 'Imágenes', icon: 'pi pi-image', hint: 'Fotos, carteles, esquemas',
     accept: 'image/*',
     text: 'text-[#1F7A6E]', soft: 'bg-[#E2F3F0]', gradient: 'from-[#CDEBE5] to-[#EEF8F6]'
   },
-  TEMPLATE: {
-    label: 'Plantilla', plural: 'Plantillas', icon: 'pi pi-file-edit', hint: 'Word, Excel, PowerPoint...',
-    accept: '',
-    text: 'text-[#2F5D9E]', soft: 'bg-[#E6EEF8]', gradient: 'from-[#D5E2F4] to-[#F0F5FB]'
-  },
   VIDEO_LINK: {
     label: 'Vídeo', plural: 'Vídeos', icon: 'pi pi-video', hint: 'YouTube, Vimeo...',
     accept: '',
     text: 'text-[#7A3E9D]', soft: 'bg-[#F1E7F7]', gradient: 'from-[#E6D5F0] to-[#F7F0FB]'
   },
+  TEACHING_GUIDE: {
+    label: 'Guía didáctica', plural: 'Guías didácticas', icon: 'pi pi-compass', hint: 'Guías y fichas de actividades',
+    accept: '',
+    text: 'text-[#4F7A1F]', soft: 'bg-[#E9F3DC]', gradient: 'from-[#D6E8BC] to-[#F2F8E9]'
+  },
   LINK: {
     label: 'Enlace', plural: 'Enlaces', icon: 'pi pi-link', hint: 'Webs y recursos online',
     accept: '',
     text: 'text-[#A2620F]', soft: 'bg-[#FBF0DC]', gradient: 'from-[#F6E2BC] to-[#FDF6E9]'
+  },
+  TEMPLATE: {
+    label: 'Plantilla', plural: 'Plantillas', icon: 'pi pi-file-edit', hint: 'Word, Excel, PowerPoint...',
+    accept: '',
+    text: 'text-[#2F5D9E]', soft: 'bg-[#E6EEF8]', gradient: 'from-[#D5E2F4] to-[#F0F5FB]'
   }
 };
 
@@ -153,7 +168,7 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
   displayFormModal = signal<boolean>(false);
   editingResource = signal<LearningResource | null>(null);
   resourceForm!: FormGroup;
-  formType = signal<LearningResourceType>('PDF');
+  formType = signal<LearningResourceType>('DOCUMENT');
   selectedFile = signal<File | null>(null);
   isDragging = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
@@ -161,7 +176,7 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
   isCreatingTag = signal<boolean>(false);
 
   typeCounts = computed(() => {
-    const counts = {ALL: 0, PDF: 0, IMAGE: 0, TEMPLATE: 0, VIDEO_LINK: 0, LINK: 0} as Record<TypeFilter, number>;
+    const counts = {ALL: 0, BOOK: 0, DOCUMENT: 0, PRESENTATION: 0, IMAGE: 0, VIDEO_LINK: 0, TEACHING_GUIDE: 0, LINK: 0, TEMPLATE: 0} as Record<TypeFilter, number>;
     for (const resource of this.resources()) {
       counts[resource.type]++;
       counts.ALL++;
@@ -303,6 +318,14 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
     return type === 'LINK' || type === 'VIDEO_LINK';
   }
 
+  isPdf(resource: LearningResource): boolean {
+    return !this.isLink(resource.type) && (resource.mimeType === 'application/pdf' || /\.pdf$/i.test(resource.blobPath ?? ''));
+  }
+
+  canPreview(resource: LearningResource): boolean {
+    return resource.type === 'IMAGE' || this.isPdf(resource);
+  }
+
   domain(url: string): string {
     try {
       return new URL(url).hostname.replace(/^www\./, '');
@@ -349,7 +372,7 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (resource.type !== 'PDF' && resource.type !== 'IMAGE') return;
+    if (!this.canPreview(resource)) return;
 
     this.previewLoading.set(true);
     this.resourceService.download(resource.id).subscribe({
@@ -457,7 +480,7 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
     this.resourceForm = this.fb.group({
       name: ['', [Validators.required, notBlankValidator, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(MAX_TEXT)]],
-      type: ['PDF', Validators.required],
+      type: ['DOCUMENT', Validators.required],
       tagNames: [[]],
       blobPath: ['']
     });
@@ -473,7 +496,7 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
   openAddModal() {
     this.editingResource.set(null);
     this.selectedFile.set(null);
-    this.resourceForm.reset({name: '', description: '', type: 'PDF', tagNames: [], blobPath: ''});
+    this.resourceForm.reset({name: '', description: '', type: 'DOCUMENT', tagNames: [], blobPath: ''});
     this.displayFormModal.set(true);
   }
 
@@ -544,15 +567,15 @@ export class ResourceLibraryComponent implements OnInit, OnDestroy {
   }
 
   private fileMatchesType(file: File, type: LearningResourceType): boolean {
-    if (type === 'PDF') return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if (this.isLink(type)) return false;
     if (type === 'IMAGE') return file.type.startsWith('image/');
-    return type === 'TEMPLATE';
+    return true;
   }
 
   private detectType(file: File): LearningResourceType {
     if (file.type.startsWith('image/')) return 'IMAGE';
-    if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) return 'PDF';
-    return 'TEMPLATE';
+    if (/\.(pptx?|ppsx?|odp|key)$/i.test(file.name)) return 'PRESENTATION';
+    return 'DOCUMENT';
   }
 
   onUrlBlur() {

@@ -15,7 +15,7 @@
     }
   </div>
 
-  <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+  <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
     <button
       type="button"
       (click)="setType('ALL')"
@@ -280,12 +280,13 @@
                 <p-button label="Ver vídeo" icon="pi pi-play-circle" (onClick)="openPreview(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
                 <p-button icon="pi pi-copy" [outlined]="true" severity="secondary" (onClick)="copyLink(res)" pTooltip="Copiar enlace" tooltipPosition="top" ariaLabel="Copiar enlace" styleClass="!rounded-xl" />
               }
-              @case ('TEMPLATE') {
-                <p-button label="Descargar" icon="pi pi-download" (onClick)="download(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
-              }
               @default {
-                <p-button label="Ver" icon="pi pi-eye" (onClick)="openPreview(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
-                <p-button icon="pi pi-download" [outlined]="true" severity="secondary" (onClick)="download(res)" pTooltip="Descargar" tooltipPosition="top" ariaLabel="Descargar" styleClass="!rounded-xl" />
+                @if (canPreview(res)) {
+                  <p-button label="Ver" icon="pi pi-eye" (onClick)="openPreview(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
+                  <p-button icon="pi pi-download" [outlined]="true" severity="secondary" (onClick)="download(res)" pTooltip="Descargar" tooltipPosition="top" ariaLabel="Descargar" styleClass="!rounded-xl" />
+                } @else {
+                  <p-button label="Descargar" icon="pi pi-download" (onClick)="download(res)" styleClass="w-full !bg-[#633F17] !border-[#633F17] !rounded-xl" class="grow" />
+                }
               }
             }
             @if (res.canManage) {
@@ -418,7 +419,7 @@
           <div class="flex items-center justify-center bg-[repeating-conic-gradient(#F3EEE7_0_25%,#FAF8F5_0_50%)] bg-[length:20px_20px]">
             <img [src]="previewUrl()" [alt]="res.name" class="max-h-[65vh] max-w-full object-contain" />
           </div>
-        } @else if (res.type === 'PDF' && previewSafeUrl()) {
+        } @else if (isPdf(res) && previewSafeUrl()) {
           <iframe [src]="previewSafeUrl()" [title]="res.name" class="w-full h-[65vh] border-0 bg-white"></iframe>
         } @else if (res.type === 'VIDEO_LINK' && previewSafeUrl()) {
           <div class="aspect-video bg-black">
@@ -504,7 +505,7 @@
             <p-button label="Copiar enlace" icon="pi pi-copy" [outlined]="true" severity="secondary" (onClick)="copyLink(res)" styleClass="!rounded-xl" />
             <p-button [label]="res.type === 'VIDEO_LINK' ? 'Abrir en ' + domain(res.blobPath) : 'Abrir enlace'" icon="pi pi-external-link" (onClick)="openLink(res)" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl" />
           } @else {
-            @if (res.type === 'PDF' && previewUrl()) {
+            @if (isPdf(res) && previewUrl()) {
               <p-button label="Pantalla completa" icon="pi pi-window-maximize" [outlined]="true" severity="secondary" (onClick)="openInNewTab()" styleClass="!rounded-xl" />
             }
             <p-button label="Descargar" icon="pi pi-download" (onClick)="download(res)" styleClass="!bg-[#633F17] !border-[#633F17] !rounded-xl" />
@@ -528,7 +529,7 @@
 
     <fieldset class="border-0 p-0 m-0">
       <legend class="font-semibold text-[#3D2E24] text-sm mb-2">¿Qué quieres compartir? <span class="text-red-500">*</span></legend>
-      <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+      <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
         @for (type of resourceTypes; track type) {
           <button
             type="button"
