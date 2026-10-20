@@ -97,6 +97,10 @@ export class UserService {
     return this.http.delete<TeamMember>(`${environment.apiUrl}/user/team/${userId}/roles/${role}`);
   }
 
+  setTrainerStage(userId: number, stageId: number | null): Observable<TeamMember> {
+    return this.http.put<TeamMember>(`${environment.apiUrl}/user/team/${userId}/trainer-stage`, {stageId});
+  }
+
   getEventStaff(role: Role.EVENT_DIRECTOR | Role.TRAINER) {
     return this.http.get<SimpleUser[]>(`${environment.apiUrl}/user/event-staff/${role}`);
   }

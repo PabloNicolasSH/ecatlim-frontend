@@ -36,4 +36,11 @@ export interface TeamMember {
   avatarUrl?: string;
   entityName?: string;
   roles: string[];
+  trainerStage?: TrainerStage | null;
+}
+
+export interface TrainerStage {
+  id: number;
+  code: string;
+  name: string;
 }

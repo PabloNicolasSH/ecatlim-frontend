@@ -196,7 +196,7 @@ export const ONBOARDING_MODULES: OnboardingModuleDef[] = [
       pageStep('/app/alumnado', 'Alumnado', 'El listado de alumnos y alumnas, con su progreso y su situación.'),
       pageStep('/app/convalidaciones', 'Convalidaciones',
         'Las solicitudes de reconocimiento de formación previa, para revisarlas y responderlas.'),
-      pageStep('/app/equipo-formativo', 'Equipo formativo', 'Las personas que forman el equipo de la escuela y sus roles.'),
+      pageStep('/app/equipo-formativo', 'Equipo formativo', 'Las personas que forman el equipo de la escuela, sus roles y la etapa de formador en la que está cada persona formadora.'),
       pageStep('/app/eventos-formativos', 'Eventos formativos',
         'Desde aquí creas y gestionas los eventos formativos y sus actividades.'),
       pageStep('/app/oferta-educativa', 'Oferta educativa', 'Las etapas formativas de la escuela y su contenido.'),
