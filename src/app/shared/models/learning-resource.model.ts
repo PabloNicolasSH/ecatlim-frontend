@@ -1,4 +1,4 @@
-export type LearningResourceType = 'PDF' | 'IMAGE' | 'TEMPLATE' | 'VIDEO_LINK' | 'LINK';
+export type LearningResourceType = 'BOOK' | 'DOCUMENT' | 'PRESENTATION' | 'IMAGE' | 'VIDEO_LINK' | 'TEACHING_GUIDE' | 'LINK' | 'TEMPLATE';
 
 export interface LearningResource {
   id: number;
