@@ -143,6 +143,74 @@
 
           </div>
 
+          <div class="flex flex-col gap-3" id="event-collaborators">
+            <div class="flex items-center justify-between">
+              <span class="font-bold">Colaboradores</span>
+              <p-button label="Añadir colaborador" icon="pi pi-plus" size="small" [outlined]="true" (onClick)="addCollaborator()" />
+            </div>
+            <div formArrayName="collaborators" class="flex flex-col gap-3">
+              @for (c of collaborators.controls; track c; let i = $index) {
+                <div [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-center">
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'col-name-' + i" formControlName="name" class="w-full" />
+                    <label [for]="'col-name-' + i">Nombre</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'col-surname-' + i" formControlName="surname" class="w-full" />
+                    <label [for]="'col-surname-' + i">Apellidos</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'col-phone-' + i" formControlName="phone" class="w-full" />
+                    <label [for]="'col-phone-' + i">Móvil</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'col-email-' + i" type="email" formControlName="email" class="w-full" />
+                    <label [for]="'col-email-' + i">Correo</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'col-specialty-' + i" formControlName="specialty" class="w-full" />
+                    <label [for]="'col-specialty-' + i">Ámbito o profesión</label>
+                  </p-floatlabel>
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="removeCollaborator(i)" ariaLabel="Quitar colaborador" />
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3" id="event-evas">
+            <div class="flex items-center justify-between">
+              <span class="font-bold">EVA</span>
+              <p-button label="Añadir EVA" icon="pi pi-plus" size="small" [outlined]="true" (onClick)="addEva()" />
+            </div>
+            <div formArrayName="evas" class="flex flex-col gap-3">
+              @for (e of evas.controls; track e; let i = $index) {
+                <div [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-center">
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'eva-name-' + i" formControlName="name" class="w-full" />
+                    <label [for]="'eva-name-' + i">Nombre</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'eva-surname-' + i" formControlName="surname" class="w-full" />
+                    <label [for]="'eva-surname-' + i">Apellidos</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'eva-phone-' + i" formControlName="phone" class="w-full" />
+                    <label [for]="'eva-phone-' + i">Móvil</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <input pInputText [id]="'eva-email-' + i" type="email" formControlName="email" class="w-full" />
+                    <label [for]="'eva-email-' + i">Correo</label>
+                  </p-floatlabel>
+                  <p-floatlabel variant="on">
+                    <p-select [inputId]="'eva-origin-' + i" [options]="entities" optionLabel="name" optionValue="id" formControlName="originEntityId" [filter]="true" filterBy="name" appendTo="body" styleClass="w-full" />
+                    <label [for]="'eva-origin-' + i">Entidad de procedencia</label>
+                  </p-floatlabel>
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="removeEva(i)" ariaLabel="Quitar EVA" />
+                </div>
+              }
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <p-floatlabel variant="on">
               <textarea id="description" pTextarea formControlName="description" rows="3" class="w-full min-h-25"></textarea>

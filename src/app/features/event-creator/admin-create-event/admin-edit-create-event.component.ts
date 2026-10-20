@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {EventSchedulerComponent} from '../event-scheduler/event-scheduler.component';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Select} from 'primeng/select';
 import {InputText} from 'primeng/inputtext';
@@ -22,9 +22,11 @@ import {TimelineItem} from '../../../shared/models/timeline-item.model';
 import {InputNumber} from 'primeng/inputnumber';
 import {NgClass} from '@angular/common';
 import {EducationStageService} from '../../../shared/services/education-stage.service';
+import {EntityService} from '../../../shared/services/entity.service';
+import {ScoutGroup} from '../../../shared/models/scout-group.model';
 import {EducationStage} from '../../../shared/models/education-stage.model';
 import {forkJoin} from 'rxjs';
-import {EventForm, EventSuggestions} from '../../../shared/models/event.model';
+import {EventContact, EventForm, EventSuggestions} from '../../../shared/models/event.model';
 
 type StaffOption = SimpleUser & { fullName: string };
 
@@ -62,6 +64,7 @@ export class AdminEditCreateEventComponent implements OnInit {
   protected readonly lessonBlockService = inject(LessonBlockService);
   protected readonly eventCreatorService = inject(EventCreatorService);
   protected readonly educationStageService = inject(EducationStageService);
+  protected readonly entityService = inject(EntityService);
   protected readonly router = inject(Router);
   protected readonly route = inject(ActivatedRoute);
 
@@ -76,6 +79,7 @@ export class AdminEditCreateEventComponent implements OnInit {
 
   directors: StaffOption[] = [];
   facilitators: StaffOption[] = [];
+  entities: ScoutGroup[] = [];
 
   allBlocks: LessonBlock[] = [];
   availableBlocks: SelectItemGroup[] = [];
@@ -140,6 +144,8 @@ export class AdminEditCreateEventComponent implements OnInit {
       selectedFacilitators: [[], [Validators.required, Validators.minLength(1)]],
       selectedEducationStage: [null, Validators.required],
       selectedBlocks: [[], [Validators.required, Validators.minLength(1)]],
+      collaborators: this.formBuilder.array([]),
+      evas: this.formBuilder.array([]),
       status: ['PENDING', Validators.required],
       minParticipants: [1, [Validators.required, Validators.min(1)]],
       dateOpenInscription: [null, Validators.required],
@@ -151,7 +157,44 @@ export class AdminEditCreateEventComponent implements OnInit {
     });
   }
 
+  get collaborators(): FormArray {
+    return this.eventForm.get('collaborators') as FormArray;
+  }
+
+  get evas(): FormArray {
+    return this.eventForm.get('evas') as FormArray;
+  }
+
+  private createContactGroup(isEva: boolean, contact?: EventContact): FormGroup {
+    return this.formBuilder.group({
+      name: [contact?.name ?? '', Validators.required],
+      surname: [contact?.surname ?? '', Validators.required],
+      phone: [contact?.phone ?? '', Validators.required],
+      email: [contact?.email ?? '', [Validators.required, Validators.email]],
+      originEntityId: [contact?.originEntityId ?? null, isEva ? Validators.required : []],
+      specialty: [contact?.specialty ?? '']
+    });
+  }
+
+  addCollaborator(contact?: EventContact) {
+    this.collaborators.push(this.createContactGroup(false, contact));
+  }
+
+  addEva(contact?: EventContact) {
+    this.evas.push(this.createContactGroup(true, contact));
+  }
+
+  removeCollaborator(index: number) {
+    this.collaborators.removeAt(index);
+  }
+
+  removeEva(index: number) {
+    this.evas.removeAt(index);
+  }
+
   resetForm() {
+    this.collaborators.clear();
+    this.evas.clear();
     this.eventForm.reset({
       title: '',
       shortname: '',
@@ -206,13 +249,15 @@ export class AdminEditCreateEventComponent implements OnInit {
       directors: this.userService.getEventStaff(Role.EVENT_DIRECTOR),
       facilitators: this.userService.getEventStaff(Role.TRAINER),
       stages: this.educationStageService.getEducationStages(),
-      blocks: this.lessonBlockService.getAll()
+      blocks: this.lessonBlockService.getAll(),
+      entities: this.entityService.getEntities()
     }).subscribe({
       next: (res) => {
         this.directors = res.directors.map(toStaffOption);
         this.facilitators = res.facilitators.map(toStaffOption);
         this.availableEducationStages = res.stages;
         this.allBlocks = res.blocks;
+        this.entities = res.entities;
 
         if (this.isEdit && this.eventId) {
           this.loadEventForEditing(this.eventId);
@@ -271,6 +316,11 @@ export class AdminEditCreateEventComponent implements OnInit {
           transferCode: event.eventConfiguration?.transferCode || '',
           notificationTarget: cleanTargets
         });
+
+        this.collaborators.clear();
+        this.evas.clear();
+        (event.collaborators ?? []).forEach(c => this.addCollaborator(c));
+        (event.evas ?? []).forEach(e => this.addEva(e));
 
         this.savedTimeline = event.timelineItems || [];
         this.loading = false;
@@ -435,6 +485,8 @@ export class AdminEditCreateEventComponent implements OnInit {
       facilitatorIds: formValue.selectedFacilitators.map((f: any) => f.id),
       educationStageId: formValue.selectedEducationStage?.id,
       lessonBlockIds: formValue.selectedBlocks.map((b: any) => b.id),
+      collaborators: formValue.collaborators,
+      evas: formValue.evas,
       timelineItems: includeTimeline ? this.savedTimeline : [],
       eventConfiguration: {
         minParticipants: formValue.minParticipants,
@@ -450,7 +502,7 @@ export class AdminEditCreateEventComponent implements OnInit {
 
   private readonly fieldsByStep: { [key: number]: string[] } = {
     1: ['title', 'shortname', 'description', 'contents', 'startDate', 'endDate', 'location', 'organizer', 'selectedDirector',
-      'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'status'],
+      'selectedEducationStage', 'selectedBlocks', 'selectedFacilitators', 'collaborators', 'evas', 'status'],
     2: ['minParticipants', 'dateOpenInscription', 'dateCloseInscription', 'cost', 'transferBankNumber', 'transferCode', 'notificationTarget']
   };
 

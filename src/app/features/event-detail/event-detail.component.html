@@ -333,6 +333,30 @@
             <p class="text-xs italic text-[#8C7A6B] mb-4 mt-0">Sin equipo asignado</p>
           }
 
+          @if (ev.collaborators.length > 0) {
+            <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">Colaboradores</p>
+            <div class="space-y-2 mb-4">
+              @for (c of ev.collaborators; track c.id) {
+                <div class="flex flex-col min-w-0">
+                  <span class="text-xs font-bold text-[#3D2E24] truncate">{{ c.name }} {{ c.surname }}@if (c.specialty) { · {{ c.specialty }}}</span>
+                  <span class="text-[10px] text-[#8C7A6B] font-mono truncate">{{ c.phone }} · {{ c.email }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          @if (ev.evas.length > 0) {
+            <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">EVA</p>
+            <div class="space-y-2 mb-4">
+              @for (e of ev.evas; track e.id) {
+                <div class="flex flex-col min-w-0">
+                  <span class="text-xs font-bold text-[#3D2E24] truncate">{{ e.name }} {{ e.surname }}@if (e.originEntityName) { · {{ e.originEntityName }}}</span>
+                  <span class="text-[10px] text-[#8C7A6B] font-mono truncate">{{ e.phone }} · {{ e.email }}</span>
+                </div>
+              }
+            </div>
+          }
+
           @if (ev.staff.length > 0) {
             <p class="text-[10px] font-black uppercase tracking-wider text-[#8C7A6B] mt-0 mb-2">Logística</p>
             <div class="space-y-2">
