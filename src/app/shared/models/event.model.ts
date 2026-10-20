@@ -30,7 +30,20 @@ export interface EventConfiguration {
   notificationTarget?: string[];
 }
 
+export interface EventContact {
+  id?: number;
+  name: string;
+  surname: string;
+  phone: string;
+  email: string;
+  originEntityId?: number;
+  originEntityName?: string;
+  specialty?: string;
+}
+
 export interface EventForm extends Event {
+  collaborators?: EventContact[];
+  evas?: EventContact[];
   status?: string;
   directorId: number;
   facilitatorIds: number[];
@@ -143,6 +156,8 @@ export interface EventDetail {
   director?: SimpleUser;
   facilitators: SimpleUser[];
   staff: SimpleUser[];
+  collaborators: EventContact[];
+  evas: EventContact[];
   lessonBlocks: LessonBlockCalendarSummary[];
   config?: {
     minParticipants: number;
