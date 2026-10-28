@@ -45,6 +45,14 @@ export class UserService {
     return this.http.delete<User>(`${environment.apiUrl}/user/admin/deactivate/${id}`);
   }
 
+  resetPasswordByAdmin(id: number): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/user/admin/reset-password/${id}`, {});
+  }
+
+  resetMfaByAdmin(id: number): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/user/admin/reset-mfa/${id}`, {});
+  }
+
   activateUser(id: number): Observable<User> {
     return this.http.put<User>(`${environment.apiUrl}/user/admin/activate/${id}`, {});
   }

@@ -41,9 +41,13 @@ export class WebsocketService {
 
   protected readonly http = inject(HttpClient);
 
-  initConnection(token: string) {
+  /** The token is read again on every reconnection, so a renewed session keeps the connection working. */
+  initConnection(tokenProvider: () => string | null) {
     this.stompClient = new Client({
-      brokerURL: `${environment.webSocketUrl}/ws?token=${token}`,
+      brokerURL: `${environment.webSocketUrl}/ws?token=${tokenProvider()}`,
+      beforeConnect: client => {
+        client.brokerURL = `${environment.webSocketUrl}/ws?token=${tokenProvider()}`;
+      },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,

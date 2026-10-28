@@ -192,6 +192,28 @@ export class UserListComponent implements OnInit {
         mode: mode
       }
       this.generateConfirmation(confirmationMessage);
+    } else if (mode == 'Reset password' && user) {
+      this.generateConfirmation({
+        message: 'Se generará una contraseña temporal y se enviará por correo a ' + user.email + '. Se cerrarán sus sesiones abiertas y tendrá que cambiarla al entrar. ¿Continuar?',
+        header: 'Restablecer contraseña',
+        icon: 'pi pi-key',
+        rejectLabel: 'Cancelar',
+        acceptLabel: 'Restablecer',
+        event: event,
+        user: user,
+        mode: mode
+      });
+    } else if (mode == 'Reset MFA' && user) {
+      this.generateConfirmation({
+        message: 'Esta persona perderá su verificación en dos pasos y sus códigos de recuperación, y tendrá que configurarla de nuevo en su próximo acceso. Úsalo solo si ha perdido su dispositivo. ¿Continuar?',
+        header: 'Restablecer verificación en dos pasos',
+        icon: 'pi pi-shield',
+        rejectLabel: 'Cancelar',
+        acceptLabel: 'Restablecer',
+        event: event,
+        user: user,
+        mode: mode
+      });
     } else if (user){
       const confirmationMessage = {
         message: '¿Está seguro de que desea reactivar a ' + user.profile?.name + "?",
@@ -247,6 +269,8 @@ export class UserListComponent implements OnInit {
           this.sendRejectedMessage('Se ha cancelado la aceptación de la solicitud de alta');
         } else if (confirmation.mode == 'Delete request') {
           this.sendRejectedMessage('Se ha cancelado la eliminación de la solicitud de alta');
+        } else if (confirmation.mode == 'Reset password' || confirmation.mode == 'Reset MFA') {
+          this.sendRejectedMessage('Se ha cancelado el restablecimiento');
         } else {
           this.sendRejectedMessage('Se ha cancelado la activación del usuario')
         }
@@ -266,6 +290,22 @@ export class UserListComponent implements OnInit {
       this.createUserFromPendingUser(pendingUser);
     } else if (mode == 'Delete request' && pendingUser) {
       this.deletePendingUserRequest(pendingUser);
+    } else if (mode == 'Reset password' && user) {
+      this.userService.resetPasswordByAdmin(user.id!).subscribe({
+        next: () => this.messageService.add({
+          severity: 'success',
+          summary: 'Contraseña restablecida',
+          detail: 'Se ha enviado una contraseña temporal a ' + user.email
+        })
+      });
+    } else if (mode == 'Reset MFA' && user) {
+      this.userService.resetMfaByAdmin(user.id!).subscribe({
+        next: () => this.messageService.add({
+          severity: 'success',
+          summary: 'Verificación restablecida',
+          detail: user.email + ' tendrá que configurarla de nuevo al iniciar sesión'
+        })
+      });
     } else if (user) {
       this.messageService.add({
         severity: 'success',

@@ -10,6 +10,7 @@ import {MessageService} from 'primeng/api';
 import {ChangePassword} from './models/change-password.model';
 import {finalize} from 'rxjs';
 import {PASSWORD_SPECIAL_CHARS} from '../../shared/validation/validation-patterns';
+import {AuthService} from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -29,6 +30,7 @@ export class ResetPasswordComponent implements OnInit{
   private readonly router = inject(Router);
   private readonly userService = inject(UserService);
   private readonly messageService = inject(MessageService);
+  protected readonly authService = inject(AuthService);
 
   token: string = '';
   newPassword: string = '';
@@ -105,6 +107,8 @@ export class ResetPasswordComponent implements OnInit{
           severity: "success",
           detail: "Se ha cambiado correctamente tu contraseña"
         });
+        // The server closed every session with the change, so this device starts again from the login
+        this.authService.clearSession();
         this.router.navigateByUrl('/login');
       }
     });

@@ -132,6 +132,8 @@
               <td>
                 <div class="flex gap-1 justify-end">
                   <p-button icon="pi pi-pen-to-square" [rounded]="true" [text]="true" severity="info" (onClick)="openEditDialog(user)" ariaLabel="Editar"></p-button>
+                  <p-button icon="pi pi-key" [rounded]="true" [text]="true" severity="secondary" (onClick)="confirmDialog($event, 'Reset password', user)" ariaLabel="Restablecer contraseña"></p-button>
+                  <p-button icon="pi pi-shield" [rounded]="true" [text]="true" severity="secondary" (onClick)="confirmDialog($event, 'Reset MFA', user)" ariaLabel="Restablecer verificación en dos pasos"></p-button>
                   <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="confirmDialog($event, 'Deactivate', user)" ariaLabel="Desactivar"></p-button>
                 </div>
               </td>

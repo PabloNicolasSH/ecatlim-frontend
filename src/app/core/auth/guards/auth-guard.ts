@@ -13,6 +13,11 @@ export const authGuard: CanActivateFn = (route) => {
     return router.parseUrl("/login");
   }
 
+  // With a temporary password the only place to go is the page to change it
+  if (authService.isPasswordChangeRequired() && !route.data["changePassword"]) {
+    return router.parseUrl("/cambiar-contraseña");
+  }
+
   const roles: Role[] | undefined = route.data["roles"];
   if (roles && roles.length > 0 && !loggedUserDataService.hasAnyRole(...roles)) {
     return router.parseUrl("/app/home");
