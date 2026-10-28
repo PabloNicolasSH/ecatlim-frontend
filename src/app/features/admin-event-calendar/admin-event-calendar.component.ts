@@ -39,6 +39,7 @@ export class AdminEventCalendarComponent implements OnInit {
   protected readonly loggedUserDataService = inject(LoggedUserDataService);
 
   readonly canPublish = this.loggedUserDataService.hasAnyRole(Role.MANAGER_DIRECTOR);
+  readonly canCreateEvent = this.loggedUserDataService.hasAnyRole(Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR);
 
   allEvents = signal<any[]>([]);
   menuContextEvent: any = null;
