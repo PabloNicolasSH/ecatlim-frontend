@@ -173,7 +173,7 @@ export const routes: Routes = [
       {
         path: "eventos-formativos/crear-evento",
         component: AdminEditCreateEventComponent,
-        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR, Role.TRAINER]}
+        data: {roles: [Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR]}
       },
       {
         path: "eventos-formativos/detalle/:id",

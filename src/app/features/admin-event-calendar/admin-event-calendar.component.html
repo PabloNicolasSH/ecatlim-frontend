@@ -5,7 +5,9 @@
       <h1 class="text-3xl font-extrabold tracking-tight">Eventos Formativos</h1>
       <p class="text-gray-600 mt-1">Visualiza y gestiona el calendario de capacitación. Coordina nuevas sesiones y supervisa el progreso de los cursos.</p>
     </div>
-    <p-button label="Nuevo Evento" icon="pi pi-plus" (onClick)="goToCreateEvent()" />
+    @if (canCreateEvent) {
+      <p-button label="Nuevo Evento" icon="pi pi-plus" (onClick)="goToCreateEvent()" />
+    }
   </div>
 
   <div class="flex flex-wrap items-center justify-between gap-4 p-3 rounded-2xl mb-4">

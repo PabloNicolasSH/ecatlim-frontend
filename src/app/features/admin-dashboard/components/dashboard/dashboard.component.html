@@ -87,6 +87,7 @@
                 severity="secondary"
                 styleClass="!bg-white !text-[#7f521d] !font-semibold !text-sm !px-4 !py-2 !rounded-lg hover:!bg-[#ffdcbd] !transition-colors !border-none !shadow-none">
               </p-button>
+              @if (canCreateEvent) {
               <p-button
                 (onClick)="createEvent()"
                 label="Crear Evento"
@@ -94,6 +95,7 @@
                 severity="secondary"
                 styleClass="!bg-white !text-[#7f521d] !font-semibold !text-sm !px-4 !py-2 !rounded-lg hover:!bg-[#ffdcbd] !transition-colors !border-none !shadow-none">
               </p-button>
+              }
             </div>
           </div>
           <div class="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">

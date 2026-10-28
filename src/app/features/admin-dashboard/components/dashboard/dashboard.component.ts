@@ -6,6 +6,8 @@ import {DashboardService} from '../../dashboard.service';
 import {Button} from 'primeng/button';
 import {Router, RouterLink} from '@angular/router';
 import {RecognitionService} from '../../../../shared/services/recognition.service';
+import {LoggedUserDataService} from '../../../../core/auth/logged-user-data-service';
+import {Role} from '../../../../shared/models/role.model';
 import {UserModalAddEditComponent} from '../../../user-modal-add-edit/user-modal-add-edit.component';
 
 @Component({
@@ -28,6 +30,7 @@ export class DashboardComponent implements OnInit {
   protected readonly router = inject(Router);
 
   protected readonly recognitionService = inject(RecognitionService);
+  protected readonly canCreateEvent = inject(LoggedUserDataService).hasAnyRole(Role.MANAGER_DIRECTOR, Role.MANAGEMENT, Role.EVENT_DIRECTOR);
 
   studentModalVisible = false;
   pendingRecognitions = signal<number>(0);
