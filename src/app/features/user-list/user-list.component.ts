@@ -1,4 +1,5 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {TableModule} from 'primeng/table';
 import {UserService} from '../../shared/services/user.service';
 import {User} from '../../shared/models/user.model';
@@ -31,7 +32,8 @@ import {UserAvatarComponent} from '../../shared/components/user-avatar/user-avat
     InputText,
     IconField,
     InputIcon,
-    UserAvatarComponent
+    UserAvatarComponent,
+    DatePipe
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'

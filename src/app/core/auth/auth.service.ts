@@ -144,6 +144,11 @@ export class AuthService {
     if (newLogin && !res.passwordChangeRequired) {
       this.websocketService.initConnection(() => this.getToken());
     }
+    if (!newLogin && res.passwordChangeRequired) {
+      // The password expired while the session was open
+      this.websocketService.disconnect();
+      this.router.navigateByUrl('/cambiar-contraseña');
+    }
     this.scheduleRefresh();
   }
 

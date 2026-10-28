@@ -107,6 +107,7 @@
               <th>Correo Electrónico</th>
               <th>Entidad de procedencia</th>
               <th>Roles</th>
+              <th>Último acceso</th>
               <th>Estado</th>
               <th></th>
             </tr>
@@ -128,6 +129,7 @@
                   }
                 </div>
               </td>
+              <td class="text-[0.95rem] text-[#51453a]">{{ user.lastLoginAt ? (user.lastLoginAt | date:'dd/MM/yyyy HH:mm') : 'Nunca' }}</td>
               <td><span class="text-xs font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">Activo</span></td>
               <td>
                 <div class="flex gap-1 justify-end">

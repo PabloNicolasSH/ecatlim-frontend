@@ -7,6 +7,7 @@ export interface User {
   roles: Role[];
   profile?: UserProfile;
   onboardingCompleted?: boolean;
+  lastLoginAt?: string | null;
 }
 
 export interface UserProfile {
